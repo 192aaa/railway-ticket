@@ -16,8 +16,5 @@ ENTRYPOINT ["java", "-jar", \
     "-Xms256m", "-Xmx512m", \
     "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod}", \
     "-Dserver.port=${PORT:-8080}", \
-    "-Dspring.datasource.url=jdbc:mysql://${DB_HOST:-localhost}:${DB_PORT:-3306}/${DB_NAME:-railway_ticket}?useUnicode=true&characterEncoding=utf-8&useSSL=${DB_SSL:-false}&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true", \
-    "-Dspring.datasource.username=${DB_USERNAME:-root}", \
-    "-Dspring.datasource.password=${DB_PASSWORD:-}", \
     "-Djwt.secret=${JWT_SECRET:-railway_ticket_secret_key_2026}", \
     "app.jar"]
