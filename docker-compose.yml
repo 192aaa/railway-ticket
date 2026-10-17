@@ -1,0 +1,46 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: railway-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PWD:-root123}
+      MYSQL_DATABASE: railway_ticket
+      MYSQL_USER: railway
+      MYSQL_PASSWORD: ${DB_USER_PWD:-railway123}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: railway-backend
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_USERNAME: railway
+      DB_PASSWORD: ${DB_USER_PWD:-railway123}
+      DB_HOST: mysql
+      JWT_SECRET: ${JWT_SECRET:-change_me_to_a_random_long_string_2026}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: railway-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql-data:
