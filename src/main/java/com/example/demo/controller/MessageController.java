@@ -74,4 +74,10 @@ public class MessageController {
     public Result<List<Message>> system(@RequestAttribute("userId") Long userId) {
         return Result.success(messageService.getSystemMessages(userId));
     }
+
+    @Operation(summary = "全部标已读")
+    @PostMapping("/mark-all-read")
+    public Result<Integer> markAllRead(@RequestAttribute("userId") Long userId) {
+        return Result.success(messageService.markAllAsRead(userId));
+    }
 }

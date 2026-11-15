@@ -126,6 +126,36 @@
                 {{ refundingId === order.id ? '退票中...' : '退票' }}
               </button>
             </div>
+
+            <div class="order-timeline">
+              <template v-if="getStepIndex(order.status) === -1">
+                <div class="tl-row cancelled">
+                  <div class="tl-dot"></div>
+                  <span>退票成功 · {{ order.payTime || order.createTime }}</span>
+                </div>
+              </template>
+              <template v-else-if="getStepIndex(order.status) === -2">
+                <div class="tl-row cancelled">
+                  <div class="tl-dot"></div>
+                  <span>已取消</span>
+                </div>
+              </template>
+              <template v-else>
+                <div v-for="(step, i) in ORDER_STEPS" :key="step.key" class="tl-step" :class="{
+                  done: getStepIndex(order.status) >= i,
+                  current: getStepIndex(order.status) === i,
+                  cancelled: getStepIndex(order.status) < 0
+                }">
+                  <div class="tl-connector" v-if="i > 0"></div>
+                  <div class="tl-circle">
+                    <svg v-if="getStepIndex(order.status) >= i" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="tl-label">{{ step.label }}</div>
+                  <div v-if="i === 0" class="tl-time">{{ order.createTime }}</div>
+                  <div v-if="i === 1" class="tl-time">{{ order.payTime }}</div>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </TransitionGroup>
@@ -546,6 +576,20 @@ function isPaid(s) {
   return s === 'PAID' || s === '已支付'
 }
 
+const ORDER_STEPS = [
+  { key: 'PENDING', label: '下单' },
+  { key: 'PAID', label: '支付' },
+  { key: 'COMPLETED', label: '乘车完成' }
+]
+function getStepIndex(status) {
+  if (status === 'REFUNDED' || status === '已退票') return -1
+  if (status === 'CANCELLED' || status === '已取消') return -2
+  if (status === 'COMPLETED' || status === '已完成') return 2
+  if (status === 'PAID' || status === '已支付') return 1
+  if (status === 'PENDING' || status === '待支付') return 0
+  return 0
+}
+
 async function refund(id) {
   const order = detailOrder.value?.id === id
     ? detailOrder.value
@@ -575,6 +619,7 @@ async function refund(id) {
     detailVisible.value = false
     ElMessage.success('退票成功，余票已返还')
     load()
+    window.dispatchEvent(new Event('railflow-refresh-unread'))
   } catch (e) {
   } finally {
     refundingId.value = null
@@ -1027,6 +1072,128 @@ async function refund(id) {
 .refund-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.order-timeline {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.08);
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.order-timeline .tl-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.order-timeline .tl-connector {
+  position: absolute;
+  top: 7px;
+  left: -50%;
+  right: 50%;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.15);
+  z-index: 0;
+}
+
+.order-timeline .tl-step.done .tl-connector {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.6));
+}
+
+.order-timeline .tl-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.8);
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  color: transparent;
+  font-size: 8px;
+  font-weight: bold;
+}
+
+.order-timeline .tl-step.done .tl-circle {
+  background: rgba(59, 130, 246, 0.9);
+  border-color: rgba(96, 165, 250, 0.9);
+  color: white;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+.order-timeline .tl-step.current .tl-circle {
+  border-color: rgba(251, 191, 36, 0.9);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  animation: tlCurrentPulse 2s ease-in-out infinite;
+}
+
+@keyframes tlCurrentPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(251, 191, 36, 0.7); }
+}
+
+.order-timeline .tl-label {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.order-timeline .tl-step.done .tl-label {
+  color: #93c5fd;
+}
+
+.order-timeline .tl-step.current .tl-label {
+  color: #fbbf24;
+}
+
+.order-timeline .tl-time {
+  font-size: 9px;
+  color: #475569;
+  margin-top: 2px;
+  font-family: monospace;
+  opacity: 0;
+}
+
+.order-timeline .tl-step.done .tl-time,
+.order-timeline .tl-step.current .tl-time {
+  opacity: 1;
+}
+
+.order-timeline .tl-row.cancelled {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.order-timeline .tl-row.cancelled .tl-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+}
+
+html[data-theme="light"] .order-timeline .tl-circle {
+  background: #f1f5f9;
+}
+html[data-theme="light"] .order-timeline .tl-label {
+  color: #64748b;
+}
+html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
+  color: #1d4ed8;
 }
 
 .empty-state {

@@ -1,8 +1,14 @@
 <template>
   <div class="messages-page">
-    <div class="msg-container glass">
+    <AppNav />
+    <section class="hero-fade"></section>
+    <div class="messages-main">
+      <div class="msg-container glass">
       <div class="sidebar">
         <div class="sidebar-header">
+          <button class="back-btn" @click="$router.back()" title="返回">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
           <h2 class="sidebar-title">💬 消息中心</h2>
           <div class="header-right">
             <button class="new-msg-btn" @click="showNewMsgModal = true" title="发新消息">✏️</button>
@@ -14,6 +20,20 @@
 
         <div class="search-box">
           <input v-model="searchKw" placeholder="🔍 搜索会话..." class="search-input" />
+        </div>
+
+        <div class="filter-row">
+          <button
+            v-for="f in filterTabs"
+            :key="f.value"
+            class="filter-tab"
+            :class="{ active: filterType === f.value }"
+            @click="filterType = f.value"
+          >{{ f.label }}</button>
+          <button class="mark-all-btn" v-if="unreadCount > 0" @click="doMarkAllRead" title="全部标已读">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            全部已读
+          </button>
         </div>
 
         <div class="conv-list">
@@ -152,14 +172,16 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</template>
+     </div>
+     </div>
+   </div>
+ </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import request from '../utils/request'
-import { useUserStore } from '../stores/user'
+ import request from '../utils/request'
+ import { useUserStore } from '../stores/user'
+ import AppNav from '../components/AppNav.vue'
 
 const userStore = useUserStore()
 const myUserId = computed(() => userStore.userInfo?.id || userStore.userInfo?.userId)
@@ -177,17 +199,40 @@ const showNewMsgModal = ref(false)
 const searchUserKw = ref('')
 const searchedUsers = ref([])
 const searchUserLoading = ref(false)
+const filterType = ref('all')
+
+const filterTabs = [
+  { label: '全部', value: 'all' },
+  { label: '系统通知', value: 'system' },
+  { label: '用户私信', value: 'user' },
+  { label: `未读 ${unreadCount.value}`, value: 'unread' }
+]
 
 let pollTimer = null
 let searchTimer = null
 
 const filteredConvs = computed(() => {
-  if (!searchKw.value.trim()) return conversations.value
-  return conversations.value.filter(c =>
+  let list = conversations.value
+  if (filterType.value === 'system') list = list.filter(c => c.isSystem)
+  else if (filterType.value === 'user') list = list.filter(c => !c.isSystem)
+  else if (filterType.value === 'unread') list = list.filter(c => c.unreadCount > 0)
+  if (!searchKw.value.trim()) return list
+  return list.filter(c =>
     c.name.toLowerCase().includes(searchKw.value.toLowerCase()) ||
     c.latestMessage.toLowerCase().includes(searchKw.value.toLowerCase())
   )
 })
+
+async function doMarkAllRead() {
+  try {
+    await request.post('/message/mark-all-read')
+    unreadCount.value = 0
+    conversations.value = conversations.value.map(c => ({ ...c, unreadCount: 0 }))
+    window.dispatchEvent(new CustomEvent('railflow-refresh-unread'))
+    if (activeConv.value) openConv(activeConv.value)
+    ElMessage.success('已全部标为已读')
+  } catch { ElMessage.error('操作失败') }
+}
 
 function formatShortTime(iso) {
   if (!iso) return ''
@@ -324,22 +369,32 @@ watch(conversations, () => {
 
 <style scoped>
 .messages-page {
-  min-height: calc(100vh - 120px);
-  padding: 24px;
+  min-height: 100vh;
+}
+
+.hero-fade {
+  height: 180px;
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.12) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.messages-main {
+  max-width: 1100px;
+  margin: -100px auto 60px;
+  padding: 0 24px;
   display: flex;
-  justify-content: center;
-  animation: fadeUp 0.4s ease-out;
+  flex-direction: column;
+  gap: 20px;
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .msg-container {
   width: 100%;
-  max-width: 1100px;
-  min-height: calc(100vh - 168px);
+  min-height: calc(100vh - 180px);
   display: flex;
   border-radius: 20px;
   overflow: hidden;
@@ -358,9 +413,34 @@ watch(conversations, () => {
 .sidebar-header {
   padding: 22px 20px 14px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(59, 130, 246, 0.1);
+  color: #93c5fd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+.back-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(147, 197, 253, 0.5);
+  color: #bfdbfe;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+.back-btn:active {
+  transform: translateX(-2px) scale(0.95);
 }
 
 .sidebar-title {
@@ -747,6 +827,7 @@ watch(conversations, () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 
 .new-msg-btn {
@@ -938,6 +1019,53 @@ watch(conversations, () => {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
+
+.filter-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 0 4px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 5px 12px; border-radius: 16px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: #94a3b8; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.filter-tab:hover { background: rgba(148, 163, 184, 0.15); color: #e2e8f0; }
+.filter-tab.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+.mark-all-btn {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 16px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981; font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+  flex-shrink: 0;
+}
+
+.mark-all-btn:hover {
+  background: rgba(16, 185, 129, 0.18);
+  transform: translateY(-1px);
+}
+
+html[data-theme="light"] .filter-tab {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #64748b;
+}
+html[data-theme="light"] .filter-tab:hover { background: rgba(15, 23, 42, 0.08); color: #0f172a; }
+html[data-theme="light"] .filter-tab.active { background: rgba(37, 99, 235, 0.08); border-color: rgba(37, 99, 235, 0.4); color: #2563eb; }
+html[data-theme="light"] .mark-all-btn { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); color: #059669; }
 
 @media (max-width: 768px) {
   .msg-container { flex-direction: column; }

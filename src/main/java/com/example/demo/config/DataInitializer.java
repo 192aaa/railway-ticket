@@ -2,7 +2,11 @@ package com.example.demo.config;
 
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,11 +15,21 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Configuration
+// 测试环境可通过 app.data-init.enabled=false 完全跳过初始化
+@ConditionalOnProperty(prefix = "app", name = "data-init.enabled", havingValue = "true", matchIfMissing = true)
 public class DataInitializer implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
+    // prod 必须为 false：避免向生产库写入弱口令账号和模拟订单
+    @Value("${app.demo-data.enabled:true}")
+    private boolean demoDataEnabled;
 
     private final StationRepository stationRepository;
     private final TrainRepository trainRepository;
@@ -321,38 +335,38 @@ public class DataInitializer implements CommandLineRunner {
         saveTrain("G2006", "高铁", ly.getId(), sh.getId(), "12:00", "18:30", 1100, 1320.0, 713.0, 432.0, 0.0);
         saveTrain("G2008", "高铁", ly.getId(), gz.getId(), "14:00", "21:30", 1500, 1750.0, 945.0, 570.0, 0.0);
 
-        // ========== 3. 余票初始化 ==========
+        // ========== 3. 余票初始化（只补齐缺失记录，不覆盖已有余票，避免把售罄车次重置为满票） ==========
         LocalDate today = LocalDate.now();
         LocalDate weekLater = today.plusDays(6);
         long futureTicketCount = ticketRepository.countByTrainDateBetween(today, weekLater);
         long expectedTicketCount = trainRepository.count() * 7;
 
         if (futureTicketCount < expectedTicketCount) {
-            System.out.println("===== 初始化未来7天余票 (已有 " + futureTicketCount + "/" + expectedTicketCount + ") =====");
-            List<Train> allTrains = trainRepository.findAll();
-            for (Train train : allTrains) {
+            // 一次性查出已有余票，在内存中比对，避免 车次 × 天数 次单条查询
+            Set<String> existingKeys = new HashSet<>();
+            for (Ticket t : ticketRepository.findByTrainDateBetween(today, weekLater)) {
+                existingKeys.add(t.getTrainId() + "_" + t.getTrainDate());
+            }
+
+            List<Ticket> missingTickets = new ArrayList<>();
+            for (Train train : trainRepository.findAll()) {
                 for (int i = 0; i < 7; i++) {
                     LocalDate date = today.plusDays(i);
-                    ticketRepository.findByTrainIdAndTrainDate(train.getId(), date).ifPresentOrElse(
-                            existing -> {
-                                if (existing.getBusinessSeatCount() == 0 && existing.getFirstSeatCount() == 0
-                                        && existing.getSecondSeatCount() == 0 && existing.getSleeperCount() == 0) {
-                                    refillTicket(existing, train);
-                                    ticketRepository.save(existing);
-                                }
-                            },
-                            () -> {
-                                Ticket t = buildTicket(train.getId(), date, 0, 0, 0, 0);
-                                refillTicket(t, train);
-                                ticketRepository.save(t);
-                            }
-                    );
+                    if (!existingKeys.contains(train.getId() + "_" + date)) {
+                        Ticket t = buildTicket(train.getId(), date, 0, 0, 0, 0);
+                        refillTicket(t, train);
+                        missingTickets.add(t);
+                    }
                 }
+            }
+            if (!missingTickets.isEmpty()) {
+                log.info("===== 补齐未来7天余票 " + missingTickets.size() + " 条 =====");
+                ticketRepository.saveAll(missingTickets);
             }
         }
 
         // ========== 4. 测试用户 ==========
-        if (!userRepository.existsByUsername("admin")) {
+        if (demoDataEnabled && !userRepository.existsByUsername("admin")) {
             User admin = new User();
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("123456"));
@@ -361,7 +375,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPhone("13800138000");
             userRepository.save(admin);
         }
-        if (!userRepository.existsByUsername("zhangsan")) {
+        if (demoDataEnabled && !userRepository.existsByUsername("zhangsan")) {
             User u = new User();
             u.setUsername("zhangsan");
             u.setPassword(passwordEncoder.encode("123456"));
@@ -370,7 +384,7 @@ public class DataInitializer implements CommandLineRunner {
             u.setPhone("13900139001");
             userRepository.save(u);
         }
-        if (!userRepository.existsByUsername("lisi")) {
+        if (demoDataEnabled && !userRepository.existsByUsername("lisi")) {
             User u = new User();
             u.setUsername("lisi");
             u.setPassword(passwordEncoder.encode("123456"));
@@ -379,7 +393,7 @@ public class DataInitializer implements CommandLineRunner {
             u.setPhone("13900139002");
             userRepository.save(u);
         }
-        if (!userRepository.existsByUsername("wangwu")) {
+        if (demoDataEnabled && !userRepository.existsByUsername("wangwu")) {
             User u = new User();
             u.setUsername("wangwu");
             u.setPassword(passwordEncoder.encode("123456"));
@@ -389,25 +403,27 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(u);
         }
 
-        // ========== 5. 历史订单 ==========
-        if (orderRepository.count() == 0 && trainRepository.count() > 0) {
-            System.out.println("===== 生成模拟历史订单 =====");
+        // ========== 5. 历史订单（仅演示环境） ==========
+        if (demoDataEnabled && orderRepository.count() == 0 && trainRepository.count() > 0) {
+            log.info("===== 生成模拟历史订单 =====");
             generateMockOrders();
         }
 
         // ========== 6. 汇总 ==========
-        System.out.println("==================================================");
-        System.out.println("       🚄 铁路购票系统数据初始化完成");
-        System.out.println("==================================================");
-        System.out.println("  站点数     : " + stationRepository.count() + " 个");
-        System.out.println("  车次数     : " + trainRepository.count() + " 趟");
-        System.out.println("  未来7天余票: " + ticketRepository.countByTrainDateBetween(today, weekLater) + " 条");
-        System.out.println("  用户数     : " + userRepository.count() + " 个");
-        System.out.println("  历史订单   : " + orderRepository.count() + " 条");
-        System.out.println("--------------------------------------------------");
-        System.out.println("  测试账号: admin / zhangsan / lisi / wangwu");
-        System.out.println("  密码均为: 123456");
-        System.out.println("==================================================");
+        log.info("==================================================");
+        log.info("       🚄 铁路购票系统数据初始化完成");
+        log.info("==================================================");
+        log.info("  站点数     : " + stationRepository.count() + " 个");
+        log.info("  车次数     : " + trainRepository.count() + " 趟");
+        log.info("  未来7天余票: " + ticketRepository.countByTrainDateBetween(today, weekLater) + " 条");
+        log.info("  用户数     : " + userRepository.count() + " 个");
+        log.info("  历史订单   : " + orderRepository.count() + " 条");
+        if (demoDataEnabled) {
+            log.info("--------------------------------------------------");
+            log.info("  测试账号: admin / zhangsan / lisi / wangwu");
+            log.info("  密码均为: 123456");
+        }
+        log.info("==================================================");
     }
 
     private void generateMockOrders() {
@@ -468,7 +484,7 @@ public class DataInitializer implements CommandLineRunner {
             orderRepository.save(order);
             orderCount++;
         }
-        System.out.println("  已生成 " + orderCount + " 条模拟历史订单");
+        log.info("  已生成 " + orderCount + " 条模拟历史订单");
     }
 
     private void saveTrain(String number, String type, Long fromId, Long toId,

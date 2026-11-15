@@ -1,0 +1,17 @@
+{
+  // redhat.java 在 CodeBuddy 中装的是 universal 版（不带内嵌 JRE），需要 JDK 25+ 才能启动语言服务。
+  // 这里临时复用 VS Code 平台版扩展自带的 JRE 25；若 VS Code 升级/卸载导致路径变化，
+  // 请自行安装 JDK 25+ 并把路径改成新 JDK 的根目录（也可用用户级设置全局生效）。
+  "java.jdt.ls.java.home": "C:/Users/19275/.vscode/extensions/redhat.java-1.58.0-win32-x64/jre/25.0.4.1-win32-x86_64",
+
+  // 语言服务用 25 运行，项目仍按 pom.xml 的 Java 17 编译
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-17",
+      "path": "C:/Users/19275/.jdks/ms-17.0.20.1",
+      "default": true
+    }
+  ],
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.compile.nullAnalysis.mode": "automatic"
+}

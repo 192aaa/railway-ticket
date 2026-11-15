@@ -60,3 +60,7 @@ router.afterEach(() => {
     }, 200)
   }
 })
+
+router.onError((err) => {
+  console.error('[Router Error]', err)
+})

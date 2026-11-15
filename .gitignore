@@ -1,0 +1,23 @@
+# ---------- 依赖与构建产物 ----------
+node_modules/
+dist/
+target/
+*.class
+
+# ---------- IDE 与编辑器 ----------
+.idea/
+*.iml
+.DS_Store
+
+# ---------- 本地日志与临时文件 ----------
+*.log
+frontend/vite-log.txt
+frontend/vite-err.txt
+
+# ---------- 本地密钥（.env.example 为模板，需保留入库） ----------
+.env
+.env.local
+frontend/.env.local
+
+# 注意：docker/、deploy/、.mvn/wrapper/、.vscode/、README.md 均为构建与运行所需，
+# 必须纳入版本控制，不要再忽略这些路径。

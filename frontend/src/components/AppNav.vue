@@ -31,6 +31,17 @@
         </div>
       </div>
       <div class="nav">
+        <div class="nav-clock">
+          <div class="clock-date">{{ clock.date }}</div>
+          <div class="clock-time">
+            <span class="h">{{ clock.hh }}</span>
+            <span class="colon">:</span>
+            <span class="m">{{ clock.mm }}</span>
+            <span class="colon">:</span>
+            <span class="s">{{ clock.ss }}</span>
+          </div>
+          <div class="clock-week">{{ clock.week }}</div>
+        </div>
         <template v-if="userStore.isLoggedIn">
           <div class="user-chip">
             <div class="avatar">
@@ -57,19 +68,35 @@
             <el-icon><Tickets /></el-icon>
             我的订单
           </button>
+          <button v-ripple class="nav-btn dashboard-btn" :class="{ active: isActive('/dashboard') }" @click="$router.push('/dashboard')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            大屏
+          </button>
+          <button v-ripple class="nav-btn theme-btn" @click="toggleTheme" :title="isDark ? '切换浅色' : '切换深色'">
+            <svg v-if="isDark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
           <button v-ripple class="nav-btn logout" :disabled="logoutLoading" @click="logout">
             <el-icon><SwitchButton /></el-icon>
             {{ logoutLoading ? '退出中...' : '退出' }}
           </button>
         </template>
         <template v-else>
-          <button v-ripple class="nav-btn" :class="{ active: isActive('/login') }" @click="$router.push('/login')">
+          <button v-ripple class="nav-btn" :class="{ active: isActive('/login') }" @click="goLogin">
             <el-icon><User /></el-icon>
             登录
           </button>
-          <button v-ripple class="nav-btn primary" :class="{ active: isActive('/register') }" @click="$router.push('/register')">
+          <button v-ripple class="nav-btn primary" :class="{ active: isActive('/register') }" @click="goRegister">
             <el-icon><Plus /></el-icon>
             注册
+          </button>
+          <button v-ripple class="nav-btn dashboard-btn" :class="{ active: isActive('/dashboard') }" @click="$router.push('/dashboard')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            大屏
+          </button>
+          <button v-ripple class="nav-btn theme-btn" @click="toggleTheme" :title="isDark ? '切换浅色' : '切换深色'">
+            <svg v-if="isDark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
         </template>
       </div>
@@ -78,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { HomeFilled, Tickets, SwitchButton, User, Plus, Bell } from '@element-plus/icons-vue'
@@ -91,6 +118,48 @@ const userStore = useUserStore()
 const logoutLoading = ref(false)
 const isScrolled = ref(false)
 const unreadCount = ref(0)
+
+const THEME_KEY = 'railflow_theme'
+const isDark = ref(true)
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+}
+function toggleTheme() {
+  isDark.value = !isDark.value
+  localStorage.setItem(THEME_KEY, isDark.value ? 'dark' : 'light')
+  applyTheme()
+}
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY)
+  if (saved) isDark.value = saved === 'dark'
+  else isDark.value = true
+  applyTheme()
+}
+initTheme()
+
+const clock = reactive({ date: '', hh: '00', mm: '00', ss: '00', week: '' })
+const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+let clockTimer = null
+
+function pad(n) { return n < 10 ? '0' + n : '' + n }
+
+function tickClock() {
+  const d = new Date()
+  clock.date = `${d.getFullYear()}年${pad(d.getMonth() + 1)}月${pad(d.getDate())}日`
+  clock.hh = pad(d.getHours())
+  clock.mm = pad(d.getMinutes())
+  clock.ss = pad(d.getSeconds())
+  clock.week = WEEK_MAP[d.getDay()]
+}
+
+function startClock() {
+  tickClock()
+  clockTimer = setInterval(tickClock, 1000)
+}
+
+function stopClock() {
+  if (clockTimer) { clearInterval(clockTimer); clockTimer = null }
+}
 
 let unreadTimer = null
 
@@ -127,15 +196,27 @@ function onScroll() {
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('railflow-refresh-unread', fetchUnread)
+  startClock()
   if (userStore.isLoggedIn) startUnreadPoll()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('railflow-refresh-unread', fetchUnread)
+  stopClock()
   stopUnreadPoll()
 })
 
 function isActive(path) {
   return route.path === path || (path === '/home' && route.path === '/')
+}
+
+function goLogin() {
+  router.push('/login')
+}
+
+function goRegister() {
+  router.push('/register')
 }
 
 async function logout() {
@@ -152,9 +233,9 @@ async function logout() {
   try {
     userStore.logout()
     ElMessage.success('已退出登录')
-    router.push('/login')
   } finally {
     logoutLoading.value = false
+    router.push('/login').catch(e => console.error('[logout nav]', e))
   }
 }
 </script>
@@ -393,6 +474,30 @@ async function logout() {
   color: #fecaca;
 }
 
+.nav-btn.theme-btn {
+  border-color: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.06);
+  padding: 6px 10px;
+}
+.nav-btn.theme-btn:hover {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  color: #fcd34d;
+}
+
+.nav-btn.dashboard-btn {
+  border-color: rgba(139, 92, 246, 0.25);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.06);
+}
+.nav-btn.dashboard-btn:hover,
+.nav-btn.dashboard-btn.active {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(139, 92, 246, 0.55);
+  color: #c4b5fd;
+}
+
 .nav-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -427,5 +532,93 @@ async function logout() {
   0% { transform: scale(0); }
   70% { transform: scale(1.2); }
   100% { transform: scale(1); }
+}
+
+.nav-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 16px;
+  margin-right: 8px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.10) 100%);
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.nav-clock::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at top, rgba(96, 165, 250, 0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.nav-clock:hover {
+  border-color: rgba(96, 165, 250, 0.45);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
+.clock-date {
+  font-size: 10px;
+  color: #64748b;
+  letter-spacing: 1px;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.clock-time {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  font-family: 'SF Mono', 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.clock-time .h,
+.clock-time .m {
+  font-size: 18px;
+  background: linear-gradient(135deg, #93c5fd 0%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.clock-time .s {
+  font-size: 13px;
+  background: linear-gradient(135deg, #fcd34d 0%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+  margin-left: 1px;
+}
+
+.clock-time .colon {
+  font-size: 16px;
+  color: #60a5fa;
+  font-weight: 400;
+  animation: colonBlink 1s step-end infinite;
+  margin: 0 1px;
+}
+
+@keyframes colonBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+.clock-week {
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-top: 2px;
 }
 </style>

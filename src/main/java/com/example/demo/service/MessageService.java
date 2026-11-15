@@ -69,6 +69,11 @@ public class MessageService {
         return messageRepository.markRead(userId, 0L);
     }
 
+    @Transactional
+    public int markAllAsRead(Long userId) {
+        return messageRepository.markAllAsRead(userId);
+    }
+
     public List<Map<String, Object>> getConversations(Long userId) {
         List<Message> latestList = messageRepository.findLatestPerConversation(userId);
         Map<Long, User> userCache = new HashMap<>();

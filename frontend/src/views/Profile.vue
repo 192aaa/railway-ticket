@@ -509,11 +509,21 @@ onMounted(async () => {
 
 .avatar-wrap {
   position: relative;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+  perspective: 800px;
 }
 
 .avatar-wrap:hover {
-  transform: scale(1.05);
+  transform: scale(1.08) rotateY(180deg);
+}
+
+.avatar-wrap:hover .avatar {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.5);
+}
+
+.avatar-wrap:hover .avatar-ring {
+  animation-duration: 2s;
 }
 
 .avatar {

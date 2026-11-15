@@ -1,18 +1,28 @@
-# Getting Started
+# 项目帮助
 
-### Reference Documentation
+铁路购票系统的完整说明见 [README.md](./README.md)。
 
-For further reference, please consider the following sections:
+常用命令：
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/4.1.1/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/4.1.1/maven-plugin/build-image.html)
+```powershell
+# 本地启动后端（dev）
+.\mvnw.cmd spring-boot:run
 
-### Maven Parent overrides
+# 运行后端测试（H2 内存库，无需 MySQL）
+.\mvnw.cmd -B verify
 
-Due to Maven's design, elements are inherited from the parent POM to the project POM.
-While most of the inheritance is fine, it also inherits unwanted elements like `<license>` and `<developers>` from the
-parent.
-To prevent this, the project POM contains empty overrides for these elements.
-If you manually switch to a different parent and actually want the inheritance, you need to remove those overrides.
+# 前端
+cd frontend
+npm ci
+npm run dev
+```
 
+```bash
+# macOS / Linux
+./mvnw spring-boot:run
+./mvnw -B verify
+```
+
+容器部署：`Copy-Item .env.example .env` 后执行 `docker compose up -d --build`。
+
+`pom.xml` 中空的 `<licenses>` / `<developers>` / `<scm>` 覆盖用于避免继承 Spring Boot parent 的元数据，待项目确定授权协议后再补全。

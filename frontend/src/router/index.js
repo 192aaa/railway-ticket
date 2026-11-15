@@ -9,6 +9,7 @@ const routes = [
   { path: '/orders', name: 'Orders', component: () => import('@/views/Orders.vue') },
   { path: '/profile', name: 'Profile', component: () => import('@/views/Profile.vue') },
   { path: '/messages', name: 'Messages', component: () => import('@/views/Messages.vue') },
+  { path: '/dashboard', name: 'Dashboard', component: () => import('@/views/Dashboard.vue') },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/NotFound.vue') }
 ]
 
@@ -20,12 +21,10 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const store = useUserStore()
   if ((to.path === '/orders' || to.path === '/profile' || to.path === '/messages') && !store.isLoggedIn) {
-    next({ path: '/login', query: { redirect: to.fullPath } })
-  } else {
-    next()
+    return { path: '/login', query: { redirect: to.fullPath } }
   }
 })
 

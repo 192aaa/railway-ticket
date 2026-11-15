@@ -11,8 +11,8 @@
     <groupId>com.example</groupId>
     <artifactId>demo2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo2</name>
-    <description>demo2</description>
+    <name>railway-ticket</name>
+    <description>铁路购票系统 - Spring Boot 后端</description>
     <url/>
     <licenses>
         <license/>
@@ -60,9 +60,22 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- application.properties 暴露了 prometheus 端点，需要对应注册表实现 -->
         <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
 

@@ -18,6 +18,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     long countByTrainDateBetween(LocalDate start, LocalDate end);
 
+    List<Ticket> findByTrainDateBetween(LocalDate start, LocalDate end);
+
     @Modifying
     @Query(value = "UPDATE ticket SET business_seat_count = business_seat_count - 1 " +
             "WHERE train_id = :trainId AND train_date = :trainDate AND business_seat_count > 0",

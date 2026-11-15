@@ -4,6 +4,7 @@ import com.example.demo.common.BusinessException;
 import com.example.demo.dto.BuyTicketRequest;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "tickets", allEntries = true)
     public Order buyTicket(Long userId, BuyTicketRequest req) {
         Train train = trainRepository.findById(req.getTrainId())
                 .orElseThrow(() -> new BusinessException("车次不存在"));
@@ -61,7 +63,7 @@ public class OrderService {
         Station toStation = stationRepository.findById(train.getToStationId()).orElse(null);
 
         Double price = getPriceBySeatType(train, seatType);
-        String seatNo = generateSeatNo(train.getId(), req.getTrainDate(), seatType.getLabel());
+        String seatNo = generateSeatNo(train.getId(), req.getTrainDate(), seatType);
 
         Order order = new Order();
         order.setOrderNo("ORD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
@@ -106,20 +108,25 @@ public class OrderService {
         };
     }
 
-    private String generateSeatNo(Long trainId, String trainDate, String seatType) {
+    /**
+     * 按座位类型生成符合真实车厢布局的座位号：
+     * 商务座 4 排 × A/C/F，一等座 13 排 × A/C/D/F，二等座 20 排 × A/B/C/D/F，
+     * 硬卧 27 排 × 上/中/下铺。座位池容量均大于对应席别的初始余票数。
+     */
+    private String generateSeatNo(Long trainId, String trainDate, SeatType seatType) {
+        String seatLabel = seatType.getLabel();
         List<Order> soldOrders = orderRepository.findByTrainIdAndTrainDate(trainId, trainDate);
         Set<String> usedSeats = soldOrders.stream()
-                .filter(o -> seatType.equals(o.getSeatType())
+                .filter(o -> seatLabel.equals(o.getSeatType())
                         && OrderStatus.REFUNDED != OrderStatus.from(o.getStatus()))
                 .map(Order::getSeatNo)
                 .collect(Collectors.toSet());
 
-        String[] cols = {"A", "B", "C", "D", "F"};
+        List<String> candidates = buildSeatCandidates(seatType);
         Random random = new Random();
-        for (int attempt = 0; attempt < 200; attempt++) {
-            int row = random.nextInt(15) + 1;
-            String col = cols[random.nextInt(cols.length)];
-            String seatNo = row + col;
+        int start = random.nextInt(candidates.size());
+        for (int i = 0; i < candidates.size(); i++) {
+            String seatNo = candidates.get((start + i) % candidates.size());
             if (!usedSeats.contains(seatNo)) {
                 return seatNo;
             }
@@ -127,11 +134,37 @@ public class OrderService {
         throw new BusinessException("该车次座位已分配完毕");
     }
 
+    private List<String> buildSeatCandidates(SeatType seatType) {
+        List<String> seats = new ArrayList<>();
+        switch (seatType) {
+            case BUSINESS_SEAT -> addSeatRows(seats, 4, "A", "C", "F");
+            case FIRST_SEAT -> addSeatRows(seats, 13, "A", "C", "D", "F");
+            case SECOND_SEAT -> addSeatRows(seats, 20, "A", "B", "C", "D", "F");
+            case SLEEPER -> {
+                for (int row = 1; row <= 27; row++) {
+                    for (String berth : new String[]{"上", "中", "下"}) {
+                        seats.add(row + berth);
+                    }
+                }
+            }
+        }
+        return seats;
+    }
+
+    private void addSeatRows(List<String> seats, int rows, String... cols) {
+        for (int row = 1; row <= rows; row++) {
+            for (String col : cols) {
+                seats.add(row + col);
+            }
+        }
+    }
+
     public List<Order> getMyOrders(Long userId) {
         return orderRepository.findByUserIdOrderByCreateTimeDesc(userId);
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "tickets", allEntries = true)
     public Order refundTicket(Long userId, Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException("订单不存在"));
