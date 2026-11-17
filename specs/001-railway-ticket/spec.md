@@ -241,7 +241,7 @@
 | 检查项 | 结果 | 证据 |
 | --- | --- | --- |
 | 后端测试 | PASS | `.\mvnw.cmd -B verify` → `BUILD SUCCESS`，49 tests / 0 failures；Docker 就绪时 0 skipped（2026-11-17 复验），无 Docker 时 6 个 Testcontainers 用例自动跳过 |
-| 前端单测 / 规范 / 格式 / 构建 | PASS | `npm test` 11 例、`npm run lint` 0 errors 0 warnings、`npm run format:check` 通过、`npm run build` 2.01s |
+| 前端单测 / 规范 / 格式 / 构建 | PASS | `npm test` 11 例、`npm run lint` 0 errors 0 warnings、`npm run format:check` 通过、`npm run build` 1.46s、`npm audit` 0 vulnerabilities |
 | 前端 E2E | PASS | `npm run test:e2e` 2 例（登录存储/登出清理、401→refresh→重放），`page.route` mock API |
 | Compose 配置 | PASS | `docker compose config --quiet`（2026-11-17 复验仍通过） |
 | 容器启动与健康 | PASS | 2026-11-17 复验 `docker compose up -d --build`：mysql / redis / backend / frontend / zipkin 均 `healthy` |

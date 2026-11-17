@@ -223,7 +223,8 @@
 | 前端单测 | `cd frontend && npm test` | PASS（11 tests） |
 | 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 0 warnings；全部文件符合 Prettier） |
 | 前端 E2E | `npm run test:e2e` | PASS（2 tests，mock API） |
-| 前端构建 | `cd frontend && npm ci && npm run build` | PASS（7.78s） |
+| 前端构建 | `cd frontend && npm ci && npm run build` | PASS（最新 1.46s） |
+| 依赖安全 | `npm audit --audit-level=moderate` | PASS（0 vulnerabilities；移除未使用的 `@vue/test-utils`，`happy-dom` 升到 21.0.4） |
 | Compose 语法 | `docker compose config --quiet` | PASS（2026-11-17 复验） |
 | Dockerfile 语法 | `docker build --check -f docker/Dockerfile.backend .` | PASS（no warnings） |
 | 容器健康 | `docker compose ps` | PASS（2026-11-17 复验：mysql/redis/backend/frontend/zipkin 均 healthy） |
@@ -265,7 +266,7 @@
 
 - [x] T108 [中] [宪法 IV] 补前端 E2E 测试与 ESLint/Prettier 配置
   > 验收: `npm run test`/`npm run lint` 脚本可用且接入 CI
-  > 证据: 新增 `eslint.config.js`（ESLint 9 flat config + eslint-plugin-vue，兼容自动导入）、`.prettierrc.json`、`.prettierignore`；`package.json` 增加 `lint`/`lint:fix`/`format`/`format:check`；CI 前端 job 接入 lint + format:check；`npm audit fix` 修复 `follow-redirects` 高危漏洞至 0 vulnerabilities；浏览器 E2E 验证（刷新令牌并发重放、主动登出、服务端黑名单/撤销）已通过；修掉 Home.vue 无用 catch-rethrow 与 Prettier 拆坏的多语句模板处理器；`npm run lint`/`format:check`/`build` 均 exit=0
+  > 证据: 新增 `eslint.config.js`（ESLint 9 flat config + eslint-plugin-vue，兼容自动导入）、`.prettierrc.json`、`.prettierignore`；`package.json` 增加 `lint`/`lint:fix`/`format`/`format:check`；CI 前端 job 接入 lint + format:check；浏览器 E2E 验证（刷新令牌并发重放、主动登出、服务端黑名单/撤销）已通过；修掉 Home.vue 无用 catch-rethrow 与 Prettier 拆坏的多语句模板处理器；2026-11-17 清理 75 条 lint 警告至 0 errors/0 warnings；`npm run lint`/`format:check`/`build` 均 exit=0
 
 - [x] T109 [低] [宪法 IV] 实测依赖分层后的重建耗时
   > 验收: 仅改 Java 源码时后端镜像重建时间降到 1 分钟内
@@ -291,7 +292,7 @@
 ## Phase 9: 可选增强闭环（已完成）
 
 - [x] T114 [中] [宪法 IV] 固化前端自动化测试（Vitest 单测 + Playwright E2E）
-  > 证据: `vitest` 4 + `@vue/test-utils` + `happy-dom`，`src/**/*.test.js` 共 11 例（auth 存储/事件、request 401 刷新/并发队列/登出跳过）；`@playwright/test` + `tests/e2e/auth.spec.js` 2 例（登录存储+登出清理、401 自动刷新重放），全部用 `page.route` mock API 不依赖后端；`npm run test`/`test:e2e` 可用；本地用系统 Edge、CI 用 chromium；CI 接入 `npm test` + `playwright install` + `test:e2e`；`npm audit fix` 后 0 漏洞
+  > 证据: `vitest` 4 + `happy-dom` 21（`@vue/test-utils` 未被使用已移除），`src/**/*.test.js` 共 11 例（auth 存储/事件、request 401 刷新/并发队列/登出跳过）；`@playwright/test` + `tests/e2e/auth.spec.js` 2 例（登录存储+登出清理、401 自动刷新重放），全部用 `page.route` mock API 不依赖后端；`npm run test`/`test:e2e` 可用；本地用系统 Edge、CI 用 chromium；CI 接入 `npm test` + `playwright install` + `test:e2e`；2026-11-17 升级 `happy-dom` 至 21.0.4 后 `npm audit` 为 0 vulnerabilities
 
 - [x] T115 [中] [宪法 IV] 接入 Micrometer Tracing + Brave + 可选 Zipkin collector
   > 证据: Boot 4.1.1 无 tracing 自动配置，`TracingConfig` 手动装配 `BraveTracer`（`localServiceName`、Sampler、`AsyncReporter`+`URLConnectionSender`→`ZipkinSpanHandler`）；`TraceIdFilter` 注入 Tracer 创建 SERVER span，日志/响应头/Zipkin 共用同一 traceId，入站 `X-Trace-Id` 作为 span tag；`TracingConfigTest` 2 例；Compose 新增 `zipkin` profile 服务（`--profile tracing`）；实测 `GET /api/v2/services` 返回 `railway-ticket`，span name=`get /actuator/health`、traceId=`37772fe82f26c2eb`；`ZIPKIN_ENDPOINT` 默认空不上报

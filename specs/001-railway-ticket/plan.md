@@ -320,7 +320,8 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 项 | 结果 |
 | --- | --- |
 | `.\mvnw.cmd -B verify`（2026-11-17） | Docker 未启动：49 tests / 0 failures / 6 skipped；启动后复验：49 tests / 0 failures / 0 skipped（Testcontainers Redis 6 例真实执行），均 `BUILD SUCCESS` |
-| `npm test` / `npm run lint` / `npm run format:check` / `npm run build` | 11 通过 / 0 errors 0 warnings / 通过 / 2.01s |
+| `npm test` / `npm run lint` / `npm run format:check` / `npm run build` | 11 通过 / 0 errors 0 warnings / 通过 / 1.46s |
+| `npm audit --audit-level=moderate` | 0 vulnerabilities（移除未使用的 `@vue/test-utils`，`happy-dom` 17.6.3 → 21.0.4） |
 | `npm run test:e2e` | 2 例通过（登录存储+登出清理、401→refresh→重放） |
 | CORS 白名单配置化 | `WebConfigTest` 2 个测试通过；默认 `*` 不改变同源部署 |
 | `docker compose config --quiet`（2026-11-17 复验） | 通过 |
