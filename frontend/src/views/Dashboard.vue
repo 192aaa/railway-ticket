@@ -10,7 +10,7 @@
         </div>
         <div class="db-time">
           <span class="db-clock">{{ clock }}</span>
-          <button class="db-refresh" @click="load" :disabled="loading">
+          <button class="db-refresh" :disabled="loading" @click="load">
             <svg
               width="14"
               height="14"
@@ -38,9 +38,9 @@
       <template v-else>
         <div class="stats-grid">
           <div
-            class="stat-card glass-card"
             v-for="s in statsCards"
             :key="s.label"
+            class="stat-card glass-card"
             :style="{ '--accent': s.color }"
           >
             <div class="sc-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
@@ -155,7 +155,7 @@ async function load() {
     overview.value = ov || {}
     topRoutes.value = routes || []
     trend.value = tr || []
-  } catch (e) {
+  } catch {
   } finally {
     loading.value = false
   }

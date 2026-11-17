@@ -10,7 +10,7 @@
         <h2 class="auth-title">创建账户</h2>
         <p class="auth-sub">加入 RailFlow，开启便捷出行</p>
 
-        <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="submit" class="auth-form">
+        <el-form ref="formRef" :model="form" :rules="rules" class="auth-form" @submit.prevent="submit">
           <el-form-item prop="username">
             <el-input v-model="form.username" placeholder="用户名" size="large" :disabled="loading">
               <template #prefix
@@ -109,7 +109,7 @@ async function submit() {
     await request.post('/user/register', form)
     ElMessage.success('注册成功，请登录')
     router.push('/login')
-  } catch (e) {
+  } catch {
   } finally {
     loading.value = false
   }

@@ -121,8 +121,8 @@
           <button
             v-ripple
             class="nav-btn theme-btn"
-            @click="toggleTheme"
             :title="isDark ? '切换浅色' : '切换深色'"
+            @click="toggleTheme"
           >
             <svg
               v-if="isDark"
@@ -204,8 +204,8 @@
           <button
             v-ripple
             class="nav-btn theme-btn"
-            @click="toggleTheme"
             :title="isDark ? '切换浅色' : '切换深色'"
+            @click="toggleTheme"
           >
             <svg
               v-if="isDark"

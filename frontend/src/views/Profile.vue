@@ -91,12 +91,12 @@
 
       <div class="stats-row stagger-children">
         <div
-          class="stat-card glass-card clickable"
           v-for="(s, i) in statsList"
           :key="s.label"
+          class="stat-card glass-card clickable"
           :style="{ animationDelay: i * 0.06 + 's' }"
-          @click="s.route && $router.push(s.route)"
           :class="{ disabled: !s.route }"
+          @click="s.route && $router.push(s.route)"
         >
           <div class="stat-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
           <div class="stat-info">
@@ -356,12 +356,10 @@ const totalSpent = computed(() => {
 
 const statsList = computed(() => {
   let paid = 0,
-    refunded = 0,
-    pending = 0
+    refunded = 0
   for (const o of orders.value) {
     if (o.status === 'PAID' || o.status === '已支付') paid++
     else if (o.status === 'REFUNDED' || o.status === '已退票') refunded++
-    else pending++
   }
   return [
     {
@@ -567,7 +565,7 @@ async function saveProfile() {
     await userStore.fetchUserInfo()
     ElMessage.success('资料已更新')
     editProfileVisible.value = false
-  } catch (e) {
+  } catch {
   } finally {
     profileSaving.value = false
   }
@@ -614,7 +612,7 @@ async function savePassword() {
       userStore.logout()
       router.push('/login')
     }, 1200)
-  } catch (e) {
+  } catch {
   } finally {
     pwdSaving.value = false
   }

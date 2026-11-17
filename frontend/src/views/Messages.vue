@@ -6,7 +6,7 @@
       <div class="msg-container glass">
         <div class="sidebar">
           <div class="sidebar-header">
-            <button class="back-btn" @click="$router.back()" title="返回">
+            <button class="back-btn" title="返回" @click="$router.back()">
               <svg
                 width="18"
                 height="18"
@@ -22,7 +22,7 @@
             </button>
             <h2 class="sidebar-title">💬 消息中心</h2>
             <div class="header-right">
-              <button class="new-msg-btn" @click="showNewMsgModal = true" title="发新消息">✏️</button>
+              <button class="new-msg-btn" title="发新消息" @click="showNewMsgModal = true">✏️</button>
               <span v-if="unreadCount > 0" class="unread-total">
                 {{ unreadCount > 99 ? '99+' : unreadCount }}
               </span>
@@ -43,7 +43,7 @@
             >
               {{ f.label }}
             </button>
-            <button class="mark-all-btn" v-if="unreadCount > 0" @click="doMarkAllRead" title="全部标已读">
+            <button v-if="unreadCount > 0" class="mark-all-btn" title="全部标已读" @click="doMarkAllRead">
               <svg
                 width="14"
                 height="14"
@@ -104,7 +104,7 @@
               </div>
             </div>
 
-            <div class="chat-body" ref="chatBodyRef">
+            <div ref="chatBodyRef" class="chat-body">
               <div v-if="chatHistory.length === 0" class="empty-chat">
                 <div class="empty-icon">💭</div>
                 <p>暂无聊天记录</p>
@@ -143,10 +143,10 @@
             <div class="chat-input-area">
               <input
                 v-model="inputMsg"
-                @keyup.enter="sendMsg"
                 :placeholder="activeConv.isSystem ? '系统通知不可回复' : '输入消息...'"
                 class="chat-input"
                 :disabled="activeConv.isSystem"
+                @keyup.enter="sendMsg"
               />
               <button
                 class="send-btn"
@@ -174,9 +174,9 @@
           <div class="modal-body">
             <input
               v-model="searchUserKw"
-              @input="debounceSearchUsers"
               placeholder="🔍 输入用户名或姓名..."
               class="user-search-input"
+              @input="debounceSearchUsers"
             />
             <div class="user-search-results">
               <div v-if="searchUserLoading" class="search-tip">搜索中...</div>
@@ -190,7 +190,7 @@
                     <div class="user-item-name">
                       {{ u.username }} <span v-if="u.realName" class="real-name">({{ u.realName }})</span>
                     </div>
-                    <div class="user-item-phone" v-if="u.phoneMasked">{{ u.phoneMasked }}</div>
+                    <div v-if="u.phoneMasked" class="user-item-phone">{{ u.phoneMasked }}</div>
                   </div>
                   <button class="start-chat-btn">💬 发消息</button>
                 </div>

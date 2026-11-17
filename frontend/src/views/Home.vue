@@ -36,7 +36,7 @@
                   </template>
                 </el-autocomplete>
               </div>
-              <div class="swap-btn" v-ripple @click="swapStations">
+              <div v-ripple class="swap-btn" @click="swapStations">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -93,7 +93,7 @@
                 <span class="ds-date">{{ d.value.slice(5) }}</span>
               </button>
             </div>
-            <button class="search-btn" v-ripple :disabled="searching" @click="search">
+            <button v-ripple class="search-btn" :disabled="searching" @click="search">
               <span>{{ searching ? '查询中...' : '搜索车票' }}</span>
             </button>
           </div>
@@ -101,22 +101,22 @@
           <div class="quick-tags">
             <span class="quick-label">热门路线</span>
             <button
-              v-for="route in quickRoutes"
-              :key="route.label"
+              v-for="quick in quickRoutes"
+              :key="quick.label"
               class="quick-tag"
-              :class="{ active: quickActive === route.label }"
-              @click="applyQuick(route)"
+              :class="{ active: quickActive === quick.label }"
+              @click="applyQuick(quick)"
             >
-              {{ route.label }}
+              {{ quick.label }}
             </button>
             <button
               v-if="queryForm.fromStation && queryForm.toStation"
               class="quick-tag fav-toggle"
               :class="{ active: isFavRoute(queryForm.fromStation, queryForm.toStation) }"
-              @click="toggleCurrentRouteFav"
               :title="
                 isFavRoute(queryForm.fromStation, queryForm.toStation) ? '取消收藏这条路线' : '收藏这条路线'
               "
+              @click="toggleCurrentRouteFav"
             >
               <svg
                 width="12"
@@ -139,9 +139,9 @@
           <div v-if="favRoutes.length" class="quick-tags">
             <span class="quick-label">⭐ 我的收藏</span>
             <div class="fav-routes">
-              <div v-for="route in favRoutes" :key="route.label" class="fav-route-card">
-                <div class="fav-route-main" @click="searchWithFavDate(route)">
-                  <span class="fav-from">{{ route.from }}</span>
+              <div v-for="fav in favRoutes" :key="fav.label" class="fav-route-card">
+                <div class="fav-route-main" @click="searchWithFavDate(fav)">
+                  <span class="fav-from">{{ fav.from }}</span>
                   <svg
                     width="14"
                     height="14"
@@ -152,14 +152,14 @@
                   >
                     <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
-                  <span class="fav-to">{{ route.to }}</span>
+                  <span class="fav-to">{{ fav.to }}</span>
                 </div>
                 <div class="fav-route-quick">
-                  <button @click="searchWithFavDate(route, 0)" title="今天">今</button>
-                  <button @click="searchWithFavDate(route, 1)" title="明天">明</button>
-                  <button @click="searchWithFavDate(route, 3)" title="3天后">3天</button>
+                  <button title="今天" @click="searchWithFavDate(fav, 0)">今</button>
+                  <button title="明天" @click="searchWithFavDate(fav, 1)">明</button>
+                  <button title="3天后" @click="searchWithFavDate(fav, 3)">3天</button>
                 </div>
-                <button class="fav-remove" @click="toggleFavRoute(route.from, route.to)" title="取消收藏">
+                <button class="fav-remove" title="取消收藏" @click="toggleFavRoute(fav.from, fav.to)">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                     <polygon
                       points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
@@ -191,7 +191,7 @@
                 <span v-if="h.date" class="history-date">{{ h.date.slice(5) }}</span>
                 <span v-if="h.ts" class="history-time">{{ formatHistoryTime(h.ts) }}</span>
               </button>
-              <button class="history-del" @click.stop="deleteHistoryItem(i)" title="删除">
+              <button class="history-del" title="删除" @click.stop="deleteHistoryItem(i)">
                 <svg
                   width="10"
                   height="10"
@@ -364,8 +364,8 @@
           <button
             class="fav-btn"
             :class="{ active: isFav(train) }"
-            @click.stop="toggleFav(train)"
             :title="isFav(train) ? '取消收藏' : '收藏此车次'"
+            @click.stop="toggleFav(train)"
           >
             <svg
               width="18"
@@ -457,8 +457,8 @@
               </svg>
             </button>
             <button
-              class="buy-btn"
               v-ripple
+              class="buy-btn"
               :disabled="buyingRowId === train.trainNumber || !hasAnySeat(train)"
               @click="buyTicket(train)"
             >
@@ -531,7 +531,7 @@
         <button v-if="onlyAvailable" class="go-home-btn" @click="onlyAvailable = false">取消筛选</button>
       </div>
 
-      <div class="hot-routes-wrap glass-card" v-if="!searching && results.length <= 3">
+      <div v-if="!searching && results.length <= 3" class="hot-routes-wrap glass-card">
         <div class="hr-title">
           <span class="hr-icon">🔥</span>
           <span>热门路线 · 一键查票</span>
@@ -612,22 +612,22 @@
               </div>
               <div v-else-if="tdStops.length" class="td-stops-list">
                 <div
-                  class="td-stop"
                   v-for="(stop, idx) in tdStops"
                   :key="idx"
+                  class="td-stop"
                   :class="{ first: idx === 0, last: idx === tdStops.length - 1 }"
                 >
                   <div class="td-stop-time">
                     <span class="td-arr">{{ stop.arriveTime?.substring(0, 5) || '——' }}</span>
-                    <span class="td-dep" v-if="idx !== 0 && idx !== tdStops.length - 1">{{
+                    <span v-if="idx !== 0 && idx !== tdStops.length - 1" class="td-dep">{{
                       stop.departTime?.substring(0, 5) || '——'
                     }}</span>
                   </div>
                   <div class="td-stop-dot"></div>
-                  <div class="td-stop-line" v-if="idx < tdStops.length - 1"></div>
+                  <div v-if="idx < tdStops.length - 1" class="td-stop-line"></div>
                   <div class="td-stop-info">
                     <span class="td-stop-name">{{ stop.stationName || '未知' }}</span>
-                    <span class="td-stop-city" v-if="stop.city && stop.city !== stop.stationName">{{
+                    <span v-if="stop.city && stop.city !== stop.stationName" class="td-stop-city">{{
                       stop.city
                     }}</span>
                     <span v-if="idx === 0" class="td-stop-tag start">始发</span>
@@ -665,8 +665,8 @@
 
             <div class="td-footer">
               <button
-                class="td-buy-btn"
                 v-if="trainDetail && hasAnySeat(trainDetail)"
+                class="td-buy-btn"
                 @click="closeDetailAndBuy"
               >
                 立即购票 →
@@ -720,7 +720,7 @@
                     <div class="pm-name">支付宝</div>
                     <div class="pm-desc">推荐 · 安全便捷</div>
                   </div>
-                  <div class="pm-check" v-if="payMethod === 'alipay'">✓</div>
+                  <div v-if="payMethod === 'alipay'" class="pm-check">✓</div>
                 </button>
                 <button
                   class="pm-card"
@@ -732,7 +732,7 @@
                     <div class="pm-name">微信支付</div>
                     <div class="pm-desc">常用 · 免输卡号</div>
                   </div>
-                  <div class="pm-check" v-if="payMethod === 'wechat'">✓</div>
+                  <div v-if="payMethod === 'wechat'" class="pm-check">✓</div>
                 </button>
               </div>
             </div>
@@ -857,7 +857,7 @@
               size="small"
               class="bd-pax-input"
             />
-            <button class="bd-pax-del" @click="removeBuyPax(idx)" v-if="buyPassengers.length > 1">×</button>
+            <button v-if="buyPassengers.length > 1" class="bd-pax-del" @click="removeBuyPax(idx)">×</button>
           </div>
           <button v-if="buyPassengers.length < 5" class="bd-pax-add" @click="addBuyPax">+ 添加乘车人</button>
         </div>
@@ -897,9 +897,9 @@
         </el-button>
       </div>
 
-      <div class="pax-mgr-list" v-if="savedPassengers.length">
-        <div class="pax-mgr-item" v-for="(p, i) in savedPassengers" :key="i">
-          <div class="pax-mgr-info" @click="pickSavedPax(p)" title="添加到本次购票">
+      <div v-if="savedPassengers.length" class="pax-mgr-list">
+        <div v-for="(p, i) in savedPassengers" :key="i" class="pax-mgr-item">
+          <div class="pax-mgr-info" title="添加到本次购票" @click="pickSavedPax(p)">
             <span class="pax-mgr-name">{{ p.name }}</span>
             <span class="pax-mgr-id">{{ p.idCard }}</span>
           </div>
@@ -1140,12 +1140,6 @@ function matchTime(train, filter) {
   if (filter === 'afternoon') return h >= 12 && h < 18
   if (filter === 'night') return h >= 18 || h < 6
   return true
-}
-
-function offsetDate(offset) {
-  const d = new Date()
-  d.setDate(d.getDate() + offset)
-  return d.toISOString().split('T')[0]
 }
 
 const dateShortcuts = computed(() => {
@@ -1784,7 +1778,7 @@ async function doPay() {
     }
     payVisible.value = false
     if (payTickTimer) clearInterval(payTickTimer)
-  } catch (e) {
+  } catch {
     ElMessage.error('支付失败，请重试')
   } finally {
     payLoading.value = false

@@ -1,5 +1,5 @@
 <template>
-  <div class="fireworks-root" ref="root" @click="burstAt($event)">
+  <div ref="root" class="fireworks-root" @click="burstAt($event)">
     <canvas ref="canvas"></canvas>
   </div>
 </template>

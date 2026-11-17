@@ -35,7 +35,7 @@
         <h2 class="auth-title">欢迎回来</h2>
         <p class="auth-sub">登录你的账户继续购票</p>
 
-        <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="submit" class="auth-form">
+        <el-form ref="formRef" :model="form" :rules="rules" class="auth-form" @submit.prevent="submit">
           <el-form-item prop="username">
             <el-input v-model="form.username" placeholder="用户名" size="large">
               <template #prefix
@@ -111,7 +111,7 @@ async function submit() {
     ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/home'
     router.replace(redirect)
-  } catch (e) {
+  } catch {
   } finally {
     loading.value = false
   }

@@ -83,7 +83,7 @@
           </div>
         </div>
 
-        <div class="ai-body" ref="bodyRef">
+        <div ref="bodyRef" class="ai-body">
           <div v-if="messages.length === 0" class="ai-welcome">
             <div class="welcome-icon">🚄</div>
             <div class="welcome-title">你好，我是 RailFlow AI</div>
@@ -120,12 +120,12 @@
 
         <div class="ai-input">
           <textarea
+            ref="inputRef"
             v-model="input"
-            @keydown.enter.exact.prevent="handleSend"
             placeholder="输入问题，Enter 发送，Shift+Enter 换行"
             :disabled="loading"
             rows="1"
-            ref="inputRef"
+            @keydown.enter.exact.prevent="handleSend"
           ></textarea>
           <button class="send-btn" :disabled="!input.trim() || loading" @click="handleSend">
             <svg
@@ -196,7 +196,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, watch, computed } from 'vue'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import request from '../utils/request'
 import { useUserStore } from '../stores/user'
 
@@ -265,11 +265,6 @@ async function fetchTrains(from, to, date) {
   } catch {
     return null
   }
-}
-
-function extractStation(text) {
-  const m = text.match(/([\u4e00-\u9fa5]{2,6})(?:到|去|至)?[\u4e00-\u9fa5]{0,2}(?:高铁|动车|火车|列车)?/)
-  return m ? m[1] : null
 }
 
 function mockReply(userText) {

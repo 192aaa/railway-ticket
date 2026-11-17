@@ -1,5 +1,5 @@
 <template>
-  <button v-show="visible" class="back-to-top" @click="scrollTop" aria-label="回到顶部">
+  <button v-show="visible" class="back-to-top" aria-label="回到顶部" @click="scrollTop">
     <svg
       viewBox="0 0 24 24"
       fill="none"

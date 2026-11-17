@@ -221,7 +221,7 @@
 | --- | --- | --- |
 | 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-17：Docker 未启动 49 tests / 6 skipped；启动后 49 tests / 0 skipped） |
 | 前端单测 | `cd frontend && npm test` | PASS（11 tests） |
-| 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 75 warnings；全部文件符合 Prettier） |
+| 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 0 warnings；全部文件符合 Prettier） |
 | 前端 E2E | `npm run test:e2e` | PASS（2 tests，mock API） |
 | 前端构建 | `cd frontend && npm ci && npm run build` | PASS（7.78s） |
 | Compose 语法 | `docker compose config --quiet` | PASS（2026-11-17 复验） |

@@ -17,8 +17,8 @@
       <div class="aurora-band band-3"></div>
     </div>
 
-    <div class="cursor-glow" ref="cursorGlow"></div>
-    <div class="shooting-stars" ref="shootingStars"></div>
+    <div ref="cursorGlow" class="cursor-glow"></div>
+    <div ref="shootingStars" class="shooting-stars"></div>
 
     <div id="top-progress"></div>
 
@@ -61,7 +61,7 @@
 
           <div class="palette-body">
             <template v-if="paletteQuery.trim()">
-              <div class="palette-section" v-if="paletteFilteredRoutes.length">
+              <div v-if="paletteFilteredRoutes.length" class="palette-section">
                 <div class="palette-section-title">🚄 热门路线</div>
                 <button
                   v-for="(r, i) in paletteFilteredRoutes"
@@ -79,7 +79,7 @@
                 </button>
               </div>
 
-              <div class="palette-section" v-if="paletteFilteredPages.length">
+              <div v-if="paletteFilteredPages.length" class="palette-section">
                 <div class="palette-section-title">📄 页面跳转</div>
                 <button
                   v-for="(p, i) in paletteFilteredPages"
@@ -152,7 +152,7 @@
       </div>
     </Transition>
 
-    <div class="kbd-hint" v-if="!paletteOpen && showKbdHint" @click="openPalette">
+    <div v-if="!paletteOpen && showKbdHint" class="kbd-hint" @click="openPalette">
       <kbd>Ctrl</kbd>+<kbd>K</kbd>
       <span class="kbd-label">搜索</span>
     </div>

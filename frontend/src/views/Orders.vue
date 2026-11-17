@@ -15,7 +15,7 @@
             <span class="sc-dot"></span>
             <span>{{ counts.refunded }} 张已退票</span>
           </div>
-          <div class="stat-chip pending-chip" v-if="counts.pending">
+          <div v-if="counts.pending" class="stat-chip pending-chip">
             <span class="sc-dot"></span>
             <span>{{ counts.pending }} 张待支付</span>
           </div>
@@ -156,7 +156,7 @@
                     cancelled: getStepIndex(order.status) < 0
                   }"
                 >
-                  <div class="tl-connector" v-if="i > 0"></div>
+                  <div v-if="i > 0" class="tl-connector"></div>
                   <div class="tl-circle">
                     <svg
                       v-if="getStepIndex(order.status) >= i"
@@ -741,7 +741,7 @@ async function refund(id) {
     ElMessage.success('退票成功，余票已返还')
     load()
     window.dispatchEvent(new Event('railflow-refresh-unread'))
-  } catch (e) {
+  } catch {
   } finally {
     refundingId.value = null
   }

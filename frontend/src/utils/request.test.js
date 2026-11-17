@@ -42,7 +42,7 @@ vi.mock('axios', () => {
   return { default: factory }
 })
 
-import request from './request'
+import './request'
 
 const reqInterceptor = mocks.handlers.request[0]
 const [resSuccess, resError] = mocks.handlers.response
