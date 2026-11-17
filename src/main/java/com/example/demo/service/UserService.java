@@ -7,6 +7,7 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtil;
+import com.example.demo.security.TokenService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +19,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenService tokenService;
 
     private static final Pattern ID_CARD_PATTERN = Pattern.compile("^\\d{15}$|^\\d{17}[\\dXx]$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^1[3-9]\\d{9}$");
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil,
+                       TokenService tokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.tokenService = tokenService;
     }
 
     public User register(RegisterRequest req) {
@@ -50,8 +56,27 @@ public class UserService {
             throw new BusinessException("用户名或密码错误");
         }
 
+        return issueTokens(user);
+    }
+
+    /** 使用一次性 refresh token 换取新的 token 对，旧 refresh token 立即作废。 */
+    public LoginResponse refresh(String refreshToken) {
+        Long userId = tokenService.consumeRefreshToken(refreshToken);
+        if (userId == null) {
+            throw new BusinessException("刷新令牌无效或已过期");
+        }
+        return issueTokens(getUserById(userId));
+    }
+
+    public void logout(String accessToken, String refreshToken) {
+        tokenService.blacklist(accessToken);
+        tokenService.revokeRefreshToken(refreshToken);
+    }
+
+    private LoginResponse issueTokens(User user) {
         String token = jwtUtil.generateToken(user.getId(), user.getUsername());
-        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName());
+        return new LoginResponse(token, tokenService.issueRefreshToken(user.getId()),
+                user.getId(), user.getUsername(), user.getRealName());
     }
 
     public User getUserById(Long id) {

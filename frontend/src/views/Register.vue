@@ -13,22 +13,40 @@
         <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="submit" class="auth-form">
           <el-form-item prop="username">
             <el-input v-model="form.username" placeholder="用户名" size="large" :disabled="loading">
-              <template #prefix><el-icon><User /></el-icon></template>
+              <template #prefix
+                ><el-icon><User /></el-icon
+              ></template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
-            <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password :disabled="loading">
-              <template #prefix><el-icon><Lock /></el-icon></template>
+            <el-input
+              v-model="form.password"
+              type="password"
+              placeholder="密码"
+              size="large"
+              show-password
+              :disabled="loading"
+            >
+              <template #prefix
+                ><el-icon><Lock /></el-icon
+              ></template>
             </el-input>
           </el-form-item>
           <el-form-item prop="realName">
             <el-input v-model="form.realName" placeholder="真实姓名" size="large" :disabled="loading">
-              <template #prefix><el-icon><UserFilled /></el-icon></template>
+              <template #prefix
+                ><el-icon><UserFilled /></el-icon
+              ></template>
             </el-input>
           </el-form-item>
           <div class="form-row">
             <el-form-item>
-              <el-input v-model="form.idCard" placeholder="身份证号 (选填)" size="large" :disabled="loading" />
+              <el-input
+                v-model="form.idCard"
+                placeholder="身份证号 (选填)"
+                size="large"
+                :disabled="loading"
+              />
             </el-form-item>
             <el-form-item>
               <el-input v-model="form.phone" placeholder="手机号 (选填)" size="large" :disabled="loading" />
@@ -37,7 +55,15 @@
           <el-form-item>
             <button type="button" class="submit-btn" :disabled="loading" @click="submit">
               <svg v-if="loading" class="spinner" viewBox="0 0 50 50">
-                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"/>
+                <circle
+                  class="path"
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="5"
+                />
               </svg>
               <span>{{ loading ? '注册中...' : '注 册' }}</span>
             </button>
@@ -128,15 +154,31 @@ async function submit() {
   animation: formStagger 0.6s ease-out 0.15s both;
 }
 
-.auth-form .el-form-item:nth-child(1) { animation: itemIn 0.5s ease-out 0.1s both; }
-.auth-form .el-form-item:nth-child(2) { animation: itemIn 0.5s ease-out 0.25s both; }
-.auth-form .el-form-item:nth-child(3) { animation: itemIn 0.5s ease-out 0.4s both; }
-.auth-form .el-form-item:nth-child(4) { animation: itemIn 0.5s ease-out 0.55s both; }
-.auth-form .el-form-item:nth-child(5) { animation: itemIn 0.5s ease-out 0.7s both; }
+.auth-form .el-form-item:nth-child(1) {
+  animation: itemIn 0.5s ease-out 0.1s both;
+}
+.auth-form .el-form-item:nth-child(2) {
+  animation: itemIn 0.5s ease-out 0.25s both;
+}
+.auth-form .el-form-item:nth-child(3) {
+  animation: itemIn 0.5s ease-out 0.4s both;
+}
+.auth-form .el-form-item:nth-child(4) {
+  animation: itemIn 0.5s ease-out 0.55s both;
+}
+.auth-form .el-form-item:nth-child(5) {
+  animation: itemIn 0.5s ease-out 0.7s both;
+}
 
 @keyframes itemIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-form :deep(.el-input__wrapper) {
@@ -228,7 +270,9 @@ async function submit() {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 35px rgba(59, 130, 246, 0.55), 0 0 40px rgba(139, 92, 246, 0.25);
+  box-shadow:
+    0 10px 35px rgba(59, 130, 246, 0.55),
+    0 0 40px rgba(139, 92, 246, 0.25);
 }
 
 .submit-btn:active:not(:disabled) {
@@ -247,8 +291,12 @@ async function submit() {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .auth-links {

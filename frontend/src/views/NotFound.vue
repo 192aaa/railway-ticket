@@ -4,16 +4,16 @@
       <div class="nf-num">
         <span>4</span>
         <svg class="nf-train" viewBox="0 0 100 60" fill="none">
-          <rect x="5" y="15" width="90" height="35" rx="6" fill="url(#nf-g)"/>
-          <rect x="15" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9"/>
-          <rect x="40" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9"/>
-          <rect x="65" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9"/>
-          <circle cx="22" cy="52" r="6" fill="#0f172a" stroke="#60a5fa" stroke-width="2.5"/>
-          <circle cx="78" cy="52" r="6" fill="#0f172a" stroke="#60a5fa" stroke-width="2.5"/>
+          <rect x="5" y="15" width="90" height="35" rx="6" fill="url(#nf-g)" />
+          <rect x="15" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9" />
+          <rect x="40" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9" />
+          <rect x="65" y="22" width="18" height="14" rx="2" fill="#fff" opacity="0.9" />
+          <circle cx="22" cy="52" r="6" fill="#0f172a" stroke="#60a5fa" stroke-width="2.5" />
+          <circle cx="78" cy="52" r="6" fill="#0f172a" stroke="#60a5fa" stroke-width="2.5" />
           <defs>
             <linearGradient id="nf-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#60a5fa"/>
-              <stop offset="100%" stop-color="#a78bfa"/>
+              <stop offset="0%" stop-color="#60a5fa" />
+              <stop offset="100%" stop-color="#a78bfa" />
             </linearGradient>
           </defs>
         </svg>

@@ -5,25 +5,80 @@
         <div class="ai-header">
           <div class="ai-header-left">
             <div class="ai-avatar">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M16 14h.01"/><path d="M8 14h.01"/><path d="M12 12v2"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/></svg>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z" />
+                <path d="M16 14h.01" />
+                <path d="M8 14h.01" />
+                <path d="M12 12v2" />
+                <path d="M20 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M4 21v-2a4 4 0 0 1 3-3.87" />
+              </svg>
             </div>
             <div>
               <div class="ai-name">RailFlow AI 助手</div>
               <div class="ai-status">
-                <span class="dot" :class="{ online: apiKey ? true : false }"></span>
-                {{ apiKey ? '已连接' : '模拟模式' }}
+                <span class="dot" :class="{ online: aiConfigured }"></span>
+                {{ aiConfigured ? '已连接' : '模拟模式' }}
               </div>
             </div>
           </div>
           <div class="ai-header-actions">
             <button class="action-btn" title="设置" @click="showSettings = true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
             </button>
             <button class="action-btn" title="清空" @click="clearChat">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
             </button>
             <button class="action-btn" title="收起" @click="open = false">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
             </button>
           </div>
         </div>
@@ -41,12 +96,7 @@
             </div>
           </div>
 
-          <div
-            v-for="(m, idx) in messages"
-            :key="idx"
-            class="ai-msg"
-            :class="m.role"
-          >
+          <div v-for="(m, idx) in messages" :key="idx" class="ai-msg" :class="m.role">
             <div class="msg-avatar" :class="m.role === 'user' ? 'user' : 'ai'">
               {{ m.role === 'user' ? '我' : 'AI' }}
             </div>
@@ -62,9 +112,7 @@
             <div class="msg-avatar ai">AI</div>
             <div class="msg-content">
               <div class="bubble assistant">
-                <div class="typing">
-                  <span></span><span></span><span></span>
-                </div>
+                <div class="typing"><span></span><span></span><span></span></div>
               </div>
             </div>
           </div>
@@ -80,7 +128,19 @@
             ref="inputRef"
           ></textarea>
           <button class="send-btn" :disabled="!input.trim() || loading" @click="handleSend">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m22 2-7 20-4-9-9-4Z" />
+              <path d="M22 2 11 13" />
+            </svg>
           </button>
         </div>
       </div>
@@ -88,7 +148,18 @@
 
     <button v-if="!open" class="ai-fab" @click="open = true">
       <div class="fab-ring"></div>
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <svg
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      </svg>
       <span v-if="unread" class="fab-badge">{{ unread > 99 ? '99+' : unread }}</span>
     </button>
 
@@ -100,31 +171,23 @@
         </div>
         <div class="modal-body">
           <div class="setting-row">
-            <label>API Endpoint</label>
-            <input v-model="localSettings.endpoint" placeholder="https://api.deepseek.com/v1/chat/completions" />
-            <span class="hint">支持 OpenAI 兼容接口</span>
+            <label>连接状态</label>
+            <span class="hint">{{
+              aiConfigured ? '已连接服务端大模型' : '模拟模式（服务端未配置密钥）'
+            }}</span>
           </div>
           <div class="setting-row">
-            <label>API Key</label>
-            <input v-model="localSettings.apiKey" type="password" placeholder="sk-..." />
-          </div>
-          <div class="setting-row">
-            <label>模型</label>
-            <input v-model="localSettings.model" placeholder="deepseek-chat 或 gpt-4o-mini" />
-          </div>
-          <div class="setting-row">
-            <label>温度 {{ localSettings.temperature.toFixed(1) }}</label>
-            <input v-model.number="localSettings.temperature" type="range" min="0" max="2" step="0.1" />
+            <label>当前模型</label>
+            <span class="hint">{{ aiModel || '—' }}</span>
           </div>
           <div class="setting-actions">
-            <button class="save-btn" @click="saveSettings">保存</button>
-            <button class="test-btn" @click="testConnection">测试连接</button>
+            <button class="test-btn" @click="testConnection">刷新状态</button>
           </div>
           <div v-if="testResult" class="test-result" :class="testResult.ok ? 'ok' : 'err'">
             {{ testResult.msg }}
           </div>
           <div class="settings-tip">
-            💡 不填 Key 也能用模拟模式体验基本对话功能
+            🔒 模型密钥由服务端安全持有，不会保存在浏览器中。未配置时自动降级为模拟回复。
           </div>
         </div>
       </div>
@@ -150,66 +213,28 @@ const showSettings = ref(false)
 const bodyRef = ref(null)
 const inputRef = ref(null)
 
-const settings = reactive({
-  endpoint: '',
-  apiKey: '',
-  model: '',
-  temperature: 0.7
-})
-const localSettings = reactive({ ...settings })
+// 密钥与模型配置全部由服务端持有，浏览器只保存会话级状态
+const aiConfigured = ref(false)
+const aiModel = ref('')
 const testResult = ref(null)
 
-const STORAGE_KEY = 'railflow_ai_settings'
 const CHAT_KEY = 'railflow_ai_chat'
 
-function loadSettings() {
+async function loadAiStatus() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      const s = JSON.parse(raw)
-      Object.assign(settings, s)
-      Object.assign(localSettings, s)
-    } else {
-      settings.endpoint = 'https://api.deepseek.com/v1/chat/completions'
-      settings.model = 'deepseek-chat'
-      localSettings.endpoint = settings.endpoint
-      localSettings.model = settings.model
-    }
-  } catch {}
-}
-
-function saveSettings() {
-  Object.assign(settings, localSettings)
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-  showSettings.value = false
-  testResult.value = null
+    const status = await request.get('/ai/status')
+    aiConfigured.value = !!status.configured
+    aiModel.value = status.model || ''
+  } catch {
+    aiConfigured.value = false
+  }
 }
 
 async function testConnection() {
-  testResult.value = { ok: false, msg: '连接中...' }
-  try {
-    const endpoint = localSettings.endpoint || 'https://api.deepseek.com/v1/chat/completions'
-    const resp = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localSettings.apiKey}`
-      },
-      body: JSON.stringify({
-        model: localSettings.model || 'deepseek-chat',
-        messages: [{ role: 'user', content: 'ping' }],
-        max_tokens: 10
-      })
-    })
-    if (resp.ok) {
-      testResult.value = { ok: true, msg: '✅ 连接成功！' }
-    } else {
-      const data = await resp.json().catch(() => ({}))
-      testResult.value = { ok: false, msg: '❌ ' + (data.error?.message || `HTTP ${resp.status}`) }
-    }
-  } catch (e) {
-    testResult.value = { ok: false, msg: '❌ 无法连接: ' + e.message }
-  }
+  await loadAiStatus()
+  testResult.value = aiConfigured.value
+    ? { ok: true, msg: `✅ 服务端已配置模型 ${aiModel.value}，密钥由服务端安全持有` }
+    : { ok: false, msg: '当前为模拟模式：服务端未配置 AI_API_KEY，可正常体验基础对话' }
 }
 
 function scrollToBottom() {
@@ -299,7 +324,7 @@ function mockReply(userText) {
 
 不过我现在没连接 AI 模型（模拟模式），暂时只能处理常见问题。
 
-点击右上角 **⚙️ 设置**，填入 API Key 后我就能用完整的 AI 能力回答你啦！
+如需完整 AI 能力，请让服务端配置 AI_API_KEY 环境变量；密钥由服务端安全持有。
 
 你可以试试问我：
 - "北京到上海明天的高铁"
@@ -361,7 +386,8 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'buy_ticket',
-      description: '购买火车票，基于 trainId 下单。调用前必须先调用 query_tickets 查票获取 trainId，并已经获得用户确认。',
+      description:
+        '购买火车票，基于 trainId 下单。调用前必须先调用 query_tickets 查票获取 trainId，并已经获得用户确认。',
       parameters: {
         type: 'object',
         properties: {
@@ -382,12 +408,22 @@ function resolveRelativeDate(text) {
   const now = new Date()
   const match = text.match(/(?:明天|后天|大后天|今天|后天|(\d+)天之后)/)
   if (match) {
-    const offset = match[1] ? parseInt(match[1]) : (match[0] === '今天' ? 0 : match[0] === '明天' ? 1 : match[0] === '后天' ? 2 : match[0] === '大后天' ? 3 : parseInt(match[1]) || 0)
+    const offset = match[1]
+      ? parseInt(match[1])
+      : match[0] === '今天'
+        ? 0
+        : match[0] === '明天'
+          ? 1
+          : match[0] === '后天'
+            ? 2
+            : match[0] === '大后天'
+              ? 3
+              : parseInt(match[1]) || 0
     const d = new Date(now)
     d.setDate(d.getDate() + offset)
     return d.toISOString().slice(0, 10)
   }
-  const weekMap = { '周一': 1, '周二': 2, '周三': 3, '周四': 4, '周五': 5, '周六': 6, '周日': 0, '星期日': 0 }
+  const weekMap = { 周一: 1, 周二: 2, 周三: 3, 周四: 4, 周五: 5, 周六: 6, 周日: 0, 星期日: 0 }
   for (const [cn, dow] of Object.entries(weekMap)) {
     if (text.includes(cn)) {
       const d = new Date(now)
@@ -411,14 +447,17 @@ async function runTool(name, args) {
       if (!data || data.length === 0) {
         return `查询结果为空：${fromStation} → ${toStation} (${date}) 没有找到车次。请检查站名是否正确。`
       }
-      const summary = data.slice(0, 15).map(t => {
-        const seats = []
-        if (t.businessSeatCount > 0) seats.push(`商务 ${t.businessSeatCount}张 ¥${t.businessSeatPrice}`)
-        if (t.firstSeatCount > 0) seats.push(`一等 ${t.firstSeatCount}张 ¥${t.firstSeatPrice}`)
-        if (t.secondSeatCount > 0) seats.push(`二等 ${t.secondSeatCount}张 ¥${t.secondSeatPrice}`)
-        if (t.sleeperCount > 0) seats.push(`卧铺 ${t.sleeperCount}张 ¥${t.sleeperPrice}`)
-        return `| ${t.trainNumber} | ${t.trainType} | id=${t.trainId} | ${t.startTime}-${t.endTime} | ${t.duration}分钟 | ${seats.join(' / ') || '无票'} |`
-      }).join('\n')
+      const summary = data
+        .slice(0, 15)
+        .map((t) => {
+          const seats = []
+          if (t.businessSeatCount > 0) seats.push(`商务 ${t.businessSeatCount}张 ¥${t.businessSeatPrice}`)
+          if (t.firstSeatCount > 0) seats.push(`一等 ${t.firstSeatCount}张 ¥${t.firstSeatPrice}`)
+          if (t.secondSeatCount > 0) seats.push(`二等 ${t.secondSeatCount}张 ¥${t.secondSeatPrice}`)
+          if (t.sleeperCount > 0) seats.push(`卧铺 ${t.sleeperCount}张 ¥${t.sleeperPrice}`)
+          return `| ${t.trainNumber} | ${t.trainType} | id=${t.trainId} | ${t.startTime}-${t.endTime} | ${t.duration}分钟 | ${seats.join(' / ') || '无票'} |`
+        })
+        .join('\n')
       return `查询成功！${fromStation} → ${toStation} (${date})，共 ${data.length} 车次：\n\n| 车次 | 车型 | trainId | 时间 | 历时 | 余票/价格 |\n|---|---|---|---|---|---|\n${summary}\n\n请根据用户需求（最快/最便宜/推荐）挑选合适车次，记得把 trainId 告诉我以便购票时使用。`
     } catch (e) {
       return `查询失败: ${e.message}`
@@ -434,7 +473,11 @@ async function runTool(name, args) {
     }
     try {
       const order = await request.post('/order/buy', {
-        trainId, trainDate, seatType, passengerName, passengerIdCard
+        trainId,
+        trainDate,
+        seatType,
+        passengerName,
+        passengerIdCard
       })
       return `购票成功！\n- 订单号: ${order.id}\n- 车次: ${order.trainNumber || args.trainNumber}\n- 日期: ${order.trainDate || trainDate}\n- 座位: ${seatType}\n- 乘车人: ${passengerName}\n请用🎉语气告诉用户。`
     } catch (e) {
@@ -445,32 +488,21 @@ async function runTool(name, args) {
 }
 
 async function callAI(messages, tools = null) {
-  const endpoint = settings.endpoint || 'https://api.deepseek.com/v1/chat/completions'
+  // 只把对话内容发给后端代理；密钥、模型、温度均由服务端配置，浏览器不接触。
   const body = {
-    model: settings.model || 'deepseek-chat',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...messages.map(m => ({ role: m.role, content: m.content, tool_calls: m.tool_calls || undefined, tool_call_id: m.tool_call_id || undefined }))
+      ...messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+        tool_calls: m.tool_calls || undefined,
+        tool_call_id: m.tool_call_id || undefined
+      }))
     ],
-    temperature: settings.temperature,
-    stream: false
+    ...(tools ? { tools } : {})
   }
-  if (tools) body.tools = tools
-
-  const resp = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${settings.apiKey}`
-    },
-    body: JSON.stringify(body)
-  })
-
-  if (!resp.ok) {
-    const d = await resp.json().catch(() => ({}))
-    throw new Error(d.error?.message || `HTTP ${resp.status}`)
-  }
-  return resp.json()
+  // request 响应拦截器已解包 Result.data，这里拿到的是上游原始响应对象
+  return request.post('/ai/chat', body)
 }
 
 async function callAIWithTools(userText, existingHistory) {
@@ -517,23 +549,40 @@ async function smartMockReply(userText) {
     const date = resolveRelativeDate(t)
     const m = t.match(/([\u4e00-\u9fa5A-Za-z]{2,8})\s*(?:到|去|至|->|→|)\s*([\u4e00-\u9fa5A-Za-z]{2,8})/)
     if (m) {
-      const from = m[1], to = m[2]
+      const from = m[1],
+        to = m[2]
       try {
         const data = await fetchTrains(from, to, date)
         if (!data || data.length === 0) return `🔍 ${from} → ${to} (${date}) 没有车次`
-        const available = data.filter(tr => tr.secondSeatCount > 0 || tr.firstSeatCount > 0 || tr.sleeperCount > 0 || tr.businessSeatCount > 0)
+        const available = data.filter(
+          (tr) =>
+            tr.secondSeatCount > 0 || tr.firstSeatCount > 0 || tr.sleeperCount > 0 || tr.businessSeatCount > 0
+        )
         if (available.length === 0) return `😢 ${from} → ${to} (${date}) 全部无票了`
         const chosen = available[0]
         let seatType = '二等座'
         let seatPrice = chosen.secondSeatPrice
-        if (chosen.secondSeatCount <= 0 && chosen.firstSeatCount > 0) { seatType = '一等座'; seatPrice = chosen.firstSeatPrice }
-        else if (chosen.firstSeatCount <= 0 && chosen.businessSeatCount > 0) { seatType = '商务座'; seatPrice = chosen.businessSeatPrice }
-        else if (chosen.sleeperCount > 0 && chosen.secondSeatCount <= 0) { seatType = '硬卧'; seatPrice = chosen.sleeperPrice }
+        if (chosen.secondSeatCount <= 0 && chosen.firstSeatCount > 0) {
+          seatType = '一等座'
+          seatPrice = chosen.firstSeatPrice
+        } else if (chosen.firstSeatCount <= 0 && chosen.businessSeatCount > 0) {
+          seatType = '商务座'
+          seatPrice = chosen.businessSeatPrice
+        } else if (chosen.sleeperCount > 0 && chosen.secondSeatCount <= 0) {
+          seatType = '硬卧'
+          seatPrice = chosen.sleeperPrice
+        }
 
         pendingBuy = {
-          trainId: chosen.trainId, trainNumber: chosen.trainNumber, trainDate: date,
-          seatType, seatPrice, from, to,
-          passengerName: null, passengerIdCard: null
+          trainId: chosen.trainId,
+          trainNumber: chosen.trainNumber,
+          trainDate: date,
+          seatType,
+          seatPrice,
+          from,
+          to,
+          passengerName: null,
+          passengerIdCard: null
         }
 
         let out = `🚄 我帮你查好啦！推荐 **${chosen.trainNumber}** 次列车\n`
@@ -542,7 +591,9 @@ async function smartMockReply(userText) {
         out += `请告诉我乘车人的**姓名**和**身份证号**，我直接帮你下单！\n`
         out += `比如："张三 110101199001011234"`
         return out
-      } catch { return mockReply(userText) }
+      } catch {
+        return mockReply(userText)
+      }
     }
   }
 
@@ -555,12 +606,14 @@ async function smartMockReply(userText) {
     if (pendingBuy.passengerName && pendingBuy.passengerIdCard) {
       try {
         const order = await request.post('/order/buy', {
-          trainId: pendingBuy.trainId, trainDate: pendingBuy.trainDate,
+          trainId: pendingBuy.trainId,
+          trainDate: pendingBuy.trainDate,
           seatType: pendingBuy.seatType,
           passengerName: pendingBuy.passengerName,
           passengerIdCard: pendingBuy.passengerIdCard
         })
-        const from = pendingBuy.from, to = pendingBuy.to
+        const from = pendingBuy.from,
+          to = pendingBuy.to
         let out = `🎉🎉🎉 购票成功！\n\n`
         out += `**订单号 #${order.id}**\n`
         out += `🚄 ${order.trainNumber || pendingBuy.trainNumber} ${from} → ${to}\n`
@@ -601,7 +654,7 @@ async function smartMockReply(userText) {
             if (train.sleeperCount > 0) seats.push(`卧铺¥${train.sleeperPrice}`)
             out += `${i + 1}. **${train.trainNumber}** ${train.startTime}→${train.endTime} (${train.duration}分钟) — ${seats.join(' / ') || '无票'}\n`
           })
-          out += `\n💡 想要更智能的推荐？点 ⚙️ 设置填入 AI API Key 获得完整能力！`
+          out += `\n💡 想要更智能的推荐？让服务端配置 AI_API_KEY 即可解锁完整能力！`
           return out
         }
         return `🔍 ${from} → ${to} (${date}) 没有找到车次。试试其他日期或检查站名？`
@@ -624,11 +677,11 @@ async function handleSend() {
 
   try {
     let reply
-    if (settings.apiKey) {
+    if (aiConfigured.value) {
       const history = messages.value.slice(-10)
       reply = await callAIWithTools(text, history)
     } else {
-      await new Promise(r => setTimeout(r, 400 + Math.random() * 400))
+      await new Promise((r) => setTimeout(r, 400 + Math.random() * 400))
       reply = await smartMockReply(text)
     }
     messages.value.push({ role: 'assistant', content: reply })
@@ -662,16 +715,20 @@ watch(open, (v) => {
 })
 
 onMounted(() => {
-  loadSettings()
+  loadAiStatus()
   try {
     const raw = localStorage.getItem(CHAT_KEY)
     if (raw) messages.value = JSON.parse(raw)
   } catch {}
 })
 
-watch(messages, () => {
-  localStorage.setItem(CHAT_KEY, JSON.stringify(messages.value.slice(-50)))
-}, { deep: true })
+watch(
+  messages,
+  () => {
+    localStorage.setItem(CHAT_KEY, JSON.stringify(messages.value.slice(-50)))
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
@@ -692,13 +749,17 @@ watch(messages, () => {
   overflow: hidden;
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.92));
   border: 1px solid rgba(96, 165, 250, 0.25);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 165, 250, 0.1);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(96, 165, 250, 0.1);
 }
 
-.fade-up-enter-active, .fade-up-leave-active {
+.fade-up-enter-active,
+.fade-up-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.fade-up-enter-from, .fade-up-leave-to {
+.fade-up-enter-from,
+.fade-up-leave-to {
   opacity: 0;
   transform: translateY(20px) scale(0.95);
 }
@@ -845,8 +906,14 @@ watch(messages, () => {
 }
 
 @keyframes msgIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .ai-msg.user {
@@ -913,8 +980,14 @@ watch(messages, () => {
   animation: blink 0.8s infinite;
 }
 @keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .typing {
@@ -929,11 +1002,21 @@ watch(messages, () => {
   background: #64748b;
   animation: bounce 1.4s infinite;
 }
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
+.typing span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 @keyframes bounce {
-  0%, 60%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-6px); }
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-6px);
+  }
 }
 
 .ai-input {
@@ -1021,8 +1104,14 @@ watch(messages, () => {
   pointer-events: none;
 }
 @keyframes ring {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.3); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
 }
 
 .fab-badge {
@@ -1054,7 +1143,14 @@ watch(messages, () => {
   z-index: 10000;
   animation: fadeIn 0.2s;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 .modal-box {
   width: 420px;
@@ -1065,8 +1161,14 @@ watch(messages, () => {
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes popIn {
-  from { opacity: 0; transform: scale(0.9) translateY(16px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header {
@@ -1093,7 +1195,10 @@ watch(messages, () => {
   font-size: 14px;
   transition: all 0.2s;
 }
-.modal-close:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.modal-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
 
 .modal-body {
   padding: 20px;
@@ -1112,8 +1217,8 @@ watch(messages, () => {
   color: #94a3b8;
   font-weight: 500;
 }
-.setting-row input[type="text"],
-.setting-row input[type="password"] {
+.setting-row input[type='text'],
+.setting-row input[type='password'] {
   width: 100%;
   padding: 10px 14px;
   border-radius: 10px;
@@ -1133,7 +1238,7 @@ watch(messages, () => {
   font-size: 11px;
   color: #64748b;
 }
-.setting-row input[type="range"] {
+.setting-row input[type='range'] {
   width: 100%;
   accent-color: #3b82f6;
 }
@@ -1143,7 +1248,8 @@ watch(messages, () => {
   gap: 10px;
   margin-top: 4px;
 }
-.save-btn, .test-btn {
+.save-btn,
+.test-btn {
   flex: 1;
   padding: 10px;
   border-radius: 10px;
@@ -1157,12 +1263,17 @@ watch(messages, () => {
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   color: white;
 }
-.save-btn:hover { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+.save-btn:hover {
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
 .test-btn {
   background: rgba(148, 163, 184, 0.12);
   color: #94a3b8;
 }
-.test-btn:hover { background: rgba(148, 163, 184, 0.25); color: #e2e8f0; }
+.test-btn:hover {
+  background: rgba(148, 163, 184, 0.25);
+  color: #e2e8f0;
+}
 
 .test-result {
   padding: 10px 14px;
@@ -1189,7 +1300,10 @@ watch(messages, () => {
 }
 
 @media (max-width: 480px) {
-  .ai-chat-wrap { right: 12px; bottom: 12px; }
+  .ai-chat-wrap {
+    right: 12px;
+    bottom: 12px;
+  }
   .ai-panel {
     width: calc(100vw - 24px);
     height: calc(100vh - 100px);

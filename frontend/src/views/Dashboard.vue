@@ -11,7 +11,21 @@
         <div class="db-time">
           <span class="db-clock">{{ clock }}</span>
           <button class="db-refresh" @click="load" :disabled="loading">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ spinning: loading }"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              :class="{ spinning: loading }"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
             刷新
           </button>
         </div>
@@ -23,7 +37,12 @@
 
       <template v-else>
         <div class="stats-grid">
-          <div class="stat-card glass-card" v-for="s in statsCards" :key="s.label" :style="{ '--accent': s.color }">
+          <div
+            class="stat-card glass-card"
+            v-for="s in statsCards"
+            :key="s.label"
+            :style="{ '--accent': s.color }"
+          >
             <div class="sc-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
             <div class="sc-body">
               <div class="sc-value">{{ formatNum(s.value) }}</div>
@@ -43,14 +62,16 @@
             <div class="top-routes">
               <div v-if="topRoutes.length === 0" class="empty-hint">暂无购票数据</div>
               <div v-for="(r, i) in topRoutes" :key="i" class="route-row">
-                <div class="rank-badge" :class="{ top1: i === 0, top2: i === 1, top3: i === 2 }">{{ i + 1 }}</div>
+                <div class="rank-badge" :class="{ top1: i === 0, top2: i === 1, top3: i === 2 }">
+                  {{ i + 1 }}
+                </div>
                 <div class="route-label">
                   <span class="from">{{ r.fromStation }}</span>
                   <span class="arrow">→</span>
                   <span class="to">{{ r.toStation }}</span>
                 </div>
                 <div class="route-bar-wrap">
-                  <div class="route-bar" :style="{ width: (r.count / maxRouteCount * 100) + '%' }"></div>
+                  <div class="route-bar" :style="{ width: (r.count / maxRouteCount) * 100 + '%' }"></div>
                 </div>
                 <div class="route-count">{{ r.count }} 张</div>
               </div>
@@ -63,7 +84,7 @@
             </div>
             <div class="trend-chart">
               <div v-for="(t, i) in trend" :key="i" class="trend-col">
-                <div class="trend-bar" :style="{ height: (t.orders / maxTrend * 100) + '%' }"></div>
+                <div class="trend-bar" :style="{ height: (t.orders / maxTrend) * 100 + '%' }"></div>
                 <div class="trend-value">{{ t.orders }}</div>
                 <div class="trend-date">{{ t.date }}</div>
               </div>
@@ -87,7 +108,10 @@
               <div class="si-name">{{ s.label }}</div>
               <div class="si-count">{{ s.value }}</div>
               <div class="si-bar-wrap">
-                <div class="si-bar" :style="{ width: (s.value / totalOrders * 100) + '%', background: s.color }"></div>
+                <div
+                  class="si-bar"
+                  :style="{ width: (s.value / totalOrders) * 100 + '%', background: s.color }"
+                ></div>
               </div>
             </div>
           </div>
@@ -113,7 +137,7 @@ let clockTimer = null
 function startClock() {
   const update = () => {
     const now = new Date()
-    const pad = n => String(n).padStart(2, '0')
+    const pad = (n) => String(n).padStart(2, '0')
     clock.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
   }
   update()
@@ -138,20 +162,50 @@ async function load() {
 }
 
 const statsCards = computed(() => [
-  { label: '总订单数', value: overview.value.totalOrders || 0, icon: '📋', color: '#3b82f6', bg: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(59,130,246,0.1))' },
-  { label: '今日购票', value: overview.value.todayOrders || 0, icon: '🎫', color: '#10b981', bg: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(16,185,129,0.1))' },
-  { label: '今日收入', value: overview.value.todayRevenue || 0, icon: '💰', color: '#f59e0b', bg: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(245,158,11,0.1))' },
-  { label: '列车总数', value: overview.value.totalTrains || 0, icon: '🚄', color: '#ec4899', bg: 'linear-gradient(135deg, rgba(236,72,153,0.3), rgba(236,72,153,0.1))' },
-  { label: '注册用户', value: overview.value.totalUsers || 0, icon: '👥', color: '#8b5cf6', bg: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(139,92,246,0.1))' }
+  {
+    label: '总订单数',
+    value: overview.value.totalOrders || 0,
+    icon: '📋',
+    color: '#3b82f6',
+    bg: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(59,130,246,0.1))'
+  },
+  {
+    label: '今日购票',
+    value: overview.value.todayOrders || 0,
+    icon: '🎫',
+    color: '#10b981',
+    bg: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(16,185,129,0.1))'
+  },
+  {
+    label: '今日收入',
+    value: overview.value.todayRevenue || 0,
+    icon: '💰',
+    color: '#f59e0b',
+    bg: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(245,158,11,0.1))'
+  },
+  {
+    label: '列车总数',
+    value: overview.value.totalTrains || 0,
+    icon: '🚄',
+    color: '#ec4899',
+    bg: 'linear-gradient(135deg, rgba(236,72,153,0.3), rgba(236,72,153,0.1))'
+  },
+  {
+    label: '注册用户',
+    value: overview.value.totalUsers || 0,
+    icon: '👥',
+    color: '#8b5cf6',
+    bg: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(139,92,246,0.1))'
+  }
 ])
 
 const maxRouteCount = computed(() => {
-  const max = Math.max(...topRoutes.value.map(r => r.count), 1)
+  const max = Math.max(...topRoutes.value.map((r) => r.count), 1)
   return max
 })
 
 const maxTrend = computed(() => {
-  const max = Math.max(...trend.value.map(t => t.orders), 1)
+  const max = Math.max(...trend.value.map((t) => t.orders), 1)
   return max
 })
 
@@ -188,7 +242,9 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.dashboard { min-height: 100vh; }
+.dashboard {
+  min-height: 100vh;
+}
 
 .db-body {
   max-width: 1200px;
@@ -212,9 +268,17 @@ onBeforeUnmount(() => {
   -webkit-text-fill-color: transparent;
 }
 
-.db-title p { margin: 0; font-size: 13px; color: #64748b; }
+.db-title p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
 
-.db-time { display: flex; align-items: center; gap: 12px; }
+.db-time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .db-clock {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
@@ -246,11 +310,20 @@ onBeforeUnmount(() => {
   color: #fff;
 }
 
-.db-refresh:disabled { opacity: 0.6; cursor: wait; }
+.db-refresh:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 
-.db-refresh svg.spinning { animation: spin 1s linear infinite; }
+.db-refresh svg.spinning {
+  animation: spin 1s linear infinite;
+}
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .stats-grid {
   display: grid;
@@ -263,7 +336,9 @@ onBeforeUnmount(() => {
   padding: 20px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .stat-card:hover {
@@ -322,10 +397,14 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
-  .charts-row { grid-template-columns: 1fr; }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
 }
 
-.chart-card { padding: 24px; }
+.chart-card {
+  padding: 24px;
+}
 
 .chart-head h3 {
   font-size: 16px;
@@ -333,7 +412,11 @@ onBeforeUnmount(() => {
   color: #f1f5f9;
 }
 
-.top-routes { display: flex; flex-direction: column; gap: 10px; }
+.top-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 .empty-hint {
   text-align: center;
@@ -362,9 +445,18 @@ onBeforeUnmount(() => {
   color: #94a3b8;
 }
 
-.rank-badge.top1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; }
-.rank-badge.top2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #000; }
-.rank-badge.top3 { background: linear-gradient(135deg, #d97706, #92400e); color: #fff; }
+.rank-badge.top1 {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #000;
+}
+.rank-badge.top2 {
+  background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+  color: #000;
+}
+.rank-badge.top3 {
+  background: linear-gradient(135deg, #d97706, #92400e);
+  color: #fff;
+}
 
 .route-label {
   font-size: 13px;
@@ -375,8 +467,13 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
 }
 
-.route-label .arrow { color: #64748b; margin: 0 4px; }
-.route-label .to { color: #fbbf24; }
+.route-label .arrow {
+  color: #64748b;
+  margin: 0 4px;
+}
+.route-label .to {
+  color: #fbbf24;
+}
 
 .route-bar-wrap {
   height: 8px;
@@ -451,11 +548,19 @@ onBeforeUnmount(() => {
   color: #60a5fa;
 }
 
-.tt-sep { margin: 0 8px; color: #475569; }
+.tt-sep {
+  margin: 0 8px;
+  color: #475569;
+}
 
-.status-card { padding: 24px; }
+.status-card {
+  padding: 24px;
+}
 
-.status-row { display: grid; gap: 14px; }
+.status-row {
+  display: grid;
+  gap: 14px;
+}
 
 .status-item {
   display: grid;
@@ -504,36 +609,78 @@ onBeforeUnmount(() => {
 
 .sk-card {
   height: 120px;
-  background: linear-gradient(90deg, rgba(30,41,59,0.8), rgba(51,65,85,0.8), rgba(30,41,59,0.8));
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.8), rgba(30, 41, 59, 0.8));
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
 }
 
 @keyframes skeleton-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-html[data-theme="light"] .db-title h1 {
+html[data-theme='light'] .db-title h1 {
   background: linear-gradient(90deg, #2563eb, #7c3aed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-html[data-theme="light"] .db-title p { color: #64748b; }
-html[data-theme="light"] .db-clock { color: #1d4ed8; border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
-html[data-theme="light"] .db-refresh { color: #475569; border-color: rgba(100,116,139,0.2); }
-html[data-theme="light"] .db-refresh:hover:not(:disabled) { color: #1e293b; }
-html[data-theme="light"] .sc-label { color: #64748b; }
-html[data-theme="light"] .chart-head h3 { color: #1e293b; }
-html[data-theme="light"] .rank-badge { background: rgba(100,116,139,0.15); color: #64748b; }
-html[data-theme="light"] .route-label { color: #334155; }
-html[data-theme="light"] .route-label .to { color: #d97706; }
-html[data-theme="light"] .route-count { color: #64748b; }
-html[data-theme="light"] .empty-hint { color: #64748b; }
-html[data-theme="light"] .trend-value { color: #2563eb; }
-html[data-theme="light"] .trend-date { color: #64748b; }
-html[data-theme="light"] .trend-total { color: #475569; }
-html[data-theme="light"] .tt-num { color: #2563eb; }
-html[data-theme="light"] .si-name { color: #334155; }
-html[data-theme="light"] .si-count { color: #1e293b; }
+html[data-theme='light'] .db-title p {
+  color: #64748b;
+}
+html[data-theme='light'] .db-clock {
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(59, 130, 246, 0.08);
+}
+html[data-theme='light'] .db-refresh {
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.2);
+}
+html[data-theme='light'] .db-refresh:hover:not(:disabled) {
+  color: #1e293b;
+}
+html[data-theme='light'] .sc-label {
+  color: #64748b;
+}
+html[data-theme='light'] .chart-head h3 {
+  color: #1e293b;
+}
+html[data-theme='light'] .rank-badge {
+  background: rgba(100, 116, 139, 0.15);
+  color: #64748b;
+}
+html[data-theme='light'] .route-label {
+  color: #334155;
+}
+html[data-theme='light'] .route-label .to {
+  color: #d97706;
+}
+html[data-theme='light'] .route-count {
+  color: #64748b;
+}
+html[data-theme='light'] .empty-hint {
+  color: #64748b;
+}
+html[data-theme='light'] .trend-value {
+  color: #2563eb;
+}
+html[data-theme='light'] .trend-date {
+  color: #64748b;
+}
+html[data-theme='light'] .trend-total {
+  color: #475569;
+}
+html[data-theme='light'] .tt-num {
+  color: #2563eb;
+}
+html[data-theme='light'] .si-name {
+  color: #334155;
+}
+html[data-theme='light'] .si-count {
+  color: #1e293b;
+}
 </style>

@@ -47,13 +47,18 @@
         </div>
       </div>
 
-      <TransitionGroup v-else-if="filteredOrders.length" name="list" tag="div" class="order-list stagger-children">
+      <TransitionGroup
+        v-else-if="filteredOrders.length"
+        name="list"
+        tag="div"
+        class="order-list stagger-children"
+      >
         <div
           v-for="(order, idx) in filteredOrders"
           :key="order.id"
           class="ticket-card glass-card"
           :data-oid="order.id"
-          :style="{ animationDelay: (idx * 0.05) + 's' }"
+          :style="{ animationDelay: idx * 0.05 + 's' }"
           :class="{
             refunded: order.status === 'REFUNDED' || order.status === '已退票',
             pending: order.status === 'PENDING' || order.status === '待支付',
@@ -141,14 +146,31 @@
                 </div>
               </template>
               <template v-else>
-                <div v-for="(step, i) in ORDER_STEPS" :key="step.key" class="tl-step" :class="{
-                  done: getStepIndex(order.status) >= i,
-                  current: getStepIndex(order.status) === i,
-                  cancelled: getStepIndex(order.status) < 0
-                }">
+                <div
+                  v-for="(step, i) in ORDER_STEPS"
+                  :key="step.key"
+                  class="tl-step"
+                  :class="{
+                    done: getStepIndex(order.status) >= i,
+                    current: getStepIndex(order.status) === i,
+                    cancelled: getStepIndex(order.status) < 0
+                  }"
+                >
                   <div class="tl-connector" v-if="i > 0"></div>
                   <div class="tl-circle">
-                    <svg v-if="getStepIndex(order.status) >= i" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg
+                      v-if="getStepIndex(order.status) >= i"
+                      width="10"
+                      height="10"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                   </div>
                   <div class="tl-label">{{ step.label }}</div>
                   <div v-if="i === 0" class="tl-time">{{ order.createTime }}</div>
@@ -165,20 +187,39 @@
           <svg class="empty-filter-svg" viewBox="0 0 120 90" fill="none">
             <defs>
               <linearGradient id="ef-g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#6366f1"/>
-                <stop offset="100%" stop-color="#a855f7"/>
+                <stop offset="0%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#a855f7" />
               </linearGradient>
             </defs>
             <g class="ef-lens">
-              <circle cx="48" cy="38" r="22" fill="none" stroke="url(#ef-g)" stroke-width="3"/>
-              <circle cx="48" cy="38" r="16" fill="rgba(99,102,241,0.08)" class="ef-inner"/>
+              <circle cx="48" cy="38" r="22" fill="none" stroke="url(#ef-g)" stroke-width="3" />
+              <circle cx="48" cy="38" r="16" fill="rgba(99,102,241,0.08)" class="ef-inner" />
             </g>
-            <line class="ef-handle" x1="64" y1="52" x2="90" y2="78" stroke="url(#ef-g)" stroke-width="4" stroke-linecap="round"/>
+            <line
+              class="ef-handle"
+              x1="64"
+              y1="52"
+              x2="90"
+              y2="78"
+              stroke="url(#ef-g)"
+              stroke-width="4"
+              stroke-linecap="round"
+            />
             <g class="ef-ticket">
-              <rect x="20" y="68" width="36" height="16" rx="3" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 2"/>
-              <line x1="26" y1="76" x2="50" y2="76" stroke="#475569" stroke-width="1"/>
-              <circle cx="26" cy="76" r="2" fill="#475569" class="ef-hole"/>
-              <circle cx="50" cy="76" r="2" fill="#475569" class="ef-hole"/>
+              <rect
+                x="20"
+                y="68"
+                width="36"
+                height="16"
+                rx="3"
+                fill="none"
+                stroke="#475569"
+                stroke-width="1.5"
+                stroke-dasharray="3 2"
+              />
+              <line x1="26" y1="76" x2="50" y2="76" stroke="#475569" stroke-width="1" />
+              <circle cx="26" cy="76" r="2" fill="#475569" class="ef-hole" />
+              <circle cx="50" cy="76" r="2" fill="#475569" class="ef-hole" />
             </g>
           </svg>
           <h3>当前筛选下无订单</h3>
@@ -189,28 +230,73 @@
           <svg class="empty-train-svg" viewBox="0 0 120 80" fill="none">
             <defs>
               <linearGradient id="eo-g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8"/>
-                <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6"/>
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6" />
               </linearGradient>
             </defs>
-            <line class="et-track" x1="0" y1="66" x2="120" y2="66" stroke="#334155" stroke-width="2" stroke-dasharray="6 4"/>
+            <line
+              class="et-track"
+              x1="0"
+              y1="66"
+              x2="120"
+              y2="66"
+              stroke="#334155"
+              stroke-width="2"
+              stroke-dasharray="6 4"
+            />
             <g class="et-cloud et-c1">
-              <ellipse cx="25" cy="14" rx="18" ry="8" fill="#475569" opacity="0.4"/>
+              <ellipse cx="25" cy="14" rx="18" ry="8" fill="#475569" opacity="0.4" />
             </g>
             <g class="et-cloud et-c2">
-              <ellipse cx="95" cy="10" rx="14" ry="6" fill="#475569" opacity="0.35"/>
+              <ellipse cx="95" cy="10" rx="14" ry="6" fill="#475569" opacity="0.35" />
             </g>
             <g class="et-body">
-              <rect x="18" y="24" width="72" height="34" rx="6" fill="url(#eo-g)" class="et-fill"/>
-              <rect x="26" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-              <rect x="48" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-              <rect x="70" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-              <rect x="30" y="48" width="48" height="3" rx="1.5" fill="#0f172a" opacity="0.4"/>
+              <rect x="18" y="24" width="72" height="34" rx="6" fill="url(#eo-g)" class="et-fill" />
+              <rect x="26" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+              <rect x="48" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+              <rect x="70" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+              <rect x="30" y="48" width="48" height="3" rx="1.5" fill="#0f172a" opacity="0.4" />
             </g>
-            <circle cx="34" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel"/>
-            <circle cx="74" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel"/>
-            <line class="et-smoke et-s1" x1="92" y1="30" x2="100" y2="18" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-            <line class="et-smoke et-s2" x1="94" y1="32" x2="106" y2="22" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+            <circle
+              cx="34"
+              cy="62"
+              r="5"
+              fill="#0f172a"
+              stroke="#60a5fa"
+              stroke-width="1.8"
+              class="et-wheel"
+            />
+            <circle
+              cx="74"
+              cy="62"
+              r="5"
+              fill="#0f172a"
+              stroke="#60a5fa"
+              stroke-width="1.8"
+              class="et-wheel"
+            />
+            <line
+              class="et-smoke et-s1"
+              x1="92"
+              y1="30"
+              x2="100"
+              y2="18"
+              stroke="#94a3b8"
+              stroke-width="2"
+              stroke-linecap="round"
+              opacity="0.5"
+            />
+            <line
+              class="et-smoke et-s2"
+              x1="94"
+              y1="32"
+              x2="106"
+              y2="22"
+              stroke="#94a3b8"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              opacity="0.35"
+            />
           </svg>
           <h3>暂无订单</h3>
           <p>快去首页买一张票吧</p>
@@ -228,7 +314,19 @@
       >
         <div v-if="detailOrder" class="detail-wrap">
           <button class="detail-close" @click="detailVisible = false">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </button>
 
           <div class="detail-header">
@@ -297,31 +395,40 @@
             <div class="eticket-qr">
               <div class="qr-grid">
                 <template v-for="(row, ri) in qrMatrix(detailOrder)" :key="ri">
-                  <span
-                    v-for="(cell, ci) in row"
-                    :key="ci"
-                    class="qr-cell"
-                    :class="{ on: cell }"
-                  ></span>
+                  <span v-for="(cell, ci) in row" :key="ci" class="qr-cell" :class="{ on: cell }"></span>
                 </template>
               </div>
               <div class="qr-label">电子检票码</div>
             </div>
             <div class="eticket-barcode">
               <div class="barcode-lines">
-                <span v-for="n in 48" :key="n" class="bar" :style="{ width: (n % 3 === 0 ? 2 : n % 5 === 0 ? 3 : 1) + 'px' }"></span>
+                <span
+                  v-for="n in 48"
+                  :key="n"
+                  class="bar"
+                  :style="{ width: (n % 3 === 0 ? 2 : n % 5 === 0 ? 3 : 1) + 'px' }"
+                ></span>
               </div>
-              <div class="barcode-text">{{ (detailOrder.orderNo || 'NOORDER') }}</div>
+              <div class="barcode-text">{{ detailOrder.orderNo || 'NOORDER' }}</div>
             </div>
           </div>
 
           <div class="detail-actions" @click.stop>
-            <button
-              v-if="isPaid(detailOrder.status)"
-              class="action-print"
-              @click="printTicket"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <button v-if="isPaid(detailOrder.status)" class="action-print" @click="printTicket">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
               打印/导出PDF
             </button>
             <button
@@ -329,7 +436,9 @@
               class="action-refund"
               :disabled="refundingId === detailOrder.id"
               @click="refund(detailOrder.id)"
-            >{{ refundingId === detailOrder.id ? '退票中...' : '申请退票' }}</button>
+            >
+              {{ refundingId === detailOrder.id ? '退票中...' : '申请退票' }}
+            </button>
             <button class="action-close" @click="detailVisible = false">关闭</button>
           </div>
         </div>
@@ -363,7 +472,7 @@ function printTicket() {
   const detailEl = document.querySelector('.ticket-detail-dialog .detail-wrap')
   if (!detailEl) return
   const printStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-    .map(el => el.outerHTML)
+    .map((el) => el.outerHTML)
     .join('\n')
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>电子客票 - ${detailOrder.value?.orderNo || ''}</title>${printStyles}<style>
     body { margin: 0; padding: 20px; background: white !important; }
@@ -397,7 +506,7 @@ function formatFullTime(t) {
   try {
     const d = new Date(typeof t === 'string' ? t.replace(' ', 'T') : t)
     if (isNaN(d.getTime())) return t
-    const pad = n => String(n).padStart(2, '0')
+    const pad = (n) => String(n).padStart(2, '0')
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
   } catch {
     return t
@@ -414,7 +523,7 @@ function calcDuration(s, e) {
   if (!s || !e) return ''
   const [sh, sm] = s.split(':').map(Number)
   const [eh, em] = e.split(':').map(Number)
-  let mins = (eh * 60 + em) - (sh * 60 + sm)
+  let mins = eh * 60 + em - (sh * 60 + sm)
   if (mins < 0) mins += 24 * 60
   if (mins <= 0) return ''
   const h = Math.floor(mins / 60)
@@ -438,7 +547,7 @@ function qrMatrix(order) {
   }
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      const v = (i === 0 || i === 2 || j === 0 || j === 2)
+      const v = i === 0 || i === 2 || j === 0 || j === 2
       matrix[i][j] = v
       matrix[i][size - 1 - j] = v
       matrix[size - 1 - i][j] = v
@@ -448,7 +557,10 @@ function qrMatrix(order) {
 }
 
 const counts = computed(() => {
-  let paid = 0, refunded = 0, pending = 0, cancelled = 0
+  let paid = 0,
+    refunded = 0,
+    pending = 0,
+    cancelled = 0
   for (const o of orders.value) {
     if (o.status === 'PAID' || o.status === '已支付') paid++
     else if (o.status === 'REFUNDED' || o.status === '已退票') refunded++
@@ -469,7 +581,13 @@ const activeFilter = computed(() => {
 const filteredOrders = computed(() => {
   const f = activeFilter.value
   if (f === 'ALL') return orders.value
-  return orders.value.filter(o => o.status === f || (f === 'PAID' && o.status === '已支付') || (f === 'REFUNDED' && o.status === '已退票') || (f === 'PENDING' && o.status === '待支付'))
+  return orders.value.filter(
+    (o) =>
+      o.status === f ||
+      (f === 'PAID' && o.status === '已支付') ||
+      (f === 'REFUNDED' && o.status === '已退票') ||
+      (f === 'PENDING' && o.status === '待支付')
+  )
 })
 
 const filterTabs = computed(() => [
@@ -495,28 +613,31 @@ onBeforeUnmount(() => {
   if (loadAbort) loadAbort.abort()
 })
 
-watch(() => route.query, async (q) => {
-  if (q.highlight === 'new') {
-    await load()
-    if (orders.value.length) {
-      highlightId.value = orders.value[0].id
-      requestAnimationFrame(() => {
-        const el = document.querySelector(`[data-oid="${highlightId.value}"]`)
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
-    }
-  } else if (q.highlight && q.highlight !== 'new') {
-    await load()
-    const targetId = Number(q.highlight)
-    if (orders.value.some(o => o.id === targetId)) {
-      highlightId.value = targetId
-      requestAnimationFrame(() => {
-        const el = document.querySelector(`[data-oid="${targetId}"]`)
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      })
+watch(
+  () => route.query,
+  async (q) => {
+    if (q.highlight === 'new') {
+      await load()
+      if (orders.value.length) {
+        highlightId.value = orders.value[0].id
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`[data-oid="${highlightId.value}"]`)
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
+    } else if (q.highlight && q.highlight !== 'new') {
+      await load()
+      const targetId = Number(q.highlight)
+      if (orders.value.some((o) => o.id === targetId)) {
+        highlightId.value = targetId
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`[data-oid="${targetId}"]`)
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        })
+      }
     }
   }
-})
+)
 
 async function load() {
   if (loadAbort) loadAbort.abort()
@@ -554,14 +675,14 @@ function formatTime(t) {
 }
 
 const STATUS_MAP = {
-  'PAID': { label: '已支付', cls: 'paid' },
-  '已支付': { label: '已支付', cls: 'paid' },
-  'REFUNDED': { label: '已退票', cls: 'refunded' },
-  '已退票': { label: '已退票', cls: 'refunded' },
-  'PENDING': { label: '待支付', cls: 'pending' },
-  '待支付': { label: '待支付', cls: 'pending' },
-  'CANCELLED': { label: '已取消', cls: 'cancelled' },
-  '已取消': { label: '已取消', cls: 'cancelled' }
+  PAID: { label: '已支付', cls: 'paid' },
+  已支付: { label: '已支付', cls: 'paid' },
+  REFUNDED: { label: '已退票', cls: 'refunded' },
+  已退票: { label: '已退票', cls: 'refunded' },
+  PENDING: { label: '待支付', cls: 'pending' },
+  待支付: { label: '待支付', cls: 'pending' },
+  CANCELLED: { label: '已取消', cls: 'cancelled' },
+  已取消: { label: '已取消', cls: 'cancelled' }
 }
 
 function statusLabel(s) {
@@ -591,9 +712,7 @@ function getStepIndex(status) {
 }
 
 async function refund(id) {
-  const order = detailOrder.value?.id === id
-    ? detailOrder.value
-    : orders.value.find(o => o.id === id)
+  const order = detailOrder.value?.id === id ? detailOrder.value : orders.value.find((o) => o.id === id)
 
   if (!order) {
     ElMessage.error('未找到该订单')
@@ -611,7 +730,9 @@ async function refund(id) {
         customClass: 'refund-confirm-box'
       }
     )
-  } catch { return }
+  } catch {
+    return
+  }
 
   refundingId.value = id
   try {
@@ -730,7 +851,9 @@ async function refund(id) {
   color: #34d399;
 }
 
-.paid-chip .sc-dot { background: #10b981; }
+.paid-chip .sc-dot {
+  background: #10b981;
+}
 
 .refunded-chip {
   background: rgba(100, 116, 139, 0.12);
@@ -738,7 +861,9 @@ async function refund(id) {
   color: #94a3b8;
 }
 
-.refunded-chip .sc-dot { background: #64748b; }
+.refunded-chip .sc-dot {
+  background: #64748b;
+}
 
 .pending-chip {
   background: rgba(245, 158, 11, 0.12);
@@ -746,7 +871,9 @@ async function refund(id) {
   color: #fbbf24;
 }
 
-.pending-chip .sc-dot { background: #f59e0b; }
+.pending-chip .sc-dot {
+  background: #f59e0b;
+}
 
 .skeleton-list {
   display: flex;
@@ -768,9 +895,18 @@ async function refund(id) {
   animation: skPulse 1.2s ease-in-out infinite;
 }
 
-.sk-lg { width: 70%; height: 26px; }
-.sk-md { width: 50%; height: 20px; }
-.sk-sm { width: 90%; height: 14px; }
+.sk-lg {
+  width: 70%;
+  height: 26px;
+}
+.sk-md {
+  width: 50%;
+  height: 20px;
+}
+.sk-sm {
+  width: 90%;
+  height: 14px;
+}
 
 .sk-chips {
   display: flex;
@@ -786,11 +922,18 @@ async function refund(id) {
   animation: skPulse 1.2s ease-in-out infinite;
 }
 
-.sk-chip.wide { width: 160px; }
+.sk-chip.wide {
+  width: 160px;
+}
 
 @keyframes skPulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .order-list {
@@ -807,7 +950,10 @@ async function refund(id) {
   grid-template-columns: 1fr 260px;
   border-radius: 20px;
   cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, border-color 0.3s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease,
+    border-color 0.3s ease;
 }
 
 .ticket-card:hover {
@@ -839,11 +985,17 @@ async function refund(id) {
 
 @keyframes ticketHighlight {
   0% {
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.9), 0 0 40px rgba(59, 130, 246, 0.6), 0 0 80px rgba(139, 92, 246, 0.3);
+    box-shadow:
+      0 0 0 2px rgba(59, 130, 246, 0.9),
+      0 0 40px rgba(59, 130, 246, 0.6),
+      0 0 80px rgba(139, 92, 246, 0.3);
     transform: translateY(-4px) scale(1.01);
   }
   40% {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.5), 0 0 120px rgba(139, 92, 246, 0.2);
+    box-shadow:
+      0 0 0 3px rgba(59, 130, 246, 0.8),
+      0 0 60px rgba(59, 130, 246, 0.5),
+      0 0 120px rgba(139, 92, 246, 0.2);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
@@ -858,7 +1010,8 @@ async function refund(id) {
   border-right: 2px dashed rgba(148, 163, 184, 0.2);
 }
 
-.ticket-edge.top, .ticket-edge.bottom {
+.ticket-edge.top,
+.ticket-edge.bottom {
   position: absolute;
   right: -2px;
   width: 16px;
@@ -867,8 +1020,12 @@ async function refund(id) {
   border-radius: 50%;
 }
 
-.ticket-edge.top { top: -8px; }
-.ticket-edge.bottom { bottom: -8px; }
+.ticket-edge.top {
+  top: -8px;
+}
+.ticket-edge.bottom {
+  bottom: -8px;
+}
 
 .ticket-hole {
   position: absolute;
@@ -879,8 +1036,12 @@ async function refund(id) {
   border-radius: 50%;
 }
 
-.top-hole { top: -7px; }
-.bottom-hole { bottom: -7px; }
+.top-hole {
+  top: -7px;
+}
+.bottom-hole {
+  bottom: -7px;
+}
 
 .ticket-grid {
   display: grid;
@@ -1017,24 +1178,46 @@ async function refund(id) {
 
 .status-dot.paid {
   background: #10b981;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7), 0 0 0 0 rgba(16, 185, 129, 0.6);
+  box-shadow:
+    0 0 8px rgba(16, 185, 129, 0.7),
+    0 0 0 0 rgba(16, 185, 129, 0.6);
   animation: dotPulsePaid 2.4s ease-in-out infinite;
 }
 
 @keyframes dotPulsePaid {
-  0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.7), 0 0 0 0 rgba(16, 185, 129, 0.6); }
-  50% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.9), 0 0 0 6px rgba(16, 185, 129, 0); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(16, 185, 129, 0.7),
+      0 0 0 0 rgba(16, 185, 129, 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(16, 185, 129, 0.9),
+      0 0 0 6px rgba(16, 185, 129, 0);
+  }
 }
 
 .status-dot.pending {
   background: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7), 0 0 0 0 rgba(245, 158, 11, 0.5);
+  box-shadow:
+    0 0 8px rgba(245, 158, 11, 0.7),
+    0 0 0 0 rgba(245, 158, 11, 0.5);
   animation: dotPulsePending 1.8s ease-in-out infinite;
 }
 
 @keyframes dotPulsePending {
-  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.7), 0 0 0 0 rgba(245, 158, 11, 0.5); }
-  50% { box-shadow: 0 0 14px rgba(245, 158, 11, 0.9), 0 0 0 5px rgba(245, 158, 11, 0); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(245, 158, 11, 0.7),
+      0 0 0 0 rgba(245, 158, 11, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(245, 158, 11, 0.9),
+      0 0 0 5px rgba(245, 158, 11, 0);
+  }
 }
 
 .status-dot.refunded {
@@ -1135,8 +1318,13 @@ async function refund(id) {
 }
 
 @keyframes tlCurrentPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
-  50% { box-shadow: 0 0 16px rgba(251, 191, 36, 0.7); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.7);
+  }
 }
 
 .order-timeline .tl-label {
@@ -1186,13 +1374,13 @@ async function refund(id) {
   background: #64748b;
 }
 
-html[data-theme="light"] .order-timeline .tl-circle {
+html[data-theme='light'] .order-timeline .tl-circle {
   background: #f1f5f9;
 }
-html[data-theme="light"] .order-timeline .tl-label {
+html[data-theme='light'] .order-timeline .tl-label {
   color: #64748b;
 }
-html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
+html[data-theme='light'] .order-timeline .tl-step.done .tl-label {
   color: #1d4ed8;
 }
 
@@ -1253,10 +1441,19 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
 }
 
 @media (max-width: 900px) {
-  .ticket-card { grid-template-columns: 1fr; }
-  .ticket-left { border-right: none; border-bottom: 2px dashed rgba(148, 163, 184, 0.2); }
-  .ticket-grid { grid-template-columns: repeat(2, 1fr); }
-  .rv-time-big { font-size: 18px; }
+  .ticket-card {
+    grid-template-columns: 1fr;
+  }
+  .ticket-left {
+    border-right: none;
+    border-bottom: 2px dashed rgba(148, 163, 184, 0.2);
+  }
+  .ticket-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .rv-time-big {
+    font-size: 18px;
+  }
 }
 
 .ticket-card {
@@ -1277,7 +1474,9 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
   border: 1px solid rgba(96, 165, 250, 0.2);
   border-radius: 20px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(59, 130, 246, 0.15);
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(59, 130, 246, 0.15);
   margin: 0;
 }
 
@@ -1622,13 +1821,25 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
 }
 
 @keyframes efPulse {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.05); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
 @keyframes efShine {
-  0%, 100% { opacity: 0.08; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }
 
 .empty-filter-svg .ef-handle {
@@ -1637,8 +1848,13 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
 }
 
 @keyframes efWiggle {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(6deg); }
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
 }
 
 .empty-filter-svg .ef-ticket {
@@ -1646,8 +1862,13 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
 }
 
 @keyframes efTicket {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 .empty-filter-svg .ef-hole {
@@ -1655,7 +1876,12 @@ html[data-theme="light"] .order-timeline .tl-step.done .tl-label {
 }
 
 @keyframes efHole {
-  0%, 100% { fill: #475569; }
-  50% { fill: #64748b; }
+  0%,
+  100% {
+    fill: #475569;
+  }
+  50% {
+    fill: #64748b;
+  }
 }
 </style>

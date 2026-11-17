@@ -16,6 +16,8 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: maven
+      - name: 确认 Docker 可用（Testcontainers Redis 集成测试）
+        run: docker info
       - name: Maven 构建并运行测试
         run: sh ./mvnw -B verify
 
@@ -32,9 +34,24 @@ jobs:
       - name: 安装依赖
         working-directory: frontend
         run: npm ci
+      - name: 代码规范检查（ESLint）
+        working-directory: frontend
+        run: npm run lint
+      - name: 格式检查（Prettier）
+        working-directory: frontend
+        run: npm run format:check
+      - name: 单元测试（Vitest）
+        working-directory: frontend
+        run: npm run test
       - name: 生产构建
         working-directory: frontend
         run: npm run build
+      - name: 安装 E2E 浏览器
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: 端到端测试（Playwright，基于构建产物 preview）
+        working-directory: frontend
+        run: npm run test:e2e
 
   compose:
     name: Compose 配置校验

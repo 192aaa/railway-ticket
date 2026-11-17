@@ -14,7 +14,9 @@ const root = ref(null)
 const canvas = ref(null)
 
 let ctx = null
-let W = 0, H = 0, DPR = 1
+let W = 0,
+  H = 0,
+  DPR = 1
 let animId = null
 let rockets = []
 let particles = []
@@ -22,11 +24,24 @@ let startTime = 0
 let launched = 0
 
 const colors = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308',
-  '#84cc16', '#22c55e', '#10b981', '#14b8a6',
-  '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1',
-  '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-  '#f43f5e', '#fbbf24'
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#84cc16',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#0ea5e9',
+  '#3b82f6',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#d946ef',
+  '#ec4899',
+  '#f43f5e',
+  '#fbbf24'
 ]
 
 function resize() {
@@ -42,11 +57,14 @@ function resize() {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0)
 }
 
-function rand(a, b) { return a + Math.random() * (b - a) }
+function rand(a, b) {
+  return a + Math.random() * (b - a)
+}
 
 function launchRocket(x, y, targetX, targetY, color) {
   rockets.push({
-    x: x, y: y,
+    x: x,
+    y: y,
     vx: (targetX - x) / 40,
     vy: (targetY - y) / 40 - 0.15,
     targetY: targetY,
@@ -57,16 +75,19 @@ function launchRocket(x, y, targetX, targetY, color) {
 
 function explode(x, y, color, big = false) {
   const count = big ? 120 : 80
-  const palette = color ? [color, '#ffffff', '#fef3c7'] : [
-    colors[Math.floor(Math.random() * colors.length)],
-    colors[Math.floor(Math.random() * colors.length)],
-    '#ffffff'
-  ]
+  const palette = color
+    ? [color, '#ffffff', '#fef3c7']
+    : [
+        colors[Math.floor(Math.random() * colors.length)],
+        colors[Math.floor(Math.random() * colors.length)],
+        '#ffffff'
+      ]
   for (let i = 0; i < count; i++) {
     const angle = (Math.PI * 2 * i) / count + rand(-0.1, 0.1)
     const speed = rand(big ? 3 : 2, big ? 7 : 5)
     particles.push({
-      x, y,
+      x,
+      y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       life: 1,
@@ -133,7 +154,10 @@ function update() {
     p.y += p.vy
     p.life -= p.decay
 
-    if (p.life <= 0) { particles.splice(i, 1); continue }
+    if (p.life <= 0) {
+      particles.splice(i, 1)
+      continue
+    }
 
     ctx.beginPath()
     ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2)
@@ -196,10 +220,13 @@ function stopShow() {
   particles = []
 }
 
-watch(() => props.show, (v) => {
-  if (v) startShow()
-  else stopShow()
-})
+watch(
+  () => props.show,
+  (v) => {
+    if (v) startShow()
+    else stopShow()
+  }
+)
 
 onMounted(() => {
   ctx = canvas.value.getContext('2d')

@@ -60,4 +60,14 @@ public class JwtUtil {
             return false;
         }
     }
+
+    /** token 剩余有效毫秒数，用于设置登出黑名单的 TTL。 */
+    public long getRemainingMillis(String token) {
+        try {
+            Date expiration = parseToken(token).getExpiration();
+            return Math.max(0, expiration.getTime() - System.currentTimeMillis());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
 }

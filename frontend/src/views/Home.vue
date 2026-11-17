@@ -37,8 +37,15 @@
                 </el-autocomplete>
               </div>
               <div class="swap-btn" v-ripple @click="swapStations">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
                 </svg>
               </div>
               <div class="station-col">
@@ -99,9 +106,32 @@
               class="quick-tag"
               :class="{ active: quickActive === route.label }"
               @click="applyQuick(route)"
-            >{{ route.label }}</button>
-            <button v-if="queryForm.fromStation && queryForm.toStation" class="quick-tag fav-toggle" :class="{ active: isFavRoute(queryForm.fromStation, queryForm.toStation) }" @click="toggleCurrentRouteFav" :title="isFavRoute(queryForm.fromStation, queryForm.toStation) ? '取消收藏这条路线' : '收藏这条路线'">
-              <svg width="12" height="12" viewBox="0 0 24 24" :fill="isFavRoute(queryForm.fromStation, queryForm.toStation) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            >
+              {{ route.label }}
+            </button>
+            <button
+              v-if="queryForm.fromStation && queryForm.toStation"
+              class="quick-tag fav-toggle"
+              :class="{ active: isFavRoute(queryForm.fromStation, queryForm.toStation) }"
+              @click="toggleCurrentRouteFav"
+              :title="
+                isFavRoute(queryForm.fromStation, queryForm.toStation) ? '取消收藏这条路线' : '收藏这条路线'
+              "
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                :fill="isFavRoute(queryForm.fromStation, queryForm.toStation) ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
               {{ isFavRoute(queryForm.fromStation, queryForm.toStation) ? '已收藏' : '收藏' }}
             </button>
           </div>
@@ -112,7 +142,16 @@
               <div v-for="route in favRoutes" :key="route.label" class="fav-route-card">
                 <div class="fav-route-main" @click="searchWithFavDate(route)">
                   <span class="fav-from">{{ route.from }}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
                   <span class="fav-to">{{ route.to }}</span>
                 </div>
                 <div class="fav-route-quick">
@@ -121,7 +160,11 @@
                   <button @click="searchWithFavDate(route, 3)" title="3天后">3天</button>
                 </div>
                 <button class="fav-remove" @click="toggleFavRoute(route.from, route.to)" title="取消收藏">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -129,22 +172,38 @@
 
           <div v-if="historyList.length" class="quick-tags">
             <span class="quick-label">搜索历史</span>
-            <div
-              v-for="(h, i) in historyList"
-              :key="h.key"
-              class="history-wrap"
-            >
-              <button
-                class="quick-tag history-tag"
-                @click="applyHistory(h)"
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <div v-for="(h, i) in historyList" :key="h.key" class="history-wrap">
+              <button class="quick-tag history-tag" @click="applyHistory(h)">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
                 <span>{{ h.from }}→{{ h.to }}</span>
                 <span v-if="h.date" class="history-date">{{ h.date.slice(5) }}</span>
                 <span v-if="h.ts" class="history-time">{{ formatHistoryTime(h.ts) }}</span>
               </button>
               <button class="history-del" @click.stop="deleteHistoryItem(i)" title="删除">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
             <button class="quick-tag clear-btn" @click="clearHistory">清空</button>
@@ -154,7 +213,17 @@
         <div v-if="!searched" class="stats-row">
           <div class="stat-item">
             <div class="stat-ico ico-blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
             </div>
             <div class="stat-body">
               <span class="stat-num">{{ stats.stations }}</span>
@@ -163,7 +232,17 @@
           </div>
           <div class="stat-item">
             <div class="stat-ico ico-purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16M8 7v4"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="4" y="3" width="16" height="16" rx="2" />
+                <path d="M4 11h16M8 7v4" />
+              </svg>
             </div>
             <div class="stat-body">
               <span class="stat-num">{{ stats.trains }}</span>
@@ -172,7 +251,17 @@
           </div>
           <div class="stat-item">
             <div class="stat-ico ico-pink">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg>
             </div>
             <div class="stat-body">
               <span class="stat-num">7</span>
@@ -185,9 +274,7 @@
 
     <section v-if="searched" class="results">
       <div class="results-header">
-        <h2>
-          共 {{ displayResults.length }} 趟列车
-        </h2>
+        <h2>共 {{ displayResults.length }} 趟列车</h2>
         <div class="date-badge">{{ queryForm.date }}</div>
       </div>
 
@@ -200,7 +287,9 @@
             class="filter-btn"
             :class="{ active: sortBy === opt.value }"
             @click="sortBy = opt.value"
-          >{{ opt.label }}</button>
+          >
+            {{ opt.label }}
+          </button>
         </div>
         <div class="filter-group">
           <span class="filter-label">车型</span>
@@ -210,7 +299,9 @@
             class="filter-btn"
             :class="{ active: trainTypeFilter === opt.value }"
             @click="trainTypeFilter = opt.value"
-          >{{ opt.label }}</button>
+          >
+            {{ opt.label }}
+          </button>
         </div>
         <div class="filter-group">
           <span class="filter-label">时段</span>
@@ -220,7 +311,9 @@
             class="filter-btn"
             :class="{ active: timeFilter === opt.value }"
             @click="timeFilter = opt.value"
-          >{{ opt.label }}</button>
+          >
+            {{ opt.label }}
+          </button>
         </div>
         <div class="filter-group">
           <button
@@ -228,7 +321,19 @@
             :class="{ active: onlyAvailable }"
             @click="onlyAvailable = !onlyAvailable"
           >
-            <svg v-if="onlyAvailable" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg
+              v-if="onlyAvailable"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             只看有票
           </button>
         </div>
@@ -253,11 +358,29 @@
           :key="train.trainNumber + train.startTime"
           class="train-card glass-card"
           :class="{ favorited: isFav(train) }"
-          :style="{ animationDelay: (idx * 0.04) + 's' }"
+          :style="{ animationDelay: idx * 0.04 + 's' }"
         >
           <div class="shimmer-overlay"></div>
-          <button class="fav-btn" :class="{ active: isFav(train) }" @click.stop="toggleFav(train)" :title="isFav(train) ? '取消收藏' : '收藏此车次'">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <button
+            class="fav-btn"
+            :class="{ active: isFav(train) }"
+            @click.stop="toggleFav(train)"
+            :title="isFav(train) ? '取消收藏' : '收藏此车次'"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
           </button>
           <div class="train-main">
             <div class="train-info">
@@ -270,7 +393,9 @@
               </div>
               <div class="route-line">
                 <div class="station-time">
-                  <div class="time-big">{{ train.startTime.split('T')[1]?.substring(0, 5) || train.startTime }}</div>
+                  <div class="time-big">
+                    {{ train.startTime.split('T')[1]?.substring(0, 5) || train.startTime }}
+                  </div>
                   <div class="station-name">{{ train.fromStation }}</div>
                 </div>
                 <div class="journey">
@@ -282,7 +407,9 @@
                   </div>
                 </div>
                 <div class="station-time right">
-                  <div class="time-big">{{ train.endTime.split('T')[1]?.substring(0, 5) || train.endTime }}</div>
+                  <div class="time-big">
+                    {{ train.endTime.split('T')[1]?.substring(0, 5) || train.endTime }}
+                  </div>
                   <div class="station-name">{{ train.toStation }}</div>
                 </div>
               </div>
@@ -301,7 +428,10 @@
                 <span class="seat-price">¥{{ seat.price }}</span>
               </div>
               <div class="seat-bottom">
-                <span v-if="seat.count > 0" class="seat-count">{{ seat.count >= 10 ? '充足' : (seat.count <= 3 ? '仅剩' : '') }} {{ seat.count > 3 ? '' : seat.count + '张' }}</span>
+                <span v-if="seat.count > 0" class="seat-count"
+                  >{{ seat.count >= 10 ? '充足' : seat.count <= 3 ? '仅剩' : '' }}
+                  {{ seat.count > 3 ? '' : seat.count + '张' }}</span
+                >
                 <span v-else class="seat-count sold-out">无票</span>
               </div>
               <div class="seat-bar">
@@ -311,12 +441,20 @@
           </div>
 
           <div class="train-action">
-            <button
-              class="detail-btn"
-              title="经停站 · 详情"
-              @click="openTrainDetail(train)"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg>
+            <button class="detail-btn" title="经停站 · 详情" @click="openTrainDetail(train)">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 3v18h18" />
+                <path d="M7 14l4-4 4 4 6-6" />
+              </svg>
             </button>
             <button
               class="buy-btn"
@@ -334,31 +472,62 @@
         <svg class="empty-train-svg" viewBox="0 0 120 80" fill="none">
           <defs>
             <linearGradient id="et-g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8"/>
-              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6"/>
+              <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.6" />
             </linearGradient>
           </defs>
-          <line class="et-track" x1="0" y1="66" x2="120" y2="66" stroke="#334155" stroke-width="2" stroke-dasharray="6 4"/>
+          <line
+            class="et-track"
+            x1="0"
+            y1="66"
+            x2="120"
+            y2="66"
+            stroke="#334155"
+            stroke-width="2"
+            stroke-dasharray="6 4"
+          />
           <g class="et-cloud et-c1">
-            <ellipse cx="25" cy="14" rx="18" ry="8" fill="#475569" opacity="0.4"/>
+            <ellipse cx="25" cy="14" rx="18" ry="8" fill="#475569" opacity="0.4" />
           </g>
           <g class="et-cloud et-c2">
-            <ellipse cx="95" cy="10" rx="14" ry="6" fill="#475569" opacity="0.35"/>
+            <ellipse cx="95" cy="10" rx="14" ry="6" fill="#475569" opacity="0.35" />
           </g>
           <g class="et-body">
-            <rect x="18" y="24" width="72" height="34" rx="6" fill="url(#et-g)" class="et-fill"/>
-            <rect x="26" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-            <rect x="48" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-            <rect x="70" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window"/>
-            <rect x="30" y="48" width="48" height="3" rx="1.5" fill="#0f172a" opacity="0.4"/>
+            <rect x="18" y="24" width="72" height="34" rx="6" fill="url(#et-g)" class="et-fill" />
+            <rect x="26" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+            <rect x="48" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+            <rect x="70" y="30" width="14" height="12" rx="2" fill="#0f172a" class="et-window" />
+            <rect x="30" y="48" width="48" height="3" rx="1.5" fill="#0f172a" opacity="0.4" />
           </g>
-          <circle cx="34" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel"/>
-          <circle cx="74" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel"/>
-          <line class="et-smoke et-s1" x1="92" y1="30" x2="100" y2="18" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-          <line class="et-smoke et-s2" x1="94" y1="32" x2="106" y2="22" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+          <circle cx="34" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel" />
+          <circle cx="74" cy="62" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="1.8" class="et-wheel" />
+          <line
+            class="et-smoke et-s1"
+            x1="92"
+            y1="30"
+            x2="100"
+            y2="18"
+            stroke="#94a3b8"
+            stroke-width="2"
+            stroke-linecap="round"
+            opacity="0.5"
+          />
+          <line
+            class="et-smoke et-s2"
+            x1="94"
+            y1="32"
+            x2="106"
+            y2="22"
+            stroke="#94a3b8"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            opacity="0.35"
+          />
         </svg>
         <h3>{{ onlyAvailable && results.length ? '筛选后无符合条件的车次' : '没有找到合适的车次' }}</h3>
-        <p>{{ onlyAvailable && results.length ? '试试取消"只看有票"筛选' : '试试调整日期或更换出发/到达地' }}</p>
+        <p>
+          {{ onlyAvailable && results.length ? '试试取消"只看有票"筛选' : '试试调整日期或更换出发/到达地' }}
+        </p>
         <button v-if="onlyAvailable" class="go-home-btn" @click="onlyAvailable = false">取消筛选</button>
       </div>
 
@@ -372,7 +541,7 @@
             v-for="(r, i) in hotRoutes"
             :key="i"
             class="hr-card"
-            :style="{ animationDelay: (i * 0.05) + 's' }"
+            :style="{ animationDelay: i * 0.05 + 's' }"
             @click="quickQueryHot(r)"
           >
             <div class="hr-from">{{ r.from }}</div>
@@ -400,13 +569,27 @@
                 <span class="td-date">📅 {{ queryForm.date }}</span>
               </div>
               <button class="td-close" @click="trainDetailVisible = false">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               </button>
             </div>
 
             <div class="td-route-summary">
               <div class="td-big-station">
-                <span class="td-big-time">{{ trainDetail?.startTime?.split('T')[1]?.substring(0,5) || '--:--' }}</span>
+                <span class="td-big-time">{{
+                  trainDetail?.startTime?.split('T')[1]?.substring(0, 5) || '--:--'
+                }}</span>
                 <span class="td-big-name">{{ trainDetail?.fromStation }}</span>
               </div>
               <div class="td-big-track">
@@ -414,7 +597,9 @@
                 <span class="td-big-dur">{{ formatDuration(trainDetail?.duration) }}</span>
               </div>
               <div class="td-big-station end">
-                <span class="td-big-time">{{ trainDetail?.endTime?.split('T')[1]?.substring(0,5) || '--:--' }}</span>
+                <span class="td-big-time">{{
+                  trainDetail?.endTime?.split('T')[1]?.substring(0, 5) || '--:--'
+                }}</span>
                 <span class="td-big-name">{{ trainDetail?.toStation }}</span>
               </div>
             </div>
@@ -422,19 +607,29 @@
             <div class="td-stops-section">
               <div class="td-section-title">🚉 经停站信息</div>
               <div v-if="tdLoading" class="td-loading">
-                <div class="td-spinner"></div> 加载经停站...
+                <div class="td-spinner"></div>
+                加载经停站...
               </div>
               <div v-else-if="tdStops.length" class="td-stops-list">
-                <div class="td-stop" v-for="(stop, idx) in tdStops" :key="idx" :class="{ first: idx === 0, last: idx === tdStops.length - 1 }">
+                <div
+                  class="td-stop"
+                  v-for="(stop, idx) in tdStops"
+                  :key="idx"
+                  :class="{ first: idx === 0, last: idx === tdStops.length - 1 }"
+                >
                   <div class="td-stop-time">
-                    <span class="td-arr">{{ stop.arriveTime?.substring(0,5) || '——' }}</span>
-                    <span class="td-dep" v-if="idx !== 0 && idx !== tdStops.length - 1">{{ stop.departTime?.substring(0,5) || '——' }}</span>
+                    <span class="td-arr">{{ stop.arriveTime?.substring(0, 5) || '——' }}</span>
+                    <span class="td-dep" v-if="idx !== 0 && idx !== tdStops.length - 1">{{
+                      stop.departTime?.substring(0, 5) || '——'
+                    }}</span>
                   </div>
                   <div class="td-stop-dot"></div>
                   <div class="td-stop-line" v-if="idx < tdStops.length - 1"></div>
                   <div class="td-stop-info">
                     <span class="td-stop-name">{{ stop.stationName || '未知' }}</span>
-                    <span class="td-stop-city" v-if="stop.city && stop.city !== stop.stationName">{{ stop.city }}</span>
+                    <span class="td-stop-city" v-if="stop.city && stop.city !== stop.stationName">{{
+                      stop.city
+                    }}</span>
                     <span v-if="idx === 0" class="td-stop-tag start">始发</span>
                     <span v-else-if="idx === tdStops.length - 1" class="td-stop-tag end">终到</span>
                   </div>
@@ -446,10 +641,18 @@
             <div class="td-seats-section">
               <div class="td-section-title">💺 座位余票</div>
               <div class="td-seats-grid">
-                <div v-for="seat in getSeatOptions(trainDetail)" :key="seat.type" class="td-seat-row" :class="getSeatLevel(seat.count)">
+                <div
+                  v-for="seat in getSeatOptions(trainDetail)"
+                  :key="seat.type"
+                  class="td-seat-row"
+                  :class="getSeatLevel(seat.count)"
+                >
                   <div class="td-seat-name">{{ seat.type }}</div>
                   <div class="td-seat-bar-wrap">
-                    <div class="td-seat-bar-fill" :style="{ width: Math.min(100, seat.count * 4) + '%' }"></div>
+                    <div
+                      class="td-seat-bar-fill"
+                      :style="{ width: Math.min(100, seat.count * 4) + '%' }"
+                    ></div>
                   </div>
                   <div class="td-seat-count">
                     <span class="td-seat-num">{{ seat.count > 0 ? seat.count : 0 }}</span>
@@ -461,7 +664,11 @@
             </div>
 
             <div class="td-footer">
-              <button class="td-buy-btn" v-if="trainDetail && hasAnySeat(trainDetail)" @click="trainDetailVisible = false; buyTicket(trainDetail)">
+              <button
+                class="td-buy-btn"
+                v-if="trainDetail && hasAnySeat(trainDetail)"
+                @click="closeDetailAndBuy"
+              >
                 立即购票 →
               </button>
             </div>
@@ -486,16 +693,28 @@
             </div>
 
             <div class="pay-info">
-              <div class="pi-line"><span class="pi-k">车次</span><span class="pi-v">{{ payData.trainNumber }}</span></div>
-              <div class="pi-line"><span class="pi-k">路线</span><span class="pi-v">{{ payData.from }} → {{ payData.to }}</span></div>
-              <div class="pi-line"><span class="pi-k">座位</span><span class="pi-v">{{ payData.seatType }}</span></div>
-              <div class="pi-line"><span class="pi-k">乘客</span><span class="pi-v">{{ payData.passenger }}</span></div>
+              <div class="pi-line">
+                <span class="pi-k">车次</span><span class="pi-v">{{ payData.trainNumber }}</span>
+              </div>
+              <div class="pi-line">
+                <span class="pi-k">路线</span><span class="pi-v">{{ payData.from }} → {{ payData.to }}</span>
+              </div>
+              <div class="pi-line">
+                <span class="pi-k">座位</span><span class="pi-v">{{ payData.seatType }}</span>
+              </div>
+              <div class="pi-line">
+                <span class="pi-k">乘客</span><span class="pi-v">{{ payData.passenger }}</span>
+              </div>
             </div>
 
             <div class="pay-methods">
               <div class="pm-label">选择支付方式</div>
               <div class="pm-grid">
-                <button class="pm-card" :class="{ active: payMethod === 'alipay' }" @click="payMethod = 'alipay'">
+                <button
+                  class="pm-card"
+                  :class="{ active: payMethod === 'alipay' }"
+                  @click="payMethod = 'alipay'"
+                >
                   <div class="pm-icon alipay">支</div>
                   <div class="pm-body">
                     <div class="pm-name">支付宝</div>
@@ -503,7 +722,11 @@
                   </div>
                   <div class="pm-check" v-if="payMethod === 'alipay'">✓</div>
                 </button>
-                <button class="pm-card" :class="{ active: payMethod === 'wechat' }" @click="payMethod = 'wechat'">
+                <button
+                  class="pm-card"
+                  :class="{ active: payMethod === 'wechat' }"
+                  @click="payMethod = 'wechat'"
+                >
                   <div class="pm-icon wechat">微</div>
                   <div class="pm-body">
                     <div class="pm-name">微信支付</div>
@@ -522,20 +745,18 @@
               </button>
             </div>
 
-            <div class="pay-tip">
-              🔒 模拟支付环境 · 点击确认即完成 · 超时未支付自动取消
-            </div>
+            <div class="pay-tip">🔒 模拟支付环境 · 点击确认即完成 · 超时未支付自动取消</div>
           </div>
         </div>
       </Transition>
 
       <Transition name="success-dialog">
-        <div v-if="successVisible" class="success-overlay" @click.self="successVisible = false; showFireworks = false">
+        <div v-if="successVisible" class="success-overlay" @click.self="closeSuccess">
           <div class="success-card">
             <div class="success-check">
               <svg viewBox="0 0 52 52" class="check-circle">
-                <circle cx="26" cy="26" r="25" fill="none"/>
-                <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                <circle cx="26" cy="26" r="25" fill="none" />
+                <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
               </svg>
             </div>
             <h3 class="success-title">购票成功！</h3>
@@ -558,7 +779,7 @@
               </div>
             </div>
             <div class="success-actions">
-              <button class="sa-btn ghost" @click="successVisible = false; showFireworks = false">继续购票</button>
+              <button class="sa-btn ghost" @click="closeSuccess">继续购票</button>
               <button class="sa-btn primary" @click="goToOrders">查看订单</button>
             </div>
           </div>
@@ -610,24 +831,25 @@
         <label class="bd-label">
           乘车人
           <button class="bd-add-pax" @click="openPaxManager">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
             管理
           </button>
         </label>
         <div class="bd-pax-list">
-          <div
-            v-for="(p, idx) in buyPassengers"
-            :key="idx"
-            class="bd-pax-chip"
-            :class="{ main: idx === 0 }"
-          >
-            <el-input
-              v-model="p.name"
-              placeholder="姓名"
-              maxlength="20"
-              size="small"
-              class="bd-pax-input"
-            />
+          <div v-for="(p, idx) in buyPassengers" :key="idx" class="bd-pax-chip" :class="{ main: idx === 0 }">
+            <el-input v-model="p.name" placeholder="姓名" maxlength="20" size="small" class="bd-pax-input" />
             <el-input
               v-model="p.idCard"
               placeholder="证件号"
@@ -637,20 +859,13 @@
             />
             <button class="bd-pax-del" @click="removeBuyPax(idx)" v-if="buyPassengers.length > 1">×</button>
           </div>
-          <button
-            v-if="buyPassengers.length < 5"
-            class="bd-pax-add"
-            @click="addBuyPax"
-          >+ 添加乘车人</button>
+          <button v-if="buyPassengers.length < 5" class="bd-pax-add" @click="addBuyPax">+ 添加乘车人</button>
         </div>
         <div v-if="savedPassengers.length" class="bd-saved-pax">
           <span class="bd-saved-label">常用乘车人：</span>
-          <button
-            v-for="(sp, i) in savedPassengers"
-            :key="i"
-            class="bd-saved-chip"
-            @click="quickAddPax(sp)"
-          >{{ sp.name }}<span class="bd-saved-id">{{ sp.idCard.slice(-4) }}</span></button>
+          <button v-for="(sp, i) in savedPassengers" :key="i" class="bd-saved-chip" @click="quickAddPax(sp)">
+            {{ sp.name }}<span class="bd-saved-id">{{ sp.idCard.slice(-4) }}</span>
+          </button>
         </div>
       </div>
 
@@ -666,16 +881,12 @@
           :loading="buyDialogData.submitting"
           :disabled="!buyDialogData.seatType"
           @click="confirmBuy"
-        >确认购票</el-button>
+          >确认购票</el-button
+        >
       </template>
     </el-dialog>
 
-    <el-dialog
-      v-model="paxManagerVisible"
-      title="常用乘车人管理"
-      width="480px"
-      class="buy-dialog"
-    >
+    <el-dialog v-model="paxManagerVisible" title="常用乘车人管理" width="480px" class="buy-dialog">
       <div class="pax-mgr-add">
         <div class="pax-mgr-row">
           <el-input v-model="paxMgrForm.name" placeholder="姓名" maxlength="20" />
@@ -700,7 +911,21 @@
         </div>
       </div>
       <div v-else class="pax-mgr-empty">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
         <p>还没有常用乘车人</p>
       </div>
     </el-dialog>
@@ -750,10 +975,10 @@ function saveFavRoutes() {
   localStorage.setItem(uk('favRoutes'), JSON.stringify(favRoutes.value))
 }
 function isFavRoute(from, to) {
-  return favRoutes.value.some(r => r.from === from && r.to === to)
+  return favRoutes.value.some((r) => r.from === from && r.to === to)
 }
 function toggleFavRoute(from, to) {
-  const idx = favRoutes.value.findIndex(r => r.from === from && r.to === to)
+  const idx = favRoutes.value.findIndex((r) => r.from === from && r.to === to)
   if (idx >= 0) {
     favRoutes.value.splice(idx, 1)
   } else {
@@ -833,7 +1058,8 @@ function formatDuration(d) {
   if (s.includes('小时') || s.includes('分钟')) return s
   const match = s.match(/(\d+):(\d+)/)
   if (match) {
-    const h = parseInt(match[1]), m = parseInt(match[2])
+    const h = parseInt(match[1]),
+      m = parseInt(match[2])
     if (h === 0) return m + '分钟'
     return h + '小时' + (m > 0 ? m + '分钟' : '')
   }
@@ -855,13 +1081,17 @@ async function openTrainDetail(train) {
     const names = [train.fromStation]
     const mid = ['济南西', '蚌埠南', '南京南', '苏州北', '无锡东']
     const seed = train.trainNumber?.charCodeAt(0) || 0
-    for (let i = 0; i < (3 + seed % 3); i++) names.push(mid[i % mid.length])
+    for (let i = 0; i < 3 + (seed % 3); i++) names.push(mid[i % mid.length])
     names.push(train.toStation)
     tdStops.value = names.map((n, i) => ({
       stationName: n,
       city: n,
-      arriveTime: i === 0 ? '' : `${String(7 + i * 2).padStart(2,'0')}:${String((i * 7) % 60).padStart(2,'0')}`,
-      departTime: i === names.length - 1 ? '' : `${String(7 + i * 2).padStart(2,'0')}:${String((i * 7 + 3) % 60).padStart(2,'0')}`
+      arriveTime:
+        i === 0 ? '' : `${String(7 + i * 2).padStart(2, '0')}:${String((i * 7) % 60).padStart(2, '0')}`,
+      departTime:
+        i === names.length - 1
+          ? ''
+          : `${String(7 + i * 2).padStart(2, '0')}:${String((i * 7 + 3) % 60).padStart(2, '0')}`
     }))
   } finally {
     tdLoading.value = false
@@ -931,13 +1161,13 @@ const dateShortcuts = computed(() => {
 const displayResults = computed(() => {
   let list = results.value
   if (onlyAvailable.value) {
-    list = list.filter(t => hasAnySeat(t))
+    list = list.filter((t) => hasAnySeat(t))
   }
   if (trainTypeFilter.value !== 'all') {
-    list = list.filter(t => matchTrainType(t, trainTypeFilter.value))
+    list = list.filter((t) => matchTrainType(t, trainTypeFilter.value))
   }
   if (timeFilter.value !== 'all') {
-    list = list.filter(t => matchTime(t, timeFilter.value))
+    list = list.filter((t) => matchTime(t, timeFilter.value))
   }
   const sorted = [...list]
   if (sortBy.value === 'start') {
@@ -994,8 +1224,14 @@ function loadHistory() {
 
 function saveHistory() {
   const key = `${queryForm.fromStation}→${queryForm.toStation}`
-  const item = { from: queryForm.fromStation, to: queryForm.toStation, date: queryForm.date, key, ts: Date.now() }
-  const list = [item, ...historyList.value.filter(h => h.key !== key)].slice(0, 5)
+  const item = {
+    from: queryForm.fromStation,
+    to: queryForm.toStation,
+    date: queryForm.date,
+    key,
+    ts: Date.now()
+  }
+  const list = [item, ...historyList.value.filter((h) => h.key !== key)].slice(0, 5)
   historyList.value = list
   localStorage.setItem(uk('history'), JSON.stringify(list))
 }
@@ -1041,12 +1277,14 @@ function saveFavs() {
 }
 
 function isFav(t) {
-  return favorites.value.some(f => f.trainNumber === t.trainNumber && f.startTime === t.startTime)
+  return favorites.value.some((f) => f.trainNumber === t.trainNumber && f.startTime === t.startTime)
 }
 
 function toggleFav(t) {
   if (isFav(t)) {
-    favorites.value = favorites.value.filter(f => !(f.trainNumber === t.trainNumber && f.startTime === t.startTime))
+    favorites.value = favorites.value.filter(
+      (f) => !(f.trainNumber === t.trainNumber && f.startTime === t.startTime)
+    )
     ElMessage.success('已取消收藏')
   } else {
     favorites.value.unshift({
@@ -1075,7 +1313,7 @@ const buyDialogData = reactive({
 })
 
 const buyTotalPrice = computed(() => {
-  const opt = buyDialogData.options.find(o => o.value === buyDialogData.seatType)
+  const opt = buyDialogData.options.find((o) => o.value === buyDialogData.seatType)
   if (!opt) return 0
   return (opt.price * buyPassengers.value.length).toFixed(2)
 })
@@ -1103,7 +1341,7 @@ function removeBuyPax(idx) {
 }
 
 function quickAddPax(sp) {
-  const emptyIdx = buyPassengers.value.findIndex(p => !p.name?.trim() || !p.idCard?.trim())
+  const emptyIdx = buyPassengers.value.findIndex((p) => !p.name?.trim() || !p.idCard?.trim())
   if (emptyIdx >= 0) {
     buyPassengers.value[emptyIdx] = { name: sp.name, idCard: sp.idCard }
   } else if (buyPassengers.value.length < 5) {
@@ -1146,7 +1384,7 @@ function savePaxFromMgr() {
 }
 
 function deletePaxFromMgr(p) {
-  savedPassengers.value = savedPassengers.value.filter(x => x !== p)
+  savedPassengers.value = savedPassengers.value.filter((x) => x !== p)
   savePassengers()
 }
 
@@ -1229,33 +1467,43 @@ onMounted(async () => {
   search()
 })
 
-watch(() => route.query, (nq) => {
-  if (nq.from || nq.to) {
-    if (nq.from) queryForm.fromStation = String(nq.from)
-    if (nq.to) queryForm.toStation = String(nq.to)
-    search()
-  }
-}, { deep: true })
+watch(
+  () => route.query,
+  (nq) => {
+    if (nq.from || nq.to) {
+      if (nq.from) queryForm.fromStation = String(nq.from)
+      if (nq.to) queryForm.toStation = String(nq.to)
+      search()
+    }
+  },
+  { deep: true }
+)
 
 onBeforeUnmount(() => {
   if (searchAbort) searchAbort.abort()
   stopTickTimer()
-  if (payTickTimer) { clearInterval(payTickTimer); payTickTimer = null }
+  if (payTickTimer) {
+    clearInterval(payTickTimer)
+    payTickTimer = null
+  }
   trainDetailVisible.value = false
   payVisible.value = false
   successVisible.value = false
   showFireworks.value = false
   if (queryForm.fromStation || queryForm.toStation) {
-    localStorage.setItem(uk('last_search'), JSON.stringify({
-      from: queryForm.fromStation,
-      to: queryForm.toStation,
-      date: queryForm.date
-    }))
+    localStorage.setItem(
+      uk('last_search'),
+      JSON.stringify({
+        from: queryForm.fromStation,
+        to: queryForm.toStation,
+        date: queryForm.date
+      })
+    )
   }
 })
 
 onUnmounted(() => {
-  document.querySelectorAll('.td-overlay, .pay-overlay, .success-overlay').forEach(el => el.remove())
+  document.querySelectorAll('.td-overlay, .pay-overlay, .success-overlay').forEach((el) => el.remove())
 })
 
 const tick = ref(0)
@@ -1263,10 +1511,15 @@ let tickTimer = null
 function startTickTimer() {
   if (tickTimer) return
   tick.value = Date.now()
-  tickTimer = setInterval(() => { tick.value = Date.now() }, 1000)
+  tickTimer = setInterval(() => {
+    tick.value = Date.now()
+  }, 1000)
 }
 function stopTickTimer() {
-  if (tickTimer) { clearInterval(tickTimer); tickTimer = null }
+  if (tickTimer) {
+    clearInterval(tickTimer)
+    tickTimer = null
+  }
 }
 
 function getCountdown(train) {
@@ -1279,7 +1532,8 @@ function getCountdown(train) {
   const depDate = new Date(depMs)
   const today = new Date()
   const sameDay = depDate.toDateString() === today.toDateString()
-  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(today.getDate() + 1)
   const isTomorrow = depDate.toDateString() === tomorrow.toDateString()
   if (!sameDay && !isTomorrow) return null
   if (diff <= -600000) return { status: 'departed', text: '已发车' }
@@ -1294,11 +1548,14 @@ function getCountdown(train) {
 function matchStations(query) {
   if (!query) return stationList.value.slice(0, 8)
   const q = query.toLowerCase().trim()
-  return stationList.value.filter(s =>
-    (s.name && s.name.includes(query)) ||
-    (s.code && s.code.toLowerCase().includes(q)) ||
-    (s.city && s.city.includes(query))
-  ).slice(0, 10)
+  return stationList.value
+    .filter(
+      (s) =>
+        (s.name && s.name.includes(query)) ||
+        (s.code && s.code.toLowerCase().includes(q)) ||
+        (s.city && s.city.includes(query))
+    )
+    .slice(0, 10)
 }
 
 function fetchFromSuggestions(query, cb) {
@@ -1317,7 +1574,7 @@ function beforeToday(date) {
 
 function swapStations() {
   if (!queryForm.fromStation && !queryForm.toStation) return
-  [queryForm.fromStation, queryForm.toStation] = [queryForm.toStation, queryForm.fromStation]
+  ;[queryForm.fromStation, queryForm.toStation] = [queryForm.toStation, queryForm.fromStation]
   quickActive.value = ''
   if (searched.value) search()
 }
@@ -1349,11 +1606,14 @@ async function search() {
       ? [...list].sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
       : []
     saveHistory()
-    localStorage.setItem(uk('last_search'), JSON.stringify({
-      from: queryForm.fromStation,
-      to: queryForm.toStation,
-      date: queryForm.date
-    }))
+    localStorage.setItem(
+      uk('last_search'),
+      JSON.stringify({
+        from: queryForm.fromStation,
+        to: queryForm.toStation,
+        date: queryForm.date
+      })
+    )
   } catch (e) {
     if (e.code !== 'ERR_CANCELED') {
       results.value = []
@@ -1368,11 +1628,31 @@ async function search() {
 
 function getSeatOptions(train) {
   return [
-    { type: '商务座', label: `商务座 (¥${train.businessSeatPrice})`, count: train.businessSeatCount, price: train.businessSeatPrice },
-    { type: '一等座', label: `一等座 (¥${train.firstSeatPrice})`, count: train.firstSeatCount, price: train.firstSeatPrice },
-    { type: '二等座', label: `二等座 (¥${train.secondSeatPrice})`, count: train.secondSeatCount, price: train.secondSeatPrice },
-    { type: '硬卧', label: `硬卧 (¥${train.sleeperPrice})`, count: train.sleeperCount, price: train.sleeperPrice }
-  ].filter(s => s.count !== undefined && s.count !== null)
+    {
+      type: '商务座',
+      label: `商务座 (¥${train.businessSeatPrice})`,
+      count: train.businessSeatCount,
+      price: train.businessSeatPrice
+    },
+    {
+      type: '一等座',
+      label: `一等座 (¥${train.firstSeatPrice})`,
+      count: train.firstSeatCount,
+      price: train.firstSeatPrice
+    },
+    {
+      type: '二等座',
+      label: `二等座 (¥${train.secondSeatPrice})`,
+      count: train.secondSeatCount,
+      price: train.secondSeatPrice
+    },
+    {
+      type: '硬卧',
+      label: `硬卧 (¥${train.sleeperPrice})`,
+      count: train.sleeperCount,
+      price: train.sleeperPrice
+    }
+  ].filter((s) => s.count !== undefined && s.count !== null)
 }
 
 function getSeatLevel(count) {
@@ -1382,7 +1662,17 @@ function getSeatLevel(count) {
 }
 
 function hasAnySeat(train) {
-  return getSeatOptions(train).some(s => s.count > 0)
+  return getSeatOptions(train).some((s) => s.count > 0)
+}
+
+function closeDetailAndBuy() {
+  trainDetailVisible.value = false
+  buyTicket(trainDetail.value)
+}
+
+function closeSuccess() {
+  successVisible.value = false
+  showFireworks.value = false
 }
 
 async function buyTicket(row) {
@@ -1393,9 +1683,12 @@ async function buyTicket(row) {
   }
 
   const opts = []
-  if (row.businessSeatCount > 0) opts.push({ value: '商务座', price: row.businessSeatPrice, count: row.businessSeatCount })
-  if (row.firstSeatCount > 0) opts.push({ value: '一等座', price: row.firstSeatPrice, count: row.firstSeatCount })
-  if (row.secondSeatCount > 0) opts.push({ value: '二等座', price: row.secondSeatPrice, count: row.secondSeatCount })
+  if (row.businessSeatCount > 0)
+    opts.push({ value: '商务座', price: row.businessSeatPrice, count: row.businessSeatCount })
+  if (row.firstSeatCount > 0)
+    opts.push({ value: '一等座', price: row.firstSeatPrice, count: row.firstSeatCount })
+  if (row.secondSeatCount > 0)
+    opts.push({ value: '二等座', price: row.secondSeatPrice, count: row.secondSeatCount })
   if (row.sleeperCount > 0) opts.push({ value: '硬卧', price: row.sleeperPrice, count: row.sleeperCount })
 
   if (!opts.length) {
@@ -1415,10 +1708,10 @@ async function buyTicket(row) {
 
 function getSeatPrice(row, seatType) {
   const map = {
-    '商务座': row.businessSeatPrice,
-    '一等座': row.firstSeatPrice,
-    '二等座': row.secondSeatPrice,
-    '硬卧': row.sleeperPrice
+    商务座: row.businessSeatPrice,
+    一等座: row.firstSeatPrice,
+    二等座: row.secondSeatPrice,
+    硬卧: row.sleeperPrice
   }
   return map[seatType] || 0
 }
@@ -1426,9 +1719,18 @@ function getSeatPrice(row, seatType) {
 async function confirmBuy() {
   for (let i = 0; i < buyPassengers.value.length; i++) {
     const p = buyPassengers.value[i]
-    if (!p.name?.trim()) { ElMessage.error(`第 ${i + 1} 位乘车人姓名不能为空`); return }
-    if (!p.idCard?.trim()) { ElMessage.error(`第 ${i + 1} 位乘车人证件号不能为空`); return }
-    if (!/^\d{15}$|^\d{17}[\dXx]$/.test(p.idCard.trim())) { ElMessage.error(`第 ${i + 1} 位乘车人证件号格式不正确`); return }
+    if (!p.name?.trim()) {
+      ElMessage.error(`第 ${i + 1} 位乘车人姓名不能为空`)
+      return
+    }
+    if (!p.idCard?.trim()) {
+      ElMessage.error(`第 ${i + 1} 位乘车人证件号不能为空`)
+      return
+    }
+    if (!/^\d{15}$|^\d{17}[\dXx]$/.test(p.idCard.trim())) {
+      ElMessage.error(`第 ${i + 1} 位乘车人证件号格式不正确`)
+      return
+    }
   }
 
   const row = buyDialogData.train
@@ -1441,9 +1743,10 @@ async function confirmBuy() {
   payData.from = row.fromStation
   payData.to = row.toStation
   payData.seatType = seatType
-  payData.passenger = buyPassengers.value.length === 1
-    ? first.name.trim()
-    : `${first.name.trim()} 等 ${buyPassengers.value.length} 人`
+  payData.passenger =
+    buyPassengers.value.length === 1
+      ? first.name.trim()
+      : `${first.name.trim()} 等 ${buyPassengers.value.length} 人`
 
   payAmount.value = pricePerTicket * buyPassengers.value.length
   payDeadline.value = Date.now() + 15 * 60 * 1000
@@ -1473,7 +1776,7 @@ function cancelPay() {
 async function doPay() {
   payLoading.value = true
   try {
-    await new Promise(r => setTimeout(r, 1200))
+    await new Promise((r) => setTimeout(r, 1200))
     const row = payData.row
     const seatType = payData.seatType
     for (const p of buyPassengers.value) {
@@ -1508,8 +1811,6 @@ async function doBuy(row, seatType, passengerName, passengerIdCard) {
     successVisible.value = true
     showFireworks.value = true
     window.dispatchEvent(new Event('railflow-refresh-unread'))
-  } catch (e) {
-    throw e
   } finally {
     buyingRowId.value = null
   }
@@ -1594,7 +1895,9 @@ function goToOrders() {
   overflow: hidden;
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.95)) !important;
   border: 1px solid rgba(96, 165, 250, 0.25) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.08) !important;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(59, 130, 246, 0.08) !important;
   backdrop-filter: blur(20px);
   border-radius: 20px;
 }
@@ -1625,7 +1928,9 @@ function goToOrders() {
 }
 
 @keyframes borderRotate {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .search-row {
@@ -1826,7 +2131,9 @@ function goToOrders() {
 
 .search-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+  box-shadow:
+    0 8px 32px rgba(59, 130, 246, 0.6),
+    0 0 40px rgba(139, 92, 246, 0.3);
 }
 
 .search-btn:active:not(:disabled) {
@@ -1834,8 +2141,13 @@ function goToOrders() {
 }
 
 @keyframes btnGradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .search-btn:disabled {
@@ -2024,7 +2336,9 @@ function goToOrders() {
   border-color: rgba(251, 191, 36, 0.5);
   color: #fbbf24;
 }
-.fav-toggle svg { color: inherit; }
+.fav-toggle svg {
+  color: inherit;
+}
 
 .fav-routes {
   display: flex;
@@ -2059,13 +2373,18 @@ function goToOrders() {
   padding: 2px 4px;
   border-radius: 6px;
 }
-.fav-route-main:hover { color: #93c5fd; }
-.fav-from, .fav-to {
+.fav-route-main:hover {
+  color: #93c5fd;
+}
+.fav-from,
+.fav-to {
   padding: 2px 6px;
   background: rgba(59, 130, 246, 0.15);
   border-radius: 4px;
 }
-.fav-to { background: rgba(16, 185, 129, 0.15); }
+.fav-to {
+  background: rgba(16, 185, 129, 0.15);
+}
 .fav-route-quick {
   display: flex;
   gap: 4px;
@@ -2103,8 +2422,12 @@ function goToOrders() {
   opacity: 0;
   transition: opacity 0.15s;
 }
-.fav-route-card:hover .fav-remove { opacity: 1; }
-.fav-remove:hover { background: rgba(239, 68, 68, 1); }
+.fav-route-card:hover .fav-remove {
+  opacity: 1;
+}
+.fav-remove:hover {
+  background: rgba(239, 68, 68, 1);
+}
 
 .history-tag {
   display: inline-flex;
@@ -2195,7 +2518,8 @@ function goToOrders() {
   font-weight: 600;
 }
 
-.skeleton-list, .train-list {
+.skeleton-list,
+.train-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2208,7 +2532,8 @@ function goToOrders() {
   gap: 14px;
 }
 
-.sk-line, .sk-chip {
+.sk-line,
+.sk-chip {
   background: linear-gradient(
     90deg,
     rgba(71, 85, 105, 0.4) 0%,
@@ -2226,9 +2551,18 @@ function goToOrders() {
   border-radius: 8px;
 }
 
-.sk-lg { width: 70%; height: 26px; }
-.sk-md { width: 50%; height: 20px; }
-.sk-sm { width: 90%; height: 14px; }
+.sk-lg {
+  width: 70%;
+  height: 26px;
+}
+.sk-md {
+  width: 50%;
+  height: 20px;
+}
+.sk-sm {
+  width: 90%;
+  height: 14px;
+}
 
 .sk-chips {
   display: flex;
@@ -2243,8 +2577,12 @@ function goToOrders() {
 }
 
 @keyframes skShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .fav-btn {
@@ -2291,7 +2629,10 @@ function goToOrders() {
   overflow: hidden;
   transform-style: preserve-3d;
   perspective: 1200px;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s ease, border-color 0.3s ease;
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease,
+    border-color 0.3s ease;
 }
 
 .train-card:hover {
@@ -2329,12 +2670,17 @@ function goToOrders() {
 
 .train-card.favorited {
   border: 1px solid rgba(250, 204, 21, 0.28);
-  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.08), 0 4px 24px rgba(250, 204, 21, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.08),
+    0 4px 24px rgba(250, 204, 21, 0.08);
 }
 
 .train-card.favorited:hover {
   border-color: rgba(250, 204, 21, 0.5) !important;
-  box-shadow: 0 14px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(250, 204, 21, 0.2), 0 0 30px rgba(250, 204, 21, 0.12) !important;
+  box-shadow:
+    0 14px 50px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(250, 204, 21, 0.2),
+    0 0 30px rgba(250, 204, 21, 0.12) !important;
 }
 
 .train-card.favorited::before {
@@ -2380,7 +2726,9 @@ function goToOrders() {
   margin-top: 2px;
 }
 
-.train-num-wrap { position: relative; }
+.train-num-wrap {
+  position: relative;
+}
 
 .countdown-tag {
   display: inline-block;
@@ -2493,8 +2841,12 @@ function goToOrders() {
 }
 
 @keyframes trackGradient {
-  0% { background-position: 0% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .track-dot {
@@ -2543,17 +2895,36 @@ function goToOrders() {
   overflow: hidden;
 }
 
-.seat-chip.ok { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.08); }
-.seat-chip.tense { border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.08); }
-.seat-chip.empty { border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.05); opacity: 0.55; }
-
-.seat-chip.sold { opacity: 0.5; }
-
-.seat-top {
-  display: flex; justify-content: space-between; align-items: baseline; gap: 6px;
+.seat-chip.ok {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.08);
+}
+.seat-chip.tense {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+.seat-chip.empty {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.05);
+  opacity: 0.55;
 }
 
-.seat-bottom { display: flex; align-items: center; gap: 4px; }
+.seat-chip.sold {
+  opacity: 0.5;
+}
+
+.seat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.seat-bottom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .seat-label {
   font-size: 11px;
@@ -2568,9 +2939,15 @@ function goToOrders() {
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
 }
 
-.seat-chip.ok .seat-count { color: #10b981; }
-.seat-chip.tense .seat-count { color: #f59e0b; }
-.seat-chip.empty .seat-count { color: #ef4444; }
+.seat-chip.ok .seat-count {
+  color: #10b981;
+}
+.seat-chip.tense .seat-count {
+  color: #f59e0b;
+}
+.seat-chip.empty .seat-count {
+  color: #ef4444;
+}
 
 .seat-count {
   font-size: 10px;
@@ -2582,7 +2959,11 @@ function goToOrders() {
 }
 
 .seat-bar {
-  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
   background: rgba(148, 163, 184, 0.1);
   overflow: hidden;
 }
@@ -2593,9 +2974,16 @@ function goToOrders() {
   transition: width 0.5s ease;
 }
 
-.seat-chip.ok .seat-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); }
-.seat-chip.tense .seat-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.seat-chip.empty .seat-bar-fill { background: #475569; width: 3% !important; }
+.seat-chip.ok .seat-bar-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.seat-chip.tense .seat-bar-fill {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+.seat-chip.empty .seat-bar-fill {
+  background: #475569;
+  width: 3% !important;
+}
 
 .train-action {
   flex-shrink: 0;
@@ -2730,7 +3118,9 @@ function goToOrders() {
   margin-bottom: 16px;
 }
 
-.hr-icon { font-size: 18px; }
+.hr-icon {
+  font-size: 18px;
+}
 
 .hr-grid {
   display: grid;
@@ -2750,14 +3140,23 @@ function goToOrders() {
   background: rgba(30, 41, 59, 0.5);
   backdrop-filter: blur(10px);
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    background 0.2s;
   text-align: center;
   animation: hrFade 0.5s ease both;
 }
 
 @keyframes hrFade {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hr-card:hover {
@@ -2767,14 +3166,17 @@ function goToOrders() {
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
 }
 
-.hr-from, .hr-to {
+.hr-from,
+.hr-to {
   font-size: 15px;
   font-weight: 800;
   color: #f1f5f9;
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
 }
 
-.hr-to { color: #fbbf24; }
+.hr-to {
+  color: #fbbf24;
+}
 
 .hr-arrow {
   position: relative;
@@ -2815,22 +3217,38 @@ function goToOrders() {
   letter-spacing: 0.5px;
 }
 
-html[data-theme="light"] .hot-routes-wrap { background: rgba(255, 255, 255, 0.7); }
-html[data-theme="light"] .hr-title { color: #1e293b; }
-html[data-theme="light"] .hr-card {
+html[data-theme='light'] .hot-routes-wrap {
+  background: rgba(255, 255, 255, 0.7);
+}
+html[data-theme='light'] .hr-title {
+  color: #1e293b;
+}
+html[data-theme='light'] .hr-card {
   background: rgba(255, 255, 255, 0.6);
   border-color: rgba(100, 116, 139, 0.15);
 }
-html[data-theme="light"] .hr-card:hover {
+html[data-theme='light'] .hr-card:hover {
   border-color: rgba(37, 99, 235, 0.4);
   background: rgba(37, 99, 235, 0.06);
 }
-html[data-theme="light"] .hr-from,
-html[data-theme="light"] .hr-to { color: #1e293b; }
-html[data-theme="light"] .hr-to { color: #d97706; }
-html[data-theme="light"] .hr-arrow-line { background: linear-gradient(90deg, transparent, rgba(100, 116, 139, 0.3), transparent); }
-html[data-theme="light"] .hr-dur { background: rgba(255, 255, 255, 0.9); color: #475569; border-color: rgba(100, 116, 139, 0.25); }
-html[data-theme="light"] .hr-rail { color: #64748b; }
+html[data-theme='light'] .hr-from,
+html[data-theme='light'] .hr-to {
+  color: #1e293b;
+}
+html[data-theme='light'] .hr-to {
+  color: #d97706;
+}
+html[data-theme='light'] .hr-arrow-line {
+  background: linear-gradient(90deg, transparent, rgba(100, 116, 139, 0.3), transparent);
+}
+html[data-theme='light'] .hr-dur {
+  background: rgba(255, 255, 255, 0.9);
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.25);
+}
+html[data-theme='light'] .hr-rail {
+  color: #64748b;
+}
 
 .success-overlay {
   position: fixed;
@@ -2870,8 +3288,13 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes successGlow {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.9; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }
 
 .success-check {
@@ -2903,17 +3326,30 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes successPop {
-  0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes successCircle {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes successCheck {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 .success-title {
@@ -3013,13 +3449,21 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes sdEnter {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes sdLeave {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .success-dialog-enter-active .success-card {
@@ -3027,8 +3471,14 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes sdCard {
-  from { transform: translateY(30px) scale(0.92); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(30px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 </style>
 
@@ -3044,7 +3494,9 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes etTrackFlow {
-  to { stroke-dashoffset: -20; }
+  to {
+    stroke-dashoffset: -20;
+  }
 }
 
 .empty-train-svg .et-cloud {
@@ -3060,13 +3512,23 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes etCloud1 {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(-12px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-12px);
+  }
 }
 
 @keyframes etCloud2 {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(10px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
 }
 
 .empty-train-svg .et-body {
@@ -3074,8 +3536,13 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes etBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .empty-train-svg .et-fill {
@@ -3083,8 +3550,13 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes etGradShift {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .empty-train-svg .et-wheel {
@@ -3093,7 +3565,9 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes etWheelSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-train-svg .et-smoke {
@@ -3101,12 +3575,22 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
   animation: etSmoke 2s ease-out infinite;
 }
 
-.empty-train-svg .et-s2 { animation-delay: 0.6s; }
+.empty-train-svg .et-s2 {
+  animation-delay: 0.6s;
+}
 
 @keyframes etSmoke {
-  0% { opacity: 0; transform: translateY(0); }
-  40% { opacity: 0.6; }
-  100% { opacity: 0; transform: translateY(-10px); }
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
 }
 
 .buy-dialog {
@@ -3117,7 +3601,9 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 .buy-dialog .el-dialog {
   background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%) !important;
   border: 1px solid rgba(59, 130, 246, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(59, 130, 246, 0.08);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(59, 130, 246, 0.08);
 }
 
 .buy-dialog .el-dialog__header {
@@ -3549,53 +4035,89 @@ html[data-theme="light"] .hr-rail { color: #64748b; }
 }
 
 @keyframes countdownSoonPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.75; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.05);
+  }
 }
 
 @keyframes countdownNowPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { opacity: 0.8; box-shadow: 0 0 10px 4px rgba(239, 68, 68, 0.3); }
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 10px 4px rgba(239, 68, 68, 0.3);
+  }
 }
 
-html[data-theme="light"] .countdown-tag.ok {
+html[data-theme='light'] .countdown-tag.ok {
   background: rgba(16, 185, 129, 0.12);
   color: #059669;
   border-color: rgba(16, 185, 129, 0.35);
 }
-html[data-theme="light"] .countdown-tag.soon {
+html[data-theme='light'] .countdown-tag.soon {
   background: rgba(245, 158, 11, 0.15);
   color: #d97706;
   border-color: rgba(245, 158, 11, 0.35);
 }
-html[data-theme="light"] .countdown-tag.now {
+html[data-theme='light'] .countdown-tag.now {
   background: rgba(239, 68, 68, 0.12);
   color: #dc2626;
   border-color: rgba(239, 68, 68, 0.4);
 }
-html[data-theme="light"] .countdown-tag.departed {
+html[data-theme='light'] .countdown-tag.departed {
   color: #9ca3af;
   background: rgba(156, 163, 175, 0.12);
   border-color: rgba(156, 163, 175, 0.3);
 }
-html[data-theme="light"] .train-card.favorited {
+html[data-theme='light'] .train-card.favorited {
   border-color: rgba(217, 119, 6, 0.35) !important;
 }
-html[data-theme="light"] .train-card.favorited .train-num {
+html[data-theme='light'] .train-card.favorited .train-num {
   color: #d97706;
 }
 
-.payfade-enter-active { transition: opacity 0.22s ease; }
-.payfade-leave-active { transition: opacity 0.18s ease; }
-.payfade-enter-from, .payfade-leave-to { opacity: 0; }
-.payfade-enter-active .pay-card { animation: payIn 0.28s cubic-bezier(0.16,1,0.3,1); }
-@keyframes payIn { from { transform: translateY(16px) scale(0.97); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.payfade-enter-active {
+  transition: opacity 0.22s ease;
+}
+.payfade-leave-active {
+  transition: opacity 0.18s ease;
+}
+.payfade-enter-from,
+.payfade-leave-to {
+  opacity: 0;
+}
+.payfade-enter-active .pay-card {
+  animation: payIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes payIn {
+  from {
+    transform: translateY(16px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
 
 .pay-overlay {
-  position: fixed; inset: 0; z-index: 9998;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
   background: rgba(2, 6, 23, 0.7);
   backdrop-filter: blur(8px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
 }
 
@@ -3605,21 +4127,31 @@ html[data-theme="light"] .train-card.favorited .train-num {
   border: 1px solid rgba(96, 165, 250, 0.25);
   border-radius: 18px;
   padding: 24px 26px 20px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5), 0 0 60px rgba(59, 130, 246, 0.08);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(59, 130, 246, 0.08);
 }
 
 .pay-header {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 18px;
 }
 
 .pay-title {
-  font-size: 17px; font-weight: 700; color: #f1f5f9;
+  font-size: 17px;
+  font-weight: 700;
+  color: #f1f5f9;
 }
 
 .pay-countdown {
-  display: flex; flex-direction: column; align-items: flex-end;
-  gap: 2px; padding: 6px 12px; border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 8px;
   background: rgba(59, 130, 246, 0.12);
   border: 1px solid rgba(96, 165, 250, 0.25);
 }
@@ -3631,108 +4163,206 @@ html[data-theme="light"] .train-card.favorited .train-num {
 }
 
 @keyframes urgentPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
-  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
 }
 
 .pc-label {
-  font-size: 10px; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .pc-time {
-  font-size: 16px; font-weight: 800; color: #60a5fa;
+  font-size: 16px;
+  font-weight: 800;
+  color: #60a5fa;
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
 }
 
-.pay-countdown.urgent .pc-time { color: #f87171; }
-
-.pay-amount {
-  text-align: center; padding: 14px; margin: 4px 0 14px;
-  background: rgba(59, 130, 246, 0.08);
-  border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.15);
+.pay-countdown.urgent .pc-time {
+  color: #f87171;
 }
 
-.pa-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; }
+.pay-amount {
+  text-align: center;
+  padding: 14px;
+  margin: 4px 0 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(96, 165, 250, 0.15);
+}
+
+.pa-label {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
 
 .pa-value {
-  font-size: 34px; font-weight: 900; color: #60a5fa;
+  font-size: 34px;
+  font-weight: 900;
+  color: #60a5fa;
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
   letter-spacing: -0.5px;
 }
 
 .pay-info {
   background: rgba(148, 163, 184, 0.06);
-  border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
   border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .pi-line {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 5px 0; font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 13px;
 }
 
-.pi-k { color: #94a3b8; font-weight: 600; }
+.pi-k {
+  color: #94a3b8;
+  font-weight: 600;
+}
 
-.pi-v { color: #e2e8f0; font-weight: 600; font-family: 'SF Mono', monospace; }
+.pi-v {
+  color: #e2e8f0;
+  font-weight: 600;
+  font-family: 'SF Mono', monospace;
+}
 
-.pay-methods { margin-bottom: 16px; }
+.pay-methods {
+  margin-bottom: 16px;
+}
 
 .pm-label {
-  font-size: 12px; font-weight: 700; color: #94a3b8;
-  margin-bottom: 10px; letter-spacing: 0.5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
 }
 
-.pm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pm-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 
 .pm-card {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px; border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
   border: 2px solid rgba(148, 163, 184, 0.15);
   background: rgba(148, 163, 184, 0.05);
-  cursor: pointer; transition: all 0.18s;
+  cursor: pointer;
+  transition: all 0.18s;
   position: relative;
 }
 
-.pm-card:hover { border-color: rgba(96, 165, 250, 0.3); background: rgba(59, 130, 246, 0.08); }
-.pm-card.active { border-color: rgba(96, 165, 250, 0.6); background: rgba(59, 130, 246, 0.12); }
+.pm-card:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(59, 130, 246, 0.08);
+}
+.pm-card.active {
+  border-color: rgba(96, 165, 250, 0.6);
+  background: rgba(59, 130, 246, 0.12);
+}
 
 .pm-icon {
-  width: 36px; height: 36px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 900; color: #fff; flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
 }
 
-.pm-icon.alipay { background: linear-gradient(135deg, #1677ff, #0060cc); }
-.pm-icon.wechat { background: linear-gradient(135deg, #07c160, #05964a); }
+.pm-icon.alipay {
+  background: linear-gradient(135deg, #1677ff, #0060cc);
+}
+.pm-icon.wechat {
+  background: linear-gradient(135deg, #07c160, #05964a);
+}
 
-.pm-body { flex: 1; min-width: 0; }
+.pm-body {
+  flex: 1;
+  min-width: 0;
+}
 
-.pm-name { font-size: 14px; font-weight: 700; color: #f1f5f9; }
-.pm-desc { font-size: 11px; color: #64748b; margin-top: 1px; }
+.pm-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.pm-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 1px;
+}
 
 .pm-check {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: #3b82f6; color: #fff; font-size: 12px; font-weight: 900;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.pay-actions { display: flex; gap: 10px; margin-bottom: 14px; }
+.pay-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
 
 .pay-btn {
-  flex: 1; padding: 13px 16px; border-radius: 10px;
-  font-size: 14px; font-weight: 700; cursor: pointer;
-  transition: all 0.18s; display: flex; align-items: center; justify-content: center; gap: 8px;
+  flex: 1;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .pay-btn.cancel {
-  background: rgba(148, 163, 184, 0.1); color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.1);
+  color: #cbd5e1;
   border: 1px solid rgba(148, 163, 184, 0.25);
 }
-.pay-btn.cancel:hover:not(:disabled) { background: rgba(148, 163, 184, 0.2); }
+.pay-btn.cancel:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.2);
+}
 
 .pay-btn.primary {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff; border: none;
+  color: #fff;
+  border: none;
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
 }
 .pay-btn.primary:hover:not(:disabled) {
@@ -3740,71 +4370,162 @@ html[data-theme="light"] .train-card.favorited .train-num {
   box-shadow: 0 10px 28px rgba(59, 130, 246, 0.45);
 }
 
-.pay-btn:disabled { opacity: 0.6; cursor: wait; }
+.pay-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 
 .pay-spinner {
-  width: 16px; height: 16px; border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   animation: spin 0.7s linear infinite;
 }
 
 .pay-tip {
-  text-align: center; font-size: 11px; color: #64748b;
-  padding: 8px 0; border-top: 1px dashed rgba(148, 163, 184, 0.15);
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+  padding: 8px 0;
+  border-top: 1px dashed rgba(148, 163, 184, 0.15);
 }
 
-html[data-theme="light"] .pay-overlay { background: rgba(15, 23, 42, 0.35); }
-html[data-theme="light"] .pay-card {
+html[data-theme='light'] .pay-overlay {
+  background: rgba(15, 23, 42, 0.35);
+}
+html[data-theme='light'] .pay-card {
   background: linear-gradient(180deg, #ffffff, #f8fafc);
   border-color: rgba(37, 99, 235, 0.2);
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
 }
-html[data-theme="light"] .pay-title { color: #0f172a; }
-html[data-theme="light"] .pay-countdown { background: rgba(59, 130, 246, 0.08); border-color: rgba(37, 99, 235, 0.25); }
-html[data-theme="light"] .pay-countdown.urgent { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); }
-html[data-theme="light"] .pc-label { color: #64748b; }
-html[data-theme="light"] .pc-time { color: #2563eb; }
-html[data-theme="light"] .pay-countdown.urgent .pc-time { color: #dc2626; }
-html[data-theme="light"] .pay-amount { background: rgba(59, 130, 246, 0.06); border-color: rgba(37, 99, 235, 0.15); }
-html[data-theme="light"] .pa-label { color: #64748b; }
-html[data-theme="light"] .pa-value { color: #2563eb; }
-html[data-theme="light"] .pay-info { background: rgba(148, 163, 184, 0.06); border-color: rgba(148, 163, 184, 0.15); }
-html[data-theme="light"] .pi-k { color: #64748b; }
-html[data-theme="light"] .pi-v { color: #1e293b; }
-html[data-theme="light"] .pm-label { color: #64748b; }
-html[data-theme="light"] .pm-card { background: rgba(148, 163, 184, 0.08); border-color: rgba(148, 163, 184, 0.2); }
-html[data-theme="light"] .pm-card:hover { background: rgba(59, 130, 246, 0.06); border-color: rgba(37, 99, 235, 0.3); }
-html[data-theme="light"] .pm-card.active { background: rgba(59, 130, 246, 0.1); border-color: rgba(37, 99, 235, 0.5); }
-html[data-theme="light"] .pm-name { color: #0f172a; }
-html[data-theme="light"] .pm-desc { color: #64748b; }
-html[data-theme="light"] .pay-btn.cancel { background: rgba(148, 163, 184, 0.1); color: #334155; border-color: rgba(148, 163, 184, 0.25); }
-html[data-theme="light"] .pay-btn.cancel:hover { background: rgba(148, 163, 184, 0.2); }
-html[data-theme="light"] .pay-tip { color: #64748b; border-color: rgba(148, 163, 184, 0.2); }
-
-html[data-theme="light"] .seat-chip { background: rgba(15, 23, 42, 0.03); border-color: rgba(148, 163, 184, 0.25); }
-html[data-theme="light"] .seat-chip.ok { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.06); }
-html[data-theme="light"] .seat-chip.tense { border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.06); }
-html[data-theme="light"] .seat-chip.empty { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.04); }
-html[data-theme="light"] .seat-label { color: #475569; }
-html[data-theme="light"] .seat-price { color: #d97706; }
-html[data-theme="light"] .seat-bar { background: rgba(148, 163, 184, 0.2); }
-
-html[data-theme="light"] .search-box {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.98)) !important;
-  border: 1px solid rgba(37, 99, 235, 0.2) !important;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08), 0 0 40px rgba(59, 130, 246, 0.06) !important;
+html[data-theme='light'] .pay-title {
+  color: #0f172a;
+}
+html[data-theme='light'] .pay-countdown {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+html[data-theme='light'] .pay-countdown.urgent {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+html[data-theme='light'] .pc-label {
+  color: #64748b;
+}
+html[data-theme='light'] .pc-time {
+  color: #2563eb;
+}
+html[data-theme='light'] .pay-countdown.urgent .pc-time {
+  color: #dc2626;
+}
+html[data-theme='light'] .pay-amount {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(37, 99, 235, 0.15);
+}
+html[data-theme='light'] .pa-label {
+  color: #64748b;
+}
+html[data-theme='light'] .pa-value {
+  color: #2563eb;
+}
+html[data-theme='light'] .pay-info {
+  background: rgba(148, 163, 184, 0.06);
+  border-color: rgba(148, 163, 184, 0.15);
+}
+html[data-theme='light'] .pi-k {
+  color: #64748b;
+}
+html[data-theme='light'] .pi-v {
+  color: #1e293b;
+}
+html[data-theme='light'] .pm-label {
+  color: #64748b;
+}
+html[data-theme='light'] .pm-card {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+html[data-theme='light'] .pm-card:hover {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+html[data-theme='light'] .pm-card.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(37, 99, 235, 0.5);
+}
+html[data-theme='light'] .pm-name {
+  color: #0f172a;
+}
+html[data-theme='light'] .pm-desc {
+  color: #64748b;
+}
+html[data-theme='light'] .pay-btn.cancel {
+  background: rgba(148, 163, 184, 0.1);
+  color: #334155;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+html[data-theme='light'] .pay-btn.cancel:hover {
+  background: rgba(148, 163, 184, 0.2);
+}
+html[data-theme='light'] .pay-tip {
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.2);
 }
 
-html[data-theme="light"] .hero-title { color: #0f172a; }
-html[data-theme="light"] .hero-sub { color: #64748b; }
+html[data-theme='light'] .seat-chip {
+  background: rgba(15, 23, 42, 0.03);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+html[data-theme='light'] .seat-chip.ok {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+}
+html[data-theme='light'] .seat-chip.tense {
+  border-color: rgba(245, 158, 11, 0.5);
+  background: rgba(245, 158, 11, 0.06);
+}
+html[data-theme='light'] .seat-chip.empty {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.04);
+}
+html[data-theme='light'] .seat-label {
+  color: #475569;
+}
+html[data-theme='light'] .seat-price {
+  color: #d97706;
+}
+html[data-theme='light'] .seat-bar {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+html[data-theme='light'] .search-box {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.98)) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+  box-shadow:
+    0 20px 60px rgba(15, 23, 42, 0.08),
+    0 0 40px rgba(59, 130, 246, 0.06) !important;
+}
+
+html[data-theme='light'] .hero-title {
+  color: #0f172a;
+}
+html[data-theme='light'] .hero-sub {
+  color: #64748b;
+}
 
 .detail-btn {
-  width: 42px; height: 42px; border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
   background: rgba(96, 165, 250, 0.1);
   border: 1px solid rgba(96, 165, 250, 0.25);
-  color: #60a5fa; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  color: #60a5fa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
 }
@@ -3815,27 +4536,32 @@ html[data-theme="light"] .hero-sub { color: #64748b; }
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-html[data-theme="light"] .detail-btn {
+html[data-theme='light'] .detail-btn {
   background: rgba(37, 99, 235, 0.06);
   border-color: rgba(37, 99, 235, 0.25);
   color: #2563eb;
 }
-html[data-theme="light"] .detail-btn:hover {
+html[data-theme='light'] .detail-btn:hover {
   background: rgba(37, 99, 235, 0.12);
 }
 
 .td-overlay {
-  position: fixed; inset: 0; z-index: 9998;
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
   background: rgba(2, 6, 23, 0.75);
   backdrop-filter: blur(10px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
   overflow-y: auto;
 }
 
 .td-card {
   width: min(560px, 100%);
-  max-height: 90vh; overflow-y: auto;
+  max-height: 90vh;
+  overflow-y: auto;
   background: linear-gradient(180deg, #1e293b, #0f172a);
   border: 1px solid rgba(96, 165, 250, 0.2);
   border-radius: 18px;
@@ -3844,190 +4570,357 @@ html[data-theme="light"] .detail-btn:hover {
 }
 
 .td-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 20px;
 }
 
 .td-title {
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .td-train-num {
-  font-size: 24px; font-weight: 900; color: #60a5fa;
+  font-size: 24px;
+  font-weight: 900;
+  color: #60a5fa;
   font-family: 'SF Mono', monospace;
   letter-spacing: 1px;
 }
 
 .td-type {
-  font-size: 12px; color: #94a3b8; padding: 2px 8px;
-  background: rgba(96, 165, 250, 0.1); border-radius: 6px;
-  display: inline-block; width: fit-content;
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 2px 8px;
+  background: rgba(96, 165, 250, 0.1);
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
 }
 
-.td-date { font-size: 12px; color: #94a3b8; }
+.td-date {
+  font-size: 12px;
+  color: #94a3b8;
+}
 
 .td-close {
-  width: 32px; height: 32px; border-radius: 8px;
-  background: rgba(148, 163, 184, 0.1); border: none;
-  color: #94a3b8; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(148, 163, 184, 0.1);
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.18s;
 }
-.td-close:hover { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.td-close:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
 
 .td-route-summary {
-  display: flex; align-items: center; gap: 12px;
-  padding: 16px; background: rgba(59, 130, 246, 0.06);
-  border-radius: 14px; margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.06);
+  border-radius: 14px;
+  margin-bottom: 20px;
   border: 1px solid rgba(96, 165, 250, 0.15);
 }
 
 .td-big-station {
-  display: flex; flex-direction: column; align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-width: 80px;
 }
 
 .td-big-time {
-  font-size: 20px; font-weight: 800; color: #f1f5f9;
+  font-size: 20px;
+  font-weight: 800;
+  color: #f1f5f9;
   font-family: 'SF Mono', monospace;
 }
 
 .td-big-name {
-  font-size: 13px; font-weight: 700; color: #94a3b8; margin-top: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-top: 2px;
 }
 
 .td-big-track {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .td-big-line {
-  width: 100%; height: 2px;
+  width: 100%;
+  height: 2px;
   background: linear-gradient(90deg, transparent, #60a5fa, transparent);
   border-radius: 2px;
 }
 
 .td-big-dur {
-  font-size: 11px; color: #60a5fa; padding: 2px 8px;
-  background: rgba(96, 165, 250, 0.1); border-radius: 10px;
+  font-size: 11px;
+  color: #60a5fa;
+  padding: 2px 8px;
+  background: rgba(96, 165, 250, 0.1);
+  border-radius: 10px;
   font-weight: 600;
 }
 
-.td-stops-section, .td-seats-section { margin-bottom: 20px; }
+.td-stops-section,
+.td-seats-section {
+  margin-bottom: 20px;
+}
 
 .td-section-title {
-  font-size: 13px; font-weight: 700; color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
   margin-bottom: 12px;
 }
 
 .td-loading {
-  text-align: center; padding: 20px; color: #94a3b8; font-size: 13px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .td-spinner {
-  width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid rgba(96, 165, 250, 0.2); border-top-color: #60a5fa;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(96, 165, 250, 0.2);
+  border-top-color: #60a5fa;
   animation: spin 0.7s linear infinite;
 }
 
 .td-stops-list {
-  position: relative; padding-left: 16px;
+  position: relative;
+  padding-left: 16px;
 }
 
 .td-stop {
-  display: flex; align-items: stretch; gap: 12px;
-  padding: 8px 0; position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 8px 0;
+  position: relative;
 }
 
 .td-stop-time {
-  width: 56px; flex-shrink: 0; text-align: right;
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 2px; font-family: 'SF Mono', monospace;
+  width: 56px;
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  font-family: 'SF Mono', monospace;
   font-size: 12px;
 }
 
-.td-arr { color: #fbbf24; font-weight: 700; }
-.td-dep { color: #60a5fa; font-weight: 600; font-size: 11px; }
-
-.td-stop-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: #475569; flex-shrink: 0;
-  margin-top: 12px;
-  position: relative; z-index: 1;
+.td-arr {
+  color: #fbbf24;
+  font-weight: 700;
+}
+.td-dep {
+  color: #60a5fa;
+  font-weight: 600;
+  font-size: 11px;
 }
 
-.td-stop.first .td-stop-dot { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
-.td-stop.last .td-stop-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+.td-stop-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #475569;
+  flex-shrink: 0;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.td-stop.first .td-stop-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+.td-stop.last .td-stop-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
 
 .td-stop-line {
-  position: absolute; left: 81px; top: 22px;
-  width: 2px; bottom: -8px;
+  position: absolute;
+  left: 81px;
+  top: 22px;
+  width: 2px;
+  bottom: -8px;
   background: rgba(148, 163, 184, 0.2);
 }
 
 .td-stop-info {
-  flex: 1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.td-stop-name { font-size: 14px; font-weight: 700; color: #e2e8f0; }
-.td-stop-city { font-size: 11px; color: #64748b; }
+.td-stop-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+.td-stop-city {
+  font-size: 11px;
+  color: #64748b;
+}
 
 .td-stop-tag {
-  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
-.td-stop-tag.start { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-.td-stop-tag.end { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+.td-stop-tag.start {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+.td-stop-tag.end {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
 
 .td-stops-empty {
-  text-align: center; padding: 20px; color: #64748b; font-size: 13px;
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+  font-size: 13px;
 }
 
-.td-seats-grid { display: flex; flex-direction: column; gap: 8px; }
+.td-seats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .td-seat-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
   background: rgba(148, 163, 184, 0.05);
   border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
-.td-seat-row.ok { border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.06); }
-.td-seat-row.tense { border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.06); }
-.td-seat-row.empty { border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.04); opacity: 0.6; }
+.td-seat-row.ok {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.06);
+}
+.td-seat-row.tense {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.06);
+}
+.td-seat-row.empty {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.04);
+  opacity: 0.6;
+}
 
 .td-seat-name {
-  width: 70px; font-size: 13px; font-weight: 700; color: #e2e8f0; flex-shrink: 0;
+  width: 70px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  flex-shrink: 0;
 }
 
 .td-seat-bar-wrap {
-  flex: 1; height: 6px; border-radius: 3px;
-  background: rgba(148, 163, 184, 0.15); overflow: hidden;
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(148, 163, 184, 0.15);
+  overflow: hidden;
 }
 
 .td-seat-bar-fill {
-  height: 100%; border-radius: 3px;
+  height: 100%;
+  border-radius: 3px;
   transition: width 0.6s ease;
 }
 
-.td-seat-row.ok .td-seat-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); }
-.td-seat-row.tense .td-seat-bar-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-.td-seat-row.empty .td-seat-bar-fill { background: #475569; }
-
-.td-seat-count {
-  width: 50px; text-align: right; flex-shrink: 0;
-  display: flex; align-items: baseline; justify-content: flex-end; gap: 2px;
+.td-seat-row.ok .td-seat-bar-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.td-seat-row.tense .td-seat-bar-fill {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+.td-seat-row.empty .td-seat-bar-fill {
+  background: #475569;
 }
 
-.td-seat-num { font-size: 16px; font-weight: 800; color: #f1f5f9; font-family: 'SF Mono', monospace; }
-.td-seat-label { font-size: 11px; color: #94a3b8; }
-.td-seat-price { font-size: 14px; font-weight: 700; color: #fbbf24; font-family: 'SF Mono', monospace; width: 55px; text-align: right; flex-shrink: 0; }
+.td-seat-count {
+  width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 2px;
+}
 
-.td-footer { padding-top: 4px; }
+.td-seat-num {
+  font-size: 16px;
+  font-weight: 800;
+  color: #f1f5f9;
+  font-family: 'SF Mono', monospace;
+}
+.td-seat-label {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.td-seat-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fbbf24;
+  font-family: 'SF Mono', monospace;
+  width: 55px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.td-footer {
+  padding-top: 4px;
+}
 
 .td-buy-btn {
-  width: 100%; padding: 14px; border-radius: 10px; border: none;
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
-  color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
   transition: all 0.18s;
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
 }
@@ -4037,25 +4930,62 @@ html[data-theme="light"] .detail-btn:hover {
   box-shadow: 0 10px 28px rgba(59, 130, 246, 0.4);
 }
 
-html[data-theme="light"] .td-overlay { background: rgba(15, 23, 42, 0.4); }
-html[data-theme="light"] .td-card {
+html[data-theme='light'] .td-overlay {
+  background: rgba(15, 23, 42, 0.4);
+}
+html[data-theme='light'] .td-card {
   background: linear-gradient(180deg, #ffffff, #f8fafc);
   border-color: rgba(37, 99, 235, 0.2);
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.18);
 }
-html[data-theme="light"] .td-train-num { color: #2563eb; }
-html[data-theme="light"] .td-type { background: rgba(37, 99, 235, 0.08); color: #2563eb; }
-html[data-theme="light"] .td-date { color: #64748b; }
-html[data-theme="light"] .td-route-summary { background: rgba(37, 99, 235, 0.04); border-color: rgba(37, 99, 235, 0.15); }
-html[data-theme="light"] .td-big-time { color: #0f172a; }
-html[data-theme="light"] .td-big-name { color: #475569; }
-html[data-theme="light"] .td-big-dur { color: #2563eb; background: rgba(37, 99, 235, 0.08); }
-html[data-theme="light"] .td-section-title { color: #0f172a; }
-html[data-theme="light"] .td-seat-row { background: rgba(148, 163, 184, 0.06); border-color: rgba(148, 163, 184, 0.15); }
-html[data-theme="light"] .td-seat-name { color: #0f172a; }
-html[data-theme="light"] .td-seat-num { color: #0f172a; }
-html[data-theme="light"] .td-seat-label { color: #64748b; }
-html[data-theme="light"] .td-seat-bar-wrap { background: rgba(148, 163, 184, 0.2); }
-html[data-theme="light"] .td-stop-name { color: #0f172a; }
-html[data-theme="light"] .td-close { background: rgba(148, 163, 184, 0.1); color: #64748b; }
+html[data-theme='light'] .td-train-num {
+  color: #2563eb;
+}
+html[data-theme='light'] .td-type {
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
+}
+html[data-theme='light'] .td-date {
+  color: #64748b;
+}
+html[data-theme='light'] .td-route-summary {
+  background: rgba(37, 99, 235, 0.04);
+  border-color: rgba(37, 99, 235, 0.15);
+}
+html[data-theme='light'] .td-big-time {
+  color: #0f172a;
+}
+html[data-theme='light'] .td-big-name {
+  color: #475569;
+}
+html[data-theme='light'] .td-big-dur {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.08);
+}
+html[data-theme='light'] .td-section-title {
+  color: #0f172a;
+}
+html[data-theme='light'] .td-seat-row {
+  background: rgba(148, 163, 184, 0.06);
+  border-color: rgba(148, 163, 184, 0.15);
+}
+html[data-theme='light'] .td-seat-name {
+  color: #0f172a;
+}
+html[data-theme='light'] .td-seat-num {
+  color: #0f172a;
+}
+html[data-theme='light'] .td-seat-label {
+  color: #64748b;
+}
+html[data-theme='light'] .td-seat-bar-wrap {
+  background: rgba(148, 163, 184, 0.2);
+}
+html[data-theme='light'] .td-stop-name {
+  color: #0f172a;
+}
+html[data-theme='light'] .td-close {
+  background: rgba(148, 163, 184, 0.1);
+  color: #64748b;
+}
 </style>

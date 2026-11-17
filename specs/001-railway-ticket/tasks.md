@@ -219,65 +219,91 @@
 
 | 门禁 | 命令 | 当前状态 |
 | --- | --- | --- |
-| 后端测试 | `.\mvnw.cmd -B verify` | PASS（20 tests） |
-| 前端构建 | `cd frontend && npm ci && npm run build` | PASS |
-| Compose 语法 | `docker compose config --quiet` | PASS |
+| 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-17：Docker 未启动 49 tests / 6 skipped；启动后 49 tests / 0 skipped） |
+| 前端单测 | `cd frontend && npm test` | PASS（11 tests） |
+| 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 75 warnings；全部文件符合 Prettier） |
+| 前端 E2E | `npm run test:e2e` | PASS（2 tests，mock API） |
+| 前端构建 | `cd frontend && npm ci && npm run build` | PASS（7.78s） |
+| Compose 语法 | `docker compose config --quiet` | PASS（2026-11-17 复验） |
 | Dockerfile 语法 | `docker build --check -f docker/Dockerfile.backend .` | PASS（no warnings） |
-| 容器健康 | `docker compose ps` | PASS（mysql/backend/frontend healthy） |
-| 接口冒烟 | 首页、`/api/station/list`、未知路径 | PASS（200 / 200 / 404） |
+| 容器健康 | `docker compose ps` | PASS（2026-11-17 复验：mysql/redis/backend/frontend/zipkin 均 healthy） |
+| 接口冒烟 | 首页、`/api/station/list`、未知路径 | PASS（200 / 200 / 401 未登录或 404 带令牌；均非 500） |
 | CORS 配置 | `WebConfigTest` | PASS（白名单解析 / 空值兜底） |
-| 文档一致性 | 数字与引用反向核对 | PASS（T056） |
+| 文档一致性 | 数字与引用反向核对 | PASS（T056；2026-11-17 再次对齐 spec/plan/README） |
 
 ## Phase 8: 待办与风险登记
 
-- [ ] T101 [高] [宪法 III] CORS 收紧并引入完整安全体系（Spring Security、refresh token、登出黑名单）
+- [x] T101 [高] [宪法 III] CORS 收紧并引入完整安全体系（Spring Security、refresh token、登出黑名单）
   > 验收: prod 仅允许配置的来源；令牌可刷新、登出后旧令牌失效；`/api` 端点权限模型有测试覆盖
   > 依赖: T103
+  > 证据: `TokenService`（黑名单/一次性 refresh）、`JwtAuthFilter`、`WebConfig` CORS 白名单；`JwtAuthFilterTest`/`TokenServiceTest`；浏览器 E2E 验证 401→refresh→重放、登出后旧令牌 401/旧 refresh 400
 
-- [ ] T102 [高] [宪法 I] 引入 Flyway/Liquibase 迁移脚本，替代 `ddl-auto=update`
+- [x] T102 [高] [宪法 I] 引入 Flyway/Liquibase 迁移脚本，替代 `ddl-auto=update`
   > 验收: 有版本化 SQL、可回滚、CI 验证迁移；prod 不再自动改表
+  > 证据: `db/migration/V1__init.sql`、`V2__orders_seat_unique.sql`；prod `ddl-auto=none` + `spring-boot-flyway`；实测 `flyway_schema_history` 含 baseline v1 与 v2（success=1）
 
-- [ ] T103 [高] [宪法 III] 鉴权改为「默认拦截 + 显式放行」，修正白名单外免鉴权
+- [x] T103 [高] [宪法 III] 鉴权改为「默认拦截 + 显式放行」，修正白名单外免鉴权
   > 验收: `/api/train/**`、`/api/dashboard/**` 的鉴权策略有明确结论并写入 `spec.md`；新增端点默认需登录
   > 依赖: spec.md 待澄清问题 2
+  > 证据: `JwtAuthFilter.PUBLIC_API_PREFIXES` 显式放行查询类接口；`/api/ai/**` 等新增端点默认拦截；结论写入 `spec.md` 第 9 章
 
-- [ ] T104 [中] [宪法 III] 密钥与数据库口令取消内置默认值，生产强制校验
+- [x] T104 [中] [宪法 III] 密钥与数据库口令取消内置默认值，生产强制校验
   > 验收: 缺少 `JWT_SECRET`/`DB_*` 时 prod 启动失败且提示明确；`.env.example` 同步更新
+  > 证据: `ProdSecurityValidator` + `ProdSecurityValidatorTest`（4 例）；compose 保留一键启动默认值，prod 启动强制校验（详见 `spec.md` 第 9 章决策）
 
-- [ ] T105 [中] [宪法 I] 为座位号加数据库唯一约束或分布式分配机制
+- [x] T105 [中] [宪法 I] 为座位号加数据库唯一约束或分布式分配机制
   > 验收: 并发下单不会产生相同 `(train_id, train_date, seat_type, seat_no)`
+  > 证据: `Order` 实体 `@UniqueConstraint(uk_orders_seat)` + Flyway V2（清洗历史重复/失效号后建约束）；`OrderService` 用 `TransactionTemplate` + `saveAndFlush` 做冲突回滚重试，退票加 `#F` 释放标记；`OrderServiceTest` 6 例（含重试成功/耗尽）；真实 MySQL 6 路并发下单座位号全不同，退票后复购正常
 
-- [ ] T106 [中] [宪法 I/IV] 清理未使用的 `stations`/`trains` 缓存名；定时任务单条异常记录日志而非吞掉
+- [x] T106 [中] [宪法 I/IV] 清理未使用的 `stations`/`trains` 缓存名；定时任务单条异常记录日志而非吞掉
   > 验收: 配置与代码一致；异常有可检索日志
+  > 证据: `spring.cache.cache-names=tickets,stations,trains` 与 `StationService`/`TrainService` 的 `@Cacheable` 一致；`OrderAutoCompleteTask` 单条异常 `log.warn` 记录
 
-- [ ] T107 [中] [宪法 V] 选定协议并创建 `LICENSE`，补齐 `pom.xml` 元数据
+- [x] T107 [中] [宪法 V] 选定协议并创建 `LICENSE`，补齐 `pom.xml` 元数据
   > 验收: 根目录有 LICENSE；`pom.xml` 的 `<licenses>` 不再是空标签
+  > 证据: 选定 MIT，创建根目录 `LICENSE`（Copyright 2026 Railway Ticket contributors）；`pom.xml` 补齐 `<licenses>`/`<developers>`/`<scm>`/`<url>`；授权协议结论写入 `spec.md` 第 9 章
 
-- [ ] T108 [中] [宪法 IV] 补前端 E2E 测试与 ESLint/Prettier 配置
+- [x] T108 [中] [宪法 IV] 补前端 E2E 测试与 ESLint/Prettier 配置
   > 验收: `npm run test`/`npm run lint` 脚本可用且接入 CI
+  > 证据: 新增 `eslint.config.js`（ESLint 9 flat config + eslint-plugin-vue，兼容自动导入）、`.prettierrc.json`、`.prettierignore`；`package.json` 增加 `lint`/`lint:fix`/`format`/`format:check`；CI 前端 job 接入 lint + format:check；`npm audit fix` 修复 `follow-redirects` 高危漏洞至 0 vulnerabilities；浏览器 E2E 验证（刷新令牌并发重放、主动登出、服务端黑名单/撤销）已通过；修掉 Home.vue 无用 catch-rethrow 与 Prettier 拆坏的多语句模板处理器；`npm run lint`/`format:check`/`build` 均 exit=0
 
-- [ ] T109 [低] [宪法 IV] 补一次真实构建，实测依赖分层后的重建耗时
-  > 验收: 仅改 Java 源码时后端镜像重建时间从约 5 分钟降到 1 分钟内
-  > 说明: 分层方案已由 T058 实施并通过 `docker build --check`；本项只缺耗时数据，首次构建约 5 分钟故暂缓
+- [x] T109 [低] [宪法 IV] 实测依赖分层后的重建耗时
+  > 验收: 仅改 Java 源码时后端镜像重建时间降到 1 分钟内
+  > 证据: 首次构建（建立 `dependency:go-offline` 依赖层）474.0s；模拟仅改源码重建 **16.0s**；恢复源码后 1.8s，三次均 `exit=0`
 
-- [ ] T110 [低] [宪法 III] 清理孤立的 `Confetti.vue`；AI 助手密钥改由后端代理，避免存 `localStorage`
+- [x] T110 [低] [宪法 III] 清理孤立的 `Confetti.vue`；AI 助手密钥改由后端代理，避免存 `localStorage`
   > 验收: 无未引用组件；浏览器不长期持有模型密钥
+  > 证据: 删除无引用的 `frontend/src/components/Confetti.vue`；新增 `AiProperties`/`AiService`/`AiController`，密钥仅由 `AI_API_KEY` 环境变量注入服务端；`application.properties` 增加 `ai.*` 配置；前端 `AIChat.vue` 删除 `localStorage` 密钥读写与密钥/端点输入，改调 `/api/ai/status`、`/api/ai/chat`；实测 `/ai/status` 不泄露密钥、未配置时前端显示「模拟模式」并降级
 
-- [ ] T111 [低] [宪法 IV] 补日志归档与链路追踪配置
+- [x] T111 [低] [宪法 IV] 补日志归档与链路追踪配置
   > 验收: 生产日志可检索、请求可关联
+  > 证据: 新增 `TraceIdFilter`（最高优先级，生成/透传/清洗 `X-Trace-Id`，写 MDC 与响应头，异常时清理）+ `TraceIdFilterTest` 4 例；`logback-spring.xml` 日志格式含 `[app,traceId,thread]`，prod 按天+大小滚动归档（保留 30 天 / 3GB 上限 / gzip），dev 仅控制台；实测响应头生成/透传/清洗正常，业务异常日志 `[railway-ticket,trace-log-demo-001,...]` 带 traceId；Micrometer/Prometheus 指标（`cache_gets_total` 等）早已接入
 
 - [x] T112 [高] [宪法 V] 暂存全部源码/配置修复与本次 Spec Kit 文件
   > 验收: `git status` 无遗漏的修复文件；`git diff --cached` 包含 `pom.xml`、`DataInitializer.java`、`GlobalExceptionHandler.java`、`application*.properties`、`specs/`、`.specify/`
   > 证据: `git add -u` 后暂存区 65 个文件，`git diff --cached --check` 无输出
 
-- [ ] T113 [中] [宪法 V] 决策 `spec.md` 第 9 章剩余 4 个 `[NEEDS CLARIFICATION]` 并更新三件套
+- [x] T113 [中] [宪法 V] 决策 `spec.md` 第 9 章剩余 `[NEEDS CLARIFICATION]` 并更新三件套
   > 验收: 待澄清问题清零；结论同步到 `plan.md` 与 `tasks.md`
   > 说明: 原第 3 项「分域名部署」已由 T057 配置化解决
+  > 证据: 4 项全部决策并写入 `spec.md` 第 9 章——prod 账号=开放自注册；鉴权边界=默认拦截+显式放行；演示默认值=compose 保留默认、prod 强制校验；授权协议=MIT（已创建 LICENSE）
+
+## Phase 9: 可选增强闭环（已完成）
+
+- [x] T114 [中] [宪法 IV] 固化前端自动化测试（Vitest 单测 + Playwright E2E）
+  > 证据: `vitest` 4 + `@vue/test-utils` + `happy-dom`，`src/**/*.test.js` 共 11 例（auth 存储/事件、request 401 刷新/并发队列/登出跳过）；`@playwright/test` + `tests/e2e/auth.spec.js` 2 例（登录存储+登出清理、401 自动刷新重放），全部用 `page.route` mock API 不依赖后端；`npm run test`/`test:e2e` 可用；本地用系统 Edge、CI 用 chromium；CI 接入 `npm test` + `playwright install` + `test:e2e`；`npm audit fix` 后 0 漏洞
+
+- [x] T115 [中] [宪法 IV] 接入 Micrometer Tracing + Brave + 可选 Zipkin collector
+  > 证据: Boot 4.1.1 无 tracing 自动配置，`TracingConfig` 手动装配 `BraveTracer`（`localServiceName`、Sampler、`AsyncReporter`+`URLConnectionSender`→`ZipkinSpanHandler`）；`TraceIdFilter` 注入 Tracer 创建 SERVER span，日志/响应头/Zipkin 共用同一 traceId，入站 `X-Trace-Id` 作为 span tag；`TracingConfigTest` 2 例；Compose 新增 `zipkin` profile 服务（`--profile tracing`）；实测 `GET /api/v2/services` 返回 `railway-ticket`，span name=`get /actuator/health`、traceId=`37772fe82f26c2eb`；`ZIPKIN_ENDPOINT` 默认空不上报
 
 ## 统计
 
 | 状态 | 数量 |
 | --- | --- |
-| 已完成 | 48 |
-| 待办 | 12 |
-| 合计 | 60 |
+| 已完成 | 62 |
+| 待办 | 0 |
+| 合计 | 62 |
+
+Phase 8 全部完成。本轮（第二批）新增完成：T107、T108、T111、T113。
+
+> 2026-11-17 复核：上述 62 项仍为全部完成；`spec.md`、`plan.md`、`README.md` 的数字与描述已同步到当前代码（27 端点 / 49 测试 / Redis + Flyway + Zipkin）。当前改动位于工作区，尚未提交。

@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -11,31 +12,26 @@ import java.io.IOException;
 import java.util.List;
 
 @Component
+@Order(2)
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final TokenService tokenService;
 
-    private static final List<String> AUTH_REQUIRED_PREFIXES = List.of(
-            "/api/order/",
-            "/api/user/info",
-            "/api/user/change-password",
-            "/api/user/profile",
-            "/api/message/"
-    );
-
-    private static final List<String> PUBLIC_PREFIXES = List.of(
+    /** 显式放行的公开 /api 路径；其余 /api 路径一律要求登录。 */
+    private static final List<String> PUBLIC_API_PREFIXES = List.of(
             "/api/user/login",
             "/api/user/register",
+            "/api/user/refresh",
             "/api/ticket/",
             "/api/station/",
-            "/swagger-ui/",
-            "/swagger-ui.html",
-            "/v3/api-docs",
-            "/error"
+            "/api/train/",
+            "/api/dashboard/"
     );
 
-    public JwtAuthFilter(JwtUtil jwtUtil) {
+    public JwtAuthFilter(JwtUtil jwtUtil, TokenService tokenService) {
         this.jwtUtil = jwtUtil;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -48,39 +44,30 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
-
-        if (isPublicPath(path)) {
+        // 非 /api 路径（actuator、swagger、静态资源、/error）不在此拦截
+        if (!path.startsWith("/api/") || isPublicApi(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (isAuthRequiredPath(path)) {
-            String header = request.getHeader("Authorization");
-            if (header == null || !header.startsWith("Bearer ")) {
-                writeUnauthorized(response, "请先登录");
-                return;
-            }
-            String token = header.substring(7);
-            if (!jwtUtil.validateToken(token)) {
-                writeUnauthorized(response, "登录已失效，请重新登录");
-                return;
-            }
-            Long userId = jwtUtil.getUserId(token);
-            request.setAttribute("userId", userId);
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            writeUnauthorized(response, "请先登录");
+            return;
         }
 
+        String token = header.substring(7);
+        if (!jwtUtil.validateToken(token) || tokenService.isBlacklisted(token)) {
+            writeUnauthorized(response, "登录已失效，请重新登录");
+            return;
+        }
+
+        request.setAttribute("userId", jwtUtil.getUserId(token));
         filterChain.doFilter(request, response);
     }
 
-    private boolean isPublicPath(String path) {
-        for (String prefix : PUBLIC_PREFIXES) {
-            if (path.startsWith(prefix)) return true;
-        }
-        return false;
-    }
-
-    private boolean isAuthRequiredPath(String path) {
-        for (String prefix : AUTH_REQUIRED_PREFIXES) {
+    private boolean isPublicApi(String path) {
+        for (String prefix : PUBLIC_API_PREFIXES) {
             if (path.startsWith(prefix)) return true;
         }
         return false;

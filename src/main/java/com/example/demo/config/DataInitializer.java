@@ -437,6 +437,8 @@ public class DataInitializer implements CommandLineRunner {
 
         int orderCount = 0;
         int targetOrders = 50;
+        // 座位号必须满足 (车次, 日期, 席别, 座位号) 唯一约束；用计数器保证同组不重复。
+        java.util.Map<String, Integer> seatCounters = new java.util.HashMap<>();
         for (int i = 0; i < targetOrders; i++) {
             Train train = trains.get(rand.nextInt(trains.size()));
             User user = users.get(rand.nextInt(users.size()));
@@ -474,9 +476,18 @@ public class DataInitializer implements CommandLineRunner {
             order.setUserId(user.getId());
             order.setTrainId(train.getId());
             order.setTrainNumber(train.getTrainNumber());
-            order.setTrainDate(trainDate.format(dtf));
+            String trainDateStr = trainDate.format(dtf);
+            order.setTrainDate(trainDateStr);
             order.setSeatType(seatType);
-            order.setSeatNo(String.format("%02d%c", rand.nextInt(20) + 1, (char) ('A' + rand.nextInt(5))));
+            String seatGroup = train.getId() + "|" + trainDateStr + "|" + seatType;
+            int seatIndex = seatCounters.merge(seatGroup, 1, Integer::sum) - 1;
+            String[] cols = switch (seatType) {
+                case "商务座" -> new String[]{"A", "C", "F"};
+                case "一等座" -> new String[]{"A", "C", "D", "F"};
+                case "硬卧" -> new String[]{"上", "中", "下"};
+                default -> new String[]{"A", "B", "C", "D", "F"};
+            };
+            order.setSeatNo(String.format("%02d%s", seatIndex / cols.length + 1, cols[seatIndex % cols.length]));
             order.setPrice(price);
             order.setStatus(status);
             order.setCreateTime(createTime);

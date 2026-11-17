@@ -4,16 +4,23 @@ APP_PORT=8080
 JAR_FILE=demo2-0.0.1-SNAPSHOT.jar
 PID_FILE=/var/run/${APP_NAME}.pid
 LOG_DIR=/opt/${APP_NAME}/logs
-JWT_SECRET=${JWT_SECRET:-railway_ticket_secret_key_2026_very_long_secret_for_jwt_signing}
 
 mkdir -p ${LOG_DIR}
 
 case "$1" in
     start)
-        # prod profile 的数据源必须由环境变量提供，缺失时直接失败，避免"启动成功但连不上库"
+        # prod profile 的密钥与数据源必须由环境变量提供，缺失时直接失败，
+        # 避免"启动成功但使用内置开发密钥/连不上库"。
         : "${SPRING_DATASOURCE_URL:?请先设置 SPRING_DATASOURCE_URL}"
         : "${SPRING_DATASOURCE_USERNAME:?请先设置 SPRING_DATASOURCE_USERNAME}"
         : "${SPRING_DATASOURCE_PASSWORD:?请先设置 SPRING_DATASOURCE_PASSWORD}"
+        : "${JWT_SECRET:?请先设置 JWT_SECRET（至少 32 字节随机字符串）}"
+
+        # prod 默认走 Redis 缓存；无 Redis 的部署显式设置 SPRING_CACHE_TYPE=caffeine
+        if [ "${SPRING_CACHE_TYPE:-redis}" = "redis" ]; then
+            : "${SPRING_DATA_REDIS_HOST:?请先设置 SPRING_DATA_REDIS_HOST}"
+            : "${SPRING_DATA_REDIS_PASSWORD:?请先设置 SPRING_DATA_REDIS_PASSWORD}"
+        fi
 
         if [ -f "$PID_FILE" ] && kill -0 "$(cat $PID_FILE)" 2>/dev/null; then
             echo "⚠️  $APP_NAME 已在运行 (PID: $(cat $PID_FILE))"
@@ -24,7 +31,6 @@ case "$1" in
             -Xms256m -Xmx512m \
             -Dspring.profiles.active=prod \
             -Dserver.port=${APP_PORT} \
-            -Djwt.secret=${JWT_SECRET} \
             ${JAR_FILE} \
             > ${LOG_DIR}/app.log 2>&1 &
         echo $! > $PID_FILE

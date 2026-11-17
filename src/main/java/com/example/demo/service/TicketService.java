@@ -29,7 +29,8 @@ public class TicketService {
         this.trainStationRepository = trainStationRepository;
     }
 
-    @Cacheable(value = "tickets", key = "#fromStationName + '_' + #toStationName + '_' + #dateStr")
+    // 版本前缀由写操作递增，旧 key 靠 TTL 过期，避免全量清空造成缓存击穿
+    @Cacheable(value = "tickets", key = "@ticketCacheVersion.prefix() + #fromStationName + '_' + #toStationName + '_' + #dateStr")
     public List<TrainTicketVO> queryTickets(String fromStationName, String toStationName, String dateStr) {
         Station fromStation = stationRepository.findByNameContaining(fromStationName).stream()
                 .findFirst()

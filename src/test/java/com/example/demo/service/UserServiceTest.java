@@ -7,6 +7,7 @@ import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtil;
+import com.example.demo.security.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,13 +35,16 @@ class UserServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private TokenService tokenService;
+
     private PasswordEncoder passwordEncoder;
     private UserService userService;
 
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserService(userRepository, passwordEncoder, jwtUtil);
+        userService = new UserService(userRepository, passwordEncoder, jwtUtil, tokenService);
     }
 
     @Test

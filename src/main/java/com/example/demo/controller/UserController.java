@@ -36,6 +36,22 @@ public class UserController {
         return Result.success(userService.login(req));
     }
 
+    @Operation(summary = "刷新登录令牌")
+    @PostMapping("/refresh")
+    public Result<LoginResponse> refresh(@RequestBody Map<String, String> body) {
+        return Result.success(userService.refresh(body.get("refreshToken")));
+    }
+
+    @Operation(summary = "退出登录（令牌加入黑名单）")
+    @PostMapping("/logout")
+    public Result<Void> logout(@RequestHeader(value = "Authorization", required = false) String authorization,
+                               @RequestBody(required = false) Map<String, String> body) {
+        String accessToken = authorization != null && authorization.startsWith("Bearer ")
+                ? authorization.substring(7) : null;
+        userService.logout(accessToken, body == null ? null : body.get("refreshToken"));
+        return Result.success(null);
+    }
+
     @Operation(summary = "获取当前用户信息")
     @GetMapping("/info")
     public Result<User> info(@RequestAttribute("userId") Long userId) {

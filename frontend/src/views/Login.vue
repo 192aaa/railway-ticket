@@ -10,22 +10,22 @@
         <svg class="hero-train" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#60a5fa"/>
-              <stop offset="100%" stop-color="#a78bfa"/>
+              <stop offset="0%" stop-color="#60a5fa" />
+              <stop offset="100%" stop-color="#a78bfa" />
             </linearGradient>
           </defs>
-          <rect x="20" y="30" width="160" height="55" rx="10" fill="url(#g1)"/>
-          <rect x="32" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9"/>
-          <rect x="68" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9"/>
-          <rect x="104" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9"/>
-          <rect x="140" y="42" width="24" height="22" rx="4" fill="#fff" opacity="0.9"/>
-          <circle cx="40" cy="100" r="10" fill="#0f172a" stroke="#60a5fa" stroke-width="3"/>
-          <circle cx="160" cy="100" r="10" fill="#0f172a" stroke="#60a5fa" stroke-width="3"/>
-          <line x1="0" y1="115" x2="200" y2="115" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+          <rect x="20" y="30" width="160" height="55" rx="10" fill="url(#g1)" />
+          <rect x="32" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9" />
+          <rect x="68" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9" />
+          <rect x="104" y="42" width="28" height="22" rx="4" fill="#fff" opacity="0.9" />
+          <rect x="140" y="42" width="24" height="22" rx="4" fill="#fff" opacity="0.9" />
+          <circle cx="40" cy="100" r="10" fill="#0f172a" stroke="#60a5fa" stroke-width="3" />
+          <circle cx="160" cy="100" r="10" fill="#0f172a" stroke="#60a5fa" stroke-width="3" />
+          <line x1="0" y1="115" x2="200" y2="115" stroke="#475569" stroke-width="4" stroke-linecap="round" />
         </svg>
         <h1 class="auth-slogan">
           <span class="gradient-text">旅程的起点，</span>
-          <br/>
+          <br />
           <span>从这里开启</span>
         </h1>
         <p class="auth-desc">实时余票 · 极速购票 · 安心出行</p>
@@ -38,23 +38,30 @@
         <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="submit" class="auth-form">
           <el-form-item prop="username">
             <el-input v-model="form.username" placeholder="用户名" size="large">
-              <template #prefix><el-icon><User /></el-icon></template>
+              <template #prefix
+                ><el-icon><User /></el-icon
+              ></template>
             </el-input>
           </el-form-item>
           <el-form-item prop="password">
             <el-input v-model="form.password" type="password" placeholder="密码" size="large" show-password>
-              <template #prefix><el-icon><Lock /></el-icon></template>
+              <template #prefix
+                ><el-icon><Lock /></el-icon
+              ></template>
             </el-input>
           </el-form-item>
           <el-form-item>
-            <button
-              type="button"
-              class="submit-btn"
-              :disabled="loading"
-              @click="submit"
-            >
+            <button type="button" class="submit-btn" :disabled="loading" @click="submit">
               <svg v-if="loading" class="spinner" viewBox="0 0 50 50">
-                <circle class="path" cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5"/>
+                <circle
+                  class="path"
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="5"
+                />
               </svg>
               <span>{{ loading ? '登录中...' : '登 录' }}</span>
             </button>
@@ -189,13 +196,25 @@ async function submit() {
   animation: formStagger 0.6s ease-out 0.15s both;
 }
 
-.auth-form .el-form-item:nth-child(1) { animation: itemIn 0.5s ease-out 0.15s both; }
-.auth-form .el-form-item:nth-child(2) { animation: itemIn 0.5s ease-out 0.3s both; }
-.auth-form .el-form-item:nth-child(3) { animation: itemIn 0.5s ease-out 0.45s both; }
+.auth-form .el-form-item:nth-child(1) {
+  animation: itemIn 0.5s ease-out 0.15s both;
+}
+.auth-form .el-form-item:nth-child(2) {
+  animation: itemIn 0.5s ease-out 0.3s both;
+}
+.auth-form .el-form-item:nth-child(3) {
+  animation: itemIn 0.5s ease-out 0.45s both;
+}
 
 @keyframes itemIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .auth-form :deep(.el-input__wrapper) {
@@ -281,7 +300,9 @@ async function submit() {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 35px rgba(59, 130, 246, 0.55), 0 0 40px rgba(139, 92, 246, 0.25);
+  box-shadow:
+    0 10px 35px rgba(59, 130, 246, 0.55),
+    0 0 40px rgba(139, 92, 246, 0.25);
 }
 
 .submit-btn:active:not(:disabled) {
@@ -331,8 +352,12 @@ async function submit() {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 800px) {

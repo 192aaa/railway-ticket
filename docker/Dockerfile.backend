@@ -1,22 +1,14 @@
-# ---------- 构建阶段：镜像内完成打包，不再依赖宿主机预先生成的 target/*.jar ----------
-FROM maven:3.9-eclipse-temurin-17 AS build
-WORKDIR /build
-
-# 依赖层只与 pom.xml 相关：改 Java 源码时这一层仍命中缓存，不再重新下载 Maven 依赖
-COPY pom.xml ./
-RUN mvn -B -DskipTests dependency:go-offline
-
-COPY src/ src/
-RUN mvn -B -DskipTests clean package
-
-# ---------- 运行阶段 ----------
+# 默认构建方式：直接使用宿主机执行 `mvnw package` 生成的 jar。
+# 需要先在本地跑一次 .\mvnw.cmd -B -DskipTests package（或 mvnw verify）。
+# 若构建环境可稳定访问 Maven 仓库，可改用 docker/Dockerfile.backend.maven 在镜像内打包。
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-COPY --from=build /build/target/demo2-0.0.1-SNAPSHOT.jar app.jar
+COPY target/demo2-0.0.1-SNAPSHOT.jar app.jar
 
-# SPRING_DATASOURCE_* / JWT_SECRET / SPRING_PROFILES_ACTIVE 由 Spring Boot 直接从环境变量读取，
-# 不再手工拼接 -D 参数（exec 形式的 ENTRYPOINT 不会展开 ${...}）。
+# SPRING_DATASOURCE_* / JWT_SECRET / SPRING_PROFILES_ACTIVE / SPRING_CACHE_TYPE / SPRING_DATA_REDIS_*
+# 由 Spring Boot 直接从环境变量读取，不再手工拼接 -D 参数（exec 形式的 ENTRYPOINT 不会展开 ${...}）。
+# prod 还会在启动期校验这些密钥/口令确由环境变量提供。
 ENV JAVA_OPTS="-Xms256m -Xmx512m"
 EXPOSE 8080
 

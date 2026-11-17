@@ -4,184 +4,211 @@
     <section class="hero-fade"></section>
     <div class="messages-main">
       <div class="msg-container glass">
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <button class="back-btn" @click="$router.back()" title="返回">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <h2 class="sidebar-title">💬 消息中心</h2>
-          <div class="header-right">
-            <button class="new-msg-btn" @click="showNewMsgModal = true" title="发新消息">✏️</button>
-            <span v-if="unreadCount > 0" class="unread-total">
-              {{ unreadCount > 99 ? '99+' : unreadCount }}
-            </span>
-          </div>
-        </div>
-
-        <div class="search-box">
-          <input v-model="searchKw" placeholder="🔍 搜索会话..." class="search-input" />
-        </div>
-
-        <div class="filter-row">
-          <button
-            v-for="f in filterTabs"
-            :key="f.value"
-            class="filter-tab"
-            :class="{ active: filterType === f.value }"
-            @click="filterType = f.value"
-          >{{ f.label }}</button>
-          <button class="mark-all-btn" v-if="unreadCount > 0" @click="doMarkAllRead" title="全部标已读">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            全部已读
-          </button>
-        </div>
-
-        <div class="conv-list">
-          <div
-            v-for="conv in filteredConvs"
-            :key="conv.conversationId"
-            class="conv-item stagger-child"
-            :class="{ active: activeConvId === conv.conversationId, system: conv.isSystem }"
-            @click="openConv(conv)"
-          >
-            <div class="conv-avatar" :class="{ system: conv.isSystem }">
-              {{ conv.avatar }}
-            </div>
-            <div class="conv-info">
-              <div class="conv-top">
-                <span class="conv-name">{{ conv.name }}</span>
-                <span class="conv-time">{{ formatShortTime(conv.latestTime) }}</span>
-              </div>
-              <div class="conv-bottom">
-                <span class="conv-preview">{{ truncate(conv.latestMessage, 30) }}</span>
-                <span v-if="conv.unreadCount > 0" class="unread-badge">{{ conv.unreadCount }}</span>
-              </div>
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <button class="back-btn" @click="$router.back()" title="返回">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <h2 class="sidebar-title">💬 消息中心</h2>
+            <div class="header-right">
+              <button class="new-msg-btn" @click="showNewMsgModal = true" title="发新消息">✏️</button>
+              <span v-if="unreadCount > 0" class="unread-total">
+                {{ unreadCount > 99 ? '99+' : unreadCount }}
+              </span>
             </div>
           </div>
 
-          <div v-if="conversations.length === 0" class="empty-state">
-            <div class="empty-icon">📭</div>
-            <p>暂无消息</p>
+          <div class="search-box">
+            <input v-model="searchKw" placeholder="🔍 搜索会话..." class="search-input" />
+          </div>
+
+          <div class="filter-row">
+            <button
+              v-for="f in filterTabs"
+              :key="f.value"
+              class="filter-tab"
+              :class="{ active: filterType === f.value }"
+              @click="filterType = f.value"
+            >
+              {{ f.label }}
+            </button>
+            <button class="mark-all-btn" v-if="unreadCount > 0" @click="doMarkAllRead" title="全部标已读">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              全部已读
+            </button>
+          </div>
+
+          <div class="conv-list">
+            <div
+              v-for="conv in filteredConvs"
+              :key="conv.conversationId"
+              class="conv-item stagger-child"
+              :class="{ active: activeConvId === conv.conversationId, system: conv.isSystem }"
+              @click="openConv(conv)"
+            >
+              <div class="conv-avatar" :class="{ system: conv.isSystem }">
+                {{ conv.avatar }}
+              </div>
+              <div class="conv-info">
+                <div class="conv-top">
+                  <span class="conv-name">{{ conv.name }}</span>
+                  <span class="conv-time">{{ formatShortTime(conv.latestTime) }}</span>
+                </div>
+                <div class="conv-bottom">
+                  <span class="conv-preview">{{ truncate(conv.latestMessage, 30) }}</span>
+                  <span v-if="conv.unreadCount > 0" class="unread-badge">{{ conv.unreadCount }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="conversations.length === 0" class="empty-state">
+              <div class="empty-icon">📭</div>
+              <p>暂无消息</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-area">
+          <template v-if="activeConv">
+            <div class="chat-header">
+              <div class="chat-header-left">
+                <div class="chat-avatar" :class="{ system: activeConv.isSystem }">
+                  {{ activeConv.avatar }}
+                </div>
+                <div>
+                  <div class="chat-name">{{ activeConv.name }}</div>
+                  <div class="chat-status">在线</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-body" ref="chatBodyRef">
+              <div v-if="chatHistory.length === 0" class="empty-chat">
+                <div class="empty-icon">💭</div>
+                <p>暂无聊天记录</p>
+              </div>
+
+              <div
+                v-for="(msg, idx) in chatHistory"
+                :key="msg.id || idx"
+                class="msg-bubble"
+                :class="{ mine: msg.senderId === myUserId, system: msg.type === 'SYSTEM' }"
+              >
+                <template v-if="msg.type === 'SYSTEM'">
+                  <div class="sys-bubble">
+                    <span class="sys-icon">🔔</span>
+                    <span>{{ msg.content }}</span>
+                  </div>
+                </template>
+                <template v-else>
+                  <div v-if="msg.senderId !== myUserId" class="msg-avatar other-avatar">
+                    {{ (activeConv?.name || 'U').substring(0, 1).toUpperCase() }}
+                  </div>
+                  <div class="bubble-wrap">
+                    <div v-if="msg.senderId !== myUserId" class="bubble-sender-name">
+                      {{ activeConv?.name || '对方' }}
+                    </div>
+                    <div class="bubble-text">{{ msg.content }}</div>
+                    <div class="bubble-time">{{ formatShortTime(msg.createTime) }}</div>
+                  </div>
+                  <div v-if="msg.senderId === myUserId" class="msg-avatar mine-avatar">
+                    {{ (userStore.username || 'M').substring(0, 1).toUpperCase() }}
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <div class="chat-input-area">
+              <input
+                v-model="inputMsg"
+                @keyup.enter="sendMsg"
+                :placeholder="activeConv.isSystem ? '系统通知不可回复' : '输入消息...'"
+                class="chat-input"
+                :disabled="activeConv.isSystem"
+              />
+              <button
+                class="send-btn"
+                :disabled="!inputMsg.trim() || activeConv.isSystem || sending"
+                @click="sendMsg"
+              >
+                {{ sending ? '发送中...' : '发送' }}
+              </button>
+            </div>
+          </template>
+
+          <div v-else class="no-chat-selected">
+            <div class="empty-icon">👈</div>
+            <p>从左侧选择一个会话开始聊天</p>
           </div>
         </div>
       </div>
 
-      <div class="chat-area">
-        <template v-if="activeConv">
-          <div class="chat-header">
-            <div class="chat-header-left">
-              <div class="chat-avatar" :class="{ system: activeConv.isSystem }">{{ activeConv.avatar }}</div>
-              <div>
-                <div class="chat-name">{{ activeConv.name }}</div>
-                <div class="chat-status">在线</div>
-              </div>
-            </div>
+      <div v-if="showNewMsgModal" class="modal-overlay" @click.self="showNewMsgModal = false">
+        <div class="modal-box glass">
+          <div class="modal-header">
+            <h3>✏️ 发起新对话</h3>
+            <button class="modal-close" @click="showNewMsgModal = false">✕</button>
           </div>
-
-          <div class="chat-body" ref="chatBodyRef">
-            <div v-if="chatHistory.length === 0" class="empty-chat">
-              <div class="empty-icon">💭</div>
-              <p>暂无聊天记录</p>
-            </div>
-
-            <div
-              v-for="(msg, idx) in chatHistory"
-              :key="msg.id || idx"
-              class="msg-bubble"
-              :class="{ mine: msg.senderId === myUserId, system: msg.type === 'SYSTEM' }"
-            >
-              <template v-if="msg.type === 'SYSTEM'">
-                <div class="sys-bubble">
-                  <span class="sys-icon">🔔</span>
-                  <span>{{ msg.content }}</span>
-                </div>
-              </template>
-              <template v-else>
-                <div v-if="msg.senderId !== myUserId" class="msg-avatar other-avatar">
-                  {{ (activeConv?.name || 'U').substring(0, 1).toUpperCase() }}
-                </div>
-                <div class="bubble-wrap">
-                  <div v-if="msg.senderId !== myUserId" class="bubble-sender-name">{{ activeConv?.name || '对方' }}</div>
-                  <div class="bubble-text">{{ msg.content }}</div>
-                  <div class="bubble-time">{{ formatShortTime(msg.createTime) }}</div>
-                </div>
-                <div v-if="msg.senderId === myUserId" class="msg-avatar mine-avatar">
-                  {{ (userStore.username || 'M').substring(0, 1).toUpperCase() }}
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <div class="chat-input-area">
+          <div class="modal-body">
             <input
-              v-model="inputMsg"
-              @keyup.enter="sendMsg"
-              :placeholder="activeConv.isSystem ? '系统通知不可回复' : '输入消息...'"
-              class="chat-input"
-              :disabled="activeConv.isSystem"
+              v-model="searchUserKw"
+              @input="debounceSearchUsers"
+              placeholder="🔍 输入用户名或姓名..."
+              class="user-search-input"
             />
-            <button
-              class="send-btn"
-              :disabled="!inputMsg.trim() || activeConv.isSystem || sending"
-              @click="sendMsg"
-            >
-              {{ sending ? '发送中...' : '发送' }}
-            </button>
+            <div class="user-search-results">
+              <div v-if="searchUserLoading" class="search-tip">搜索中...</div>
+              <div v-else-if="searchedUsers.length === 0 && searchUserKw.trim()" class="search-tip">
+                未找到用户
+              </div>
+              <template v-else>
+                <div v-for="u in searchedUsers" :key="u.id" class="user-item" @click="selectUser(u)">
+                  <div class="user-item-avatar">{{ u.username.substring(0, 1).toUpperCase() }}</div>
+                  <div class="user-item-info">
+                    <div class="user-item-name">
+                      {{ u.username }} <span v-if="u.realName" class="real-name">({{ u.realName }})</span>
+                    </div>
+                    <div class="user-item-phone" v-if="u.phoneMasked">{{ u.phoneMasked }}</div>
+                  </div>
+                  <button class="start-chat-btn">💬 发消息</button>
+                </div>
+                <div v-if="!searchUserKw.trim()" class="search-tip">输入关键词开始搜索</div>
+              </template>
+            </div>
           </div>
-        </template>
-
-        <div v-else class="no-chat-selected">
-          <div class="empty-icon">👈</div>
-          <p>从左侧选择一个会话开始聊天</p>
         </div>
       </div>
     </div>
-
-    <div v-if="showNewMsgModal" class="modal-overlay" @click.self="showNewMsgModal = false">
-      <div class="modal-box glass">
-        <div class="modal-header">
-          <h3>✏️ 发起新对话</h3>
-          <button class="modal-close" @click="showNewMsgModal = false">✕</button>
-        </div>
-        <div class="modal-body">
-          <input
-            v-model="searchUserKw"
-            @input="debounceSearchUsers"
-            placeholder="🔍 输入用户名或姓名..."
-            class="user-search-input"
-          />
-          <div class="user-search-results">
-            <div v-if="searchUserLoading" class="search-tip">搜索中...</div>
-            <div v-else-if="searchedUsers.length === 0 && searchUserKw.trim()" class="search-tip">未找到用户</div>
-            <template v-else>
-              <div
-                v-for="u in searchedUsers"
-                :key="u.id"
-                class="user-item"
-                @click="selectUser(u)"
-              >
-                <div class="user-item-avatar">{{ u.username.substring(0, 1).toUpperCase() }}</div>
-                <div class="user-item-info">
-                  <div class="user-item-name">{{ u.username }} <span v-if="u.realName" class="real-name">({{ u.realName }})</span></div>
-                  <div class="user-item-phone" v-if="u.phoneMasked">{{ u.phoneMasked }}</div>
-                </div>
-                <button class="start-chat-btn">💬 发消息</button>
-              </div>
-              <div v-if="!searchUserKw.trim()" class="search-tip">输入关键词开始搜索</div>
-            </template>
-          </div>
-        </div>
-      </div>
-     </div>
-     </div>
-   </div>
- </template>
+  </div>
+</template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
- import request from '../utils/request'
- import { useUserStore } from '../stores/user'
- import AppNav from '../components/AppNav.vue'
+import request from '../utils/request'
+import { useUserStore } from '../stores/user'
+import AppNav from '../components/AppNav.vue'
 
 const userStore = useUserStore()
 const myUserId = computed(() => userStore.userInfo?.id || userStore.userInfo?.userId)
@@ -213,13 +240,14 @@ let searchTimer = null
 
 const filteredConvs = computed(() => {
   let list = conversations.value
-  if (filterType.value === 'system') list = list.filter(c => c.isSystem)
-  else if (filterType.value === 'user') list = list.filter(c => !c.isSystem)
-  else if (filterType.value === 'unread') list = list.filter(c => c.unreadCount > 0)
+  if (filterType.value === 'system') list = list.filter((c) => c.isSystem)
+  else if (filterType.value === 'user') list = list.filter((c) => !c.isSystem)
+  else if (filterType.value === 'unread') list = list.filter((c) => c.unreadCount > 0)
   if (!searchKw.value.trim()) return list
-  return list.filter(c =>
-    c.name.toLowerCase().includes(searchKw.value.toLowerCase()) ||
-    c.latestMessage.toLowerCase().includes(searchKw.value.toLowerCase())
+  return list.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchKw.value.toLowerCase()) ||
+      c.latestMessage.toLowerCase().includes(searchKw.value.toLowerCase())
   )
 })
 
@@ -227,11 +255,13 @@ async function doMarkAllRead() {
   try {
     await request.post('/message/mark-all-read')
     unreadCount.value = 0
-    conversations.value = conversations.value.map(c => ({ ...c, unreadCount: 0 }))
+    conversations.value = conversations.value.map((c) => ({ ...c, unreadCount: 0 }))
     window.dispatchEvent(new CustomEvent('railflow-refresh-unread'))
     if (activeConv.value) openConv(activeConv.value)
     ElMessage.success('已全部标为已读')
-  } catch { ElMessage.error('操作失败') }
+  } catch {
+    ElMessage.error('操作失败')
+  }
 }
 
 function formatShortTime(iso) {
@@ -304,7 +334,10 @@ function scrollToBottom() {
 
 async function doSearchUsers() {
   const kw = searchUserKw.value.trim()
-  if (!kw) { searchedUsers.value = []; return }
+  if (!kw) {
+    searchedUsers.value = []
+    return
+  }
   searchUserLoading.value = true
   try {
     searchedUsers.value = await request.get('/message/search-users', { params: { kw } })
@@ -339,12 +372,16 @@ onMounted(async () => {
     await loadUnreadCount()
     if (activeConv.value) {
       try {
-        const data = await request.get('/message/history', { params: { userId2: activeConv.value.conversationId } })
+        const data = await request.get('/message/history', {
+          params: { userId2: activeConv.value.conversationId }
+        })
         const newLen = data?.length || 0
         const oldLen = chatHistory.value.length
         chatHistory.value = data || []
         if (newLen > oldLen) {
-          await request.post('/message/read', null, { params: { conversationUserId: activeConv.value.conversationId } })
+          await request.post('/message/read', null, {
+            params: { conversationUserId: activeConv.value.conversationId }
+          })
           await loadConversations()
           nextTick(() => scrollToBottom())
         }
@@ -359,12 +396,16 @@ onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer)
 })
 
-watch(conversations, () => {
-  if (activeConvId.value != null) {
-    const fresh = conversations.value.find(c => c.conversationId === activeConvId.value)
-    if (fresh) activeConv.value = fresh
-  }
-}, { deep: true })
+watch(
+  conversations,
+  () => {
+    if (activeConvId.value != null) {
+      const fresh = conversations.value.find((c) => c.conversationId === activeConvId.value)
+      if (fresh) activeConv.value = fresh
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
@@ -388,8 +429,14 @@ watch(conversations, () => {
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .msg-container {
@@ -464,8 +511,13 @@ watch(conversations, () => {
 }
 
 @keyframes pulseRed {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
 }
 
 .search-box {
@@ -541,7 +593,8 @@ watch(conversations, () => {
   min-width: 0;
 }
 
-.conv-top, .conv-bottom {
+.conv-top,
+.conv-bottom {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -648,8 +701,14 @@ watch(conversations, () => {
 }
 
 @keyframes bubbleIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .msg-bubble.mine {
@@ -801,7 +860,9 @@ watch(conversations, () => {
   cursor: not-allowed;
 }
 
-.empty-chat, .no-chat-selected, .empty-state {
+.empty-chat,
+.no-chat-selected,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -821,7 +882,9 @@ watch(conversations, () => {
   opacity: 0.6;
 }
 
-.stagger-children { animation: none; }
+.stagger-children {
+  animation: none;
+}
 
 .header-right {
   display: flex;
@@ -859,7 +922,14 @@ watch(conversations, () => {
   animation: fadeIn 0.2s ease-out;
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 .modal-box {
   width: 440px;
@@ -874,8 +944,14 @@ watch(conversations, () => {
 }
 
 @keyframes modalPop {
-  from { opacity: 0; transform: scale(0.9) translateY(20px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-header {
@@ -905,7 +981,10 @@ watch(conversations, () => {
   transition: all 0.2s;
 }
 
-.modal-close:hover { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.modal-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
 
 .modal-body {
   padding: 18px 22px 22px;
@@ -1021,21 +1100,30 @@ watch(conversations, () => {
 }
 
 .filter-row {
-  display: flex; align-items: center; gap: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 6px 0 4px;
   flex-wrap: wrap;
 }
 
 .filter-tab {
-  padding: 5px 12px; border-radius: 16px;
+  padding: 5px 12px;
+  border-radius: 16px;
   background: rgba(148, 163, 184, 0.08);
   border: 1px solid rgba(148, 163, 184, 0.12);
-  color: #94a3b8; font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: all 0.18s;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
   white-space: nowrap;
 }
 
-.filter-tab:hover { background: rgba(148, 163, 184, 0.15); color: #e2e8f0; }
+.filter-tab:hover {
+  background: rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
+}
 .filter-tab.active {
   background: rgba(59, 130, 246, 0.15);
   border-color: rgba(59, 130, 246, 0.4);
@@ -1044,12 +1132,18 @@ watch(conversations, () => {
 
 .mark-all-btn {
   margin-left: auto;
-  display: flex; align-items: center; gap: 4px;
-  padding: 5px 10px; border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 16px;
   background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #10b981; font-size: 11px; font-weight: 600;
-  cursor: pointer; transition: all 0.18s;
+  color: #10b981;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
   flex-shrink: 0;
 }
 
@@ -1058,17 +1152,35 @@ watch(conversations, () => {
   transform: translateY(-1px);
 }
 
-html[data-theme="light"] .filter-tab {
+html[data-theme='light'] .filter-tab {
   background: rgba(15, 23, 42, 0.04);
   border-color: rgba(148, 163, 184, 0.2);
   color: #64748b;
 }
-html[data-theme="light"] .filter-tab:hover { background: rgba(15, 23, 42, 0.08); color: #0f172a; }
-html[data-theme="light"] .filter-tab.active { background: rgba(37, 99, 235, 0.08); border-color: rgba(37, 99, 235, 0.4); color: #2563eb; }
-html[data-theme="light"] .mark-all-btn { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); color: #059669; }
+html[data-theme='light'] .filter-tab:hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+html[data-theme='light'] .filter-tab.active {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.4);
+  color: #2563eb;
+}
+html[data-theme='light'] .mark-all-btn {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
+}
 
 @media (max-width: 768px) {
-  .msg-container { flex-direction: column; }
-  .sidebar { width: 100%; max-height: 45vh; border-right: none; border-bottom: 1px solid rgba(148, 163, 184, 0.1); }
+  .msg-container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  }
 }
 </style>

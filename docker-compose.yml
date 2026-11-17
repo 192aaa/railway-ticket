@@ -22,6 +22,28 @@ services:
       retries: 20
       start_period: 30s
 
+  redis:
+    image: redis:7-alpine
+    container_name: railway-redis
+    restart: always
+    environment:
+      REDIS_PWD: ${REDIS_PWD:-railway_redis_123}
+      # 供 healthcheck 的 redis-cli 读取，避免密码出现在命令行
+      REDISCLI_AUTH: ${REDIS_PWD:-railway_redis_123}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PWD\" --appendonly yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      # 宿主机已装 Redis 时可在 .env 中改 REDIS_HOST_PORT；容器内始终是 6379，
+      # backend 通过服务名 redis:6379 访问，不受影响。
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
   backend:
     build:
       context: .
@@ -30,6 +52,8 @@ services:
     restart: always
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
@@ -40,6 +64,15 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change_me_to_a_random_long_string_2026}
       # 分域名部署时在 .env 中填前端来源白名单；同源反代保持默认 *
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-*}
+      # 缓存默认走 Redis；设 SPRING_CACHE_TYPE=caffeine 可回退本地缓存
+      SPRING_CACHE_TYPE: ${SPRING_CACHE_TYPE:-redis}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PWD:-railway_redis_123}
+      REDIS_HEALTH_ENABLED: ${REDIS_HEALTH_ENABLED:-true}
+      # 链路追踪：默认空（不上报）；启用 zipkin profile 时在 .env 设 ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+      ZIPKIN_ENDPOINT: ${ZIPKIN_ENDPOINT:-}
+      TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-1.0}
     ports:
       - "8080:8080"
     healthcheck:
@@ -67,5 +100,22 @@ services:
       retries: 6
       start_period: 10s
 
+  # 可选链路追踪 collector：docker compose --profile tracing up -d
+  # 同时在根目录 .env 设置 ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: railway-zipkin
+    profiles: ["tracing"]
+    restart: always
+    ports:
+      - "9411:9411"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9411/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
 volumes:
   mysql-data:
+  redis-data:

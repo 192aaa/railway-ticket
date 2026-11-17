@@ -10,5 +10,10 @@ node_modules
 frontend/node_modules
 frontend/dist
 frontend/.env.local
-target
+target/classes
+target/test-classes
+target/generated-sources
+target/maven-status
+target/surefire-reports
+target/*.original
 deploy

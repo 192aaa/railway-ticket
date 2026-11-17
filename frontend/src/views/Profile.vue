@@ -19,22 +19,65 @@
           </div>
           <div class="user-meta">
             <span class="meta-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
               {{ userStore.username }}
             </span>
             <span class="meta-dot">·</span>
             <span v-if="userInfo?.phone" class="meta-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"
+                />
+              </svg>
               {{ maskPhone(userInfo.phone) }}
             </span>
             <span v-if="userInfo?.idCard" class="meta-dot">·</span>
             <span v-if="userInfo?.idCard" class="meta-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
               {{ maskIdCard(userInfo.idCard) }}
             </span>
             <span class="meta-dot">·</span>
             <span class="meta-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
               加入 {{ formatDate(userInfo?.createTime) }}
             </span>
           </div>
@@ -51,13 +94,15 @@
           class="stat-card glass-card clickable"
           v-for="(s, i) in statsList"
           :key="s.label"
-          :style="{ animationDelay: (i * 0.06) + 's' }"
+          :style="{ animationDelay: i * 0.06 + 's' }"
           @click="s.route && $router.push(s.route)"
           :class="{ disabled: !s.route }"
         >
           <div class="stat-icon" :style="{ background: s.bg }">{{ s.icon }}</div>
           <div class="stat-info">
-            <div class="stat-num">{{ animatedNums[s.label] !== undefined ? animatedNums[s.label] : s.value }}</div>
+            <div class="stat-num">
+              {{ animatedNums[s.label] !== undefined ? animatedNums[s.label] : s.value }}
+            </div>
             <div class="stat-label">{{ s.label }}</div>
           </div>
           <div v-if="s.route" class="stat-arrow">→</div>
@@ -80,12 +125,33 @@
               </div>
               <div class="fav-time">{{ formatShortTime(t.startTime) }}</div>
               <button class="fav-del" @click.stop="removeFav(t)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+                </svg>
               </button>
             </div>
           </div>
           <div v-else class="section-empty">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.2"
+            >
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+              />
+            </svg>
             <p>还没有收藏车次，去首页星标常用车次吧</p>
             <button class="empty-action" @click="$router.push('/home')">去首页购票 →</button>
           </div>
@@ -104,12 +170,33 @@
                 <div class="pax-id">{{ p.idCard }}</div>
               </div>
               <button class="pax-del" @click="removePax(i)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+                </svg>
               </button>
             </div>
           </div>
           <div v-else class="section-empty">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.2"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            </svg>
             <p>暂无常用购票人，添加后购票时可快速选择</p>
             <button class="empty-action" @click="openAddPax">+ 添加购票人</button>
           </div>
@@ -121,7 +208,12 @@
             <router-link to="/orders" class="section-more">查看全部 →</router-link>
           </div>
           <div v-if="recentOrders.length" class="recent-list">
-            <div v-for="o in recentOrders" :key="o.id" class="recent-item" @click="$router.push({ path: '/orders', query: { highlight: o.id } })">
+            <div
+              v-for="o in recentOrders"
+              :key="o.id"
+              class="recent-item"
+              @click="$router.push({ path: '/orders', query: { highlight: o.id } })"
+            >
               <div class="r-top">
                 <span class="r-train">{{ o.trainNumber }}</span>
                 <span class="r-status" :class="statusClass(o.status)">{{ statusLabel(o.status) }}</span>
@@ -138,7 +230,17 @@
             </div>
           </div>
           <div v-else class="section-empty">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <svg
+              width="36"
+              height="36"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.2"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
             <p>还没有订单记录</p>
             <button class="empty-action" @click="$router.push('/home')">去购票 →</button>
           </div>
@@ -152,7 +254,12 @@
           <el-input v-model="paxForm.name" placeholder="请输入真实姓名" maxlength="20" />
         </el-form-item>
         <el-form-item label="身份证号">
-          <el-input v-model="paxForm.idCard" placeholder="请输入 18 位身份证号" maxlength="18" show-password />
+          <el-input
+            v-model="paxForm.idCard"
+            placeholder="请输入 18 位身份证号"
+            maxlength="18"
+            show-password
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -193,7 +300,12 @@
           <el-input v-model="pwdForm.newPassword" type="password" placeholder="至少 6 位" show-password />
         </el-form-item>
         <el-form-item label="确认新密码">
-          <el-input v-model="pwdForm.confirmPassword" type="password" placeholder="再次输入新密码" show-password />
+          <el-input
+            v-model="pwdForm.confirmPassword"
+            type="password"
+            placeholder="再次输入新密码"
+            show-password
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -236,23 +348,37 @@ const totalSpent = computed(() => {
   let total = 0
   for (const o of orders.value) {
     if (o.status === 'PAID' || o.status === '已支付') {
-      total += (o.price || 0)
+      total += o.price || 0
     }
   }
   return total.toFixed(0)
 })
 
 const statsList = computed(() => {
-  let paid = 0, refunded = 0, pending = 0
+  let paid = 0,
+    refunded = 0,
+    pending = 0
   for (const o of orders.value) {
     if (o.status === 'PAID' || o.status === '已支付') paid++
     else if (o.status === 'REFUNDED' || o.status === '已退票') refunded++
     else pending++
   }
   return [
-    { label: '全部订单', value: orders.value.length, icon: '📋', bg: 'rgba(59,130,246,0.15)', route: '/orders' },
+    {
+      label: '全部订单',
+      value: orders.value.length,
+      icon: '📋',
+      bg: 'rgba(59,130,246,0.15)',
+      route: '/orders'
+    },
     { label: '有效订单', value: paid, icon: '✅', bg: 'rgba(16,185,129,0.15)', route: '/orders?status=PAID' },
-    { label: '已退票', value: refunded, icon: '↩️', bg: 'rgba(249,115,22,0.15)', route: '/orders?status=REFUNDED' },
+    {
+      label: '已退票',
+      value: refunded,
+      icon: '↩️',
+      bg: 'rgba(249,115,22,0.15)',
+      route: '/orders?status=REFUNDED'
+    },
     { label: '总消费', value: '¥' + totalSpent.value, icon: '💰', bg: 'rgba(251,191,36,0.15)', route: null }
   ]
 })
@@ -260,7 +386,10 @@ const statsList = computed(() => {
 const animatedNums = reactive({})
 
 function startCounter(label, target, duration = 900) {
-  if (typeof target !== 'number') { animatedNums[label] = target; return }
+  if (typeof target !== 'number') {
+    animatedNums[label] = target
+    return
+  }
   animatedNums[label] = 0
   const start = performance.now()
   function tick(now) {
@@ -289,7 +418,9 @@ function loadFavs() {
 }
 
 function removeFav(t) {
-  favorites.value = favorites.value.filter(f => !(f.trainNumber === t.trainNumber && f.startTime === t.startTime))
+  favorites.value = favorites.value.filter(
+    (f) => !(f.trainNumber === t.trainNumber && f.startTime === t.startTime)
+  )
   localStorage.setItem(uk('favorites'), JSON.stringify(favorites.value))
   ElMessage.success('已取消收藏')
 }
@@ -300,14 +431,18 @@ function clearAllFavs() {
       favorites.value = []
       localStorage.removeItem(uk('favorites'))
       ElMessage.success('已清空')
-    }).catch(() => {})
+    })
+    .catch(() => {})
 }
 
 function jumpToRoute(t) {
-  localStorage.setItem(uk('quick_search'), JSON.stringify({
-    from: t.fromStation,
-    to: t.toStation
-  }))
+  localStorage.setItem(
+    uk('quick_search'),
+    JSON.stringify({
+      from: t.fromStation,
+      to: t.toStation
+    })
+  )
   router.push('/home')
 }
 
@@ -338,10 +473,17 @@ function openAddPax() {
 function confirmAddPax() {
   const name = paxForm.name.trim()
   const idCard = paxForm.idCard.trim()
-  if (!name) { ElMessage.warning('请输入姓名'); return }
-  if (!/^\d{17}[\dXx]$/.test(idCard)) { ElMessage.warning('身份证号格式不正确'); return }
-  if (savedPassengers.value.some(p => p.idCard === idCard)) {
-    ElMessage.warning('该乘车人已存在'); return
+  if (!name) {
+    ElMessage.warning('请输入姓名')
+    return
+  }
+  if (!/^\d{17}[\dXx]$/.test(idCard)) {
+    ElMessage.warning('身份证号格式不正确')
+    return
+  }
+  if (savedPassengers.value.some((p) => p.idCard === idCard)) {
+    ElMessage.warning('该乘车人已存在')
+    return
   }
   savedPassengers.value.push({ name, idCard })
   localStorage.setItem(uk('passengers'), JSON.stringify(savedPassengers.value))
@@ -355,7 +497,9 @@ function formatDate(t) {
     const d = new Date(typeof t === 'string' ? t.replace(' ', 'T') : t)
     if (isNaN(d.getTime())) return t
     return `${d.getFullYear()}`
-  } catch { return t }
+  } catch {
+    return t
+  }
 }
 
 function formatShortTime(t) {
@@ -400,9 +544,18 @@ function openEditProfile() {
 }
 
 async function saveProfile() {
-  if (!profileForm.realName.trim()) { ElMessage.warning('真实姓名不能为空'); return }
-  if (profileForm.phone && !/^1[3-9]\d{9}$/.test(profileForm.phone.trim())) { ElMessage.warning('手机号格式不正确'); return }
-  if (profileForm.idCard && !/^\d{15}$|^\d{17}[\dXx]$/.test(profileForm.idCard.trim())) { ElMessage.warning('身份证号格式不正确'); return }
+  if (!profileForm.realName.trim()) {
+    ElMessage.warning('真实姓名不能为空')
+    return
+  }
+  if (profileForm.phone && !/^1[3-9]\d{9}$/.test(profileForm.phone.trim())) {
+    ElMessage.warning('手机号格式不正确')
+    return
+  }
+  if (profileForm.idCard && !/^\d{15}$|^\d{17}[\dXx]$/.test(profileForm.idCard.trim())) {
+    ElMessage.warning('身份证号格式不正确')
+    return
+  }
 
   profileSaving.value = true
   try {
@@ -414,7 +567,8 @@ async function saveProfile() {
     await userStore.fetchUserInfo()
     ElMessage.success('资料已更新')
     editProfileVisible.value = false
-  } catch (e) {} finally {
+  } catch (e) {
+  } finally {
     profileSaving.value = false
   }
 }
@@ -431,10 +585,22 @@ function openChangePwd() {
 }
 
 async function savePassword() {
-  if (!pwdForm.oldPassword) { ElMessage.warning('请输入原密码'); return }
-  if (!pwdForm.newPassword || pwdForm.newPassword.length < 6) { ElMessage.warning('新密码至少 6 位'); return }
-  if (pwdForm.newPassword !== pwdForm.confirmPassword) { ElMessage.warning('两次输入的新密码不一致'); return }
-  if (pwdForm.oldPassword === pwdForm.newPassword) { ElMessage.warning('新密码不能与原密码相同'); return }
+  if (!pwdForm.oldPassword) {
+    ElMessage.warning('请输入原密码')
+    return
+  }
+  if (!pwdForm.newPassword || pwdForm.newPassword.length < 6) {
+    ElMessage.warning('新密码至少 6 位')
+    return
+  }
+  if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+    ElMessage.warning('两次输入的新密码不一致')
+    return
+  }
+  if (pwdForm.oldPassword === pwdForm.newPassword) {
+    ElMessage.warning('新密码不能与原密码相同')
+    return
+  }
 
   pwdSaving.value = true
   try {
@@ -448,7 +614,8 @@ async function savePassword() {
       userStore.logout()
       router.push('/login')
     }, 1200)
-  } catch (e) {} finally {
+  } catch (e) {
+  } finally {
     pwdSaving.value = false
   }
 }
@@ -519,7 +686,9 @@ onMounted(async () => {
 }
 
 .avatar-wrap:hover .avatar {
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), 0 0 40px rgba(59, 130, 246, 0.5);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(59, 130, 246, 0.5);
 }
 
 .avatar-wrap:hover .avatar-ring {
@@ -537,7 +706,9 @@ onMounted(async () => {
   font-weight: 800;
   color: white;
   letter-spacing: 1px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.3);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(59, 130, 246, 0.3);
   position: relative;
   z-index: 1;
 }
@@ -548,7 +719,9 @@ onMounted(async () => {
   border-radius: 50%;
   border: 2px solid transparent;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6) border-box;
-  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   animation: avatarSpin 8s linear infinite;
@@ -564,12 +737,21 @@ onMounted(async () => {
 }
 
 @keyframes avatarSpin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes avatarGlow {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
 }
 
 .user-info {
@@ -682,13 +864,18 @@ onMounted(async () => {
 
 .stat-card.clickable {
   cursor: pointer;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.3s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.3s ease;
 }
 
 .stat-card.clickable:hover {
   transform: translateY(-4px);
   border-color: rgba(96, 165, 250, 0.4);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.15);
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(59, 130, 246, 0.15);
 }
 
 .stat-card.clickable:hover .stat-arrow {
@@ -845,7 +1032,9 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-.fav-list, .pax-list, .recent-list {
+.fav-list,
+.pax-list,
+.recent-list {
   display: flex;
   flex-direction: column;
   gap: 8px;

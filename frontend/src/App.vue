@@ -33,7 +33,20 @@
       <div v-if="paletteOpen" class="palette-overlay" @click.self="closePalette" @keydown.esc="closePalette">
         <div class="palette-box" role="dialog">
           <div class="palette-input-wrap">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="palette-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="palette-search-icon"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               ref="paletteInputRef"
               v-model="paletteQuery"
@@ -52,7 +65,7 @@
                 <div class="palette-section-title">🚄 热门路线</div>
                 <button
                   v-for="(r, i) in paletteFilteredRoutes"
-                  :key="'r'+i"
+                  :key="'r' + i"
                   class="palette-item"
                   :class="{ active: paletteActiveIdx === i }"
                   @click="paletteSelectRoute(r)"
@@ -70,7 +83,7 @@
                 <div class="palette-section-title">📄 页面跳转</div>
                 <button
                   v-for="(p, i) in paletteFilteredPages"
-                  :key="'p'+i"
+                  :key="'p' + i"
                   class="palette-item"
                   :class="{ active: paletteActiveIdx === paletteFilteredRoutes.length + i }"
                   @click="paletteGoPage(p)"
@@ -95,7 +108,7 @@
                 <div class="palette-section-title">⚡ 快捷页面</div>
                 <button
                   v-for="(p, i) in palettePages"
-                  :key="'pq'+i"
+                  :key="'pq' + i"
                   class="palette-item"
                   :class="{ active: paletteActiveIdx === i }"
                   @click="paletteGoPage(p)"
@@ -113,7 +126,7 @@
                 <div class="palette-section-title">🔥 热门路线</div>
                 <button
                   v-for="(r, i) in paletteHotRoutes"
-                  :key="'ph'+i"
+                  :key="'ph' + i"
                   class="palette-item"
                   :class="{ active: paletteActiveIdx === palettePages.length + i }"
                   @click="paletteSelectRoute(r)"
@@ -187,7 +200,7 @@ const paletteHotRoutes = [
 const paletteFilteredRoutes = computed(() => {
   const q = paletteQuery.value.trim().toLowerCase()
   if (!q) return paletteHotRoutes.value
-  return paletteHotRoutes.value.filter(r => {
+  return paletteHotRoutes.value.filter((r) => {
     return (
       r.from.toLowerCase().includes(q) ||
       r.to.toLowerCase().includes(q) ||
@@ -201,7 +214,7 @@ const paletteFilteredRoutes = computed(() => {
 const paletteFilteredPages = computed(() => {
   const q = paletteQuery.value.trim().toLowerCase()
   if (!q) return []
-  return palettePages.value.filter(p => {
+  return palettePages.value.filter((p) => {
     return p.label.toLowerCase().includes(q) || p.path.includes(q)
   })
 })
@@ -285,8 +298,8 @@ function spawnMeteor() {
   if (!shootingStars.value) return
   const star = document.createElement('div')
   star.className = 'star'
-  star.style.left = (Math.random() * 50 + 10) + '%'
-  star.style.top = (Math.random() * 30) + '%'
+  star.style.left = Math.random() * 50 + 10 + '%'
+  star.style.top = Math.random() * 30 + '%'
   shootingStars.value.appendChild(star)
   requestAnimationFrame(() => star.classList.add('falling'))
   setTimeout(() => star.remove(), 3100)
@@ -311,10 +324,7 @@ function initParticles() {
   }
   resize()
 
-  const count = Math.min(
-    140,
-    Math.floor((window.innerWidth * window.innerHeight) / 12000)
-  )
+  const count = Math.min(140, Math.floor((window.innerWidth * window.innerHeight) / 12000))
   particles = Array.from({ length: count }, () => ({
     x: Math.random() * window.innerWidth,
     y: Math.random() * window.innerHeight,
@@ -334,7 +344,7 @@ function initParticles() {
       const dy = mouse.y - p.y
       const dist = Math.hypot(dx, dy)
       if (dist < 160) {
-        const f = (160 - dist) / 160 * 0.02
+        const f = ((160 - dist) / 160) * 0.02
         p.vx += dx * f
         p.vy += dy * f
       }
@@ -434,30 +444,58 @@ onBeforeUnmount(() => {
 
 .beam-1 {
   left: 25%;
-  background: linear-gradient(180deg, transparent 0%, rgba(96, 165, 250, 0.12) 20%, rgba(147, 51, 234, 0.08) 50%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(96, 165, 250, 0.12) 20%,
+    rgba(147, 51, 234, 0.08) 50%,
+    transparent 100%
+  );
   transform: rotate(-15deg);
   animation: beamSweep 18s linear infinite;
 }
 
 .beam-2 {
   left: 55%;
-  background: linear-gradient(180deg, transparent 0%, rgba(168, 85, 247, 0.1) 30%, rgba(59, 130, 246, 0.08) 60%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.1) 30%,
+    rgba(59, 130, 246, 0.08) 60%,
+    transparent 100%
+  );
   transform: rotate(8deg);
   animation: beamSweep 22s linear infinite reverse;
 }
 
 .beam-3 {
   left: 80%;
-  background: linear-gradient(180deg, transparent 0%, rgba(236, 72, 153, 0.08) 25%, rgba(99, 102, 241, 0.1) 55%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(236, 72, 153, 0.08) 25%,
+    rgba(99, 102, 241, 0.1) 55%,
+    transparent 100%
+  );
   transform: rotate(-5deg);
   animation: beamSweep 25s linear infinite;
 }
 
 @keyframes beamSweep {
-  0% { opacity: 0; transform: translateX(-30%) rotate(-20deg); }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(30%) rotate(15deg); }
+  0% {
+    opacity: 0;
+    transform: translateX(-30%) rotate(-20deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(30%) rotate(15deg);
+  }
 }
 
 .bg-orb {
@@ -498,21 +536,42 @@ onBeforeUnmount(() => {
 }
 
 @keyframes orbFloatA {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(60px, 40px) scale(1.1); }
-  50% { transform: translate(30px, 80px) scale(0.95); }
-  75% { transform: translate(-30px, 30px) scale(1.05); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(60px, 40px) scale(1.1);
+  }
+  50% {
+    transform: translate(30px, 80px) scale(0.95);
+  }
+  75% {
+    transform: translate(-30px, 30px) scale(1.05);
+  }
 }
 
 @keyframes orbFloatB {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-50px, -40px) scale(1.08); }
-  66% { transform: translate(40px, -20px) scale(0.92); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-50px, -40px) scale(1.08);
+  }
+  66% {
+    transform: translate(40px, -20px) scale(0.92);
+  }
 }
 
 @keyframes orbFloatC {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-60px, 50px) scale(1.15); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-60px, 50px) scale(1.15);
+  }
 }
 
 #top-progress {
@@ -522,9 +581,13 @@ onBeforeUnmount(() => {
   height: 3px;
   width: 0%;
   background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-  box-shadow: 0 0 14px rgba(59, 130, 246, 0.7), 0 0 30px rgba(139, 92, 246, 0.4);
+  box-shadow:
+    0 0 14px rgba(59, 130, 246, 0.7),
+    0 0 30px rgba(139, 92, 246, 0.4);
   z-index: 2100;
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  transition:
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
   opacity: 0;
   border-radius: 0 2px 2px 0;
 }
@@ -553,13 +616,13 @@ onBeforeUnmount(() => {
   --border: rgba(148, 163, 184, 0.15);
   --border-strong: rgba(148, 163, 184, 0.25);
   --glass-bg: rgba(15, 23, 42, 0.55);
-  --home-bg: radial-gradient(ellipse at 20% 10%, rgba(59,130,246,0.15), transparent 50%),
-              radial-gradient(ellipse at 80% 90%, rgba(139,92,246,0.12), transparent 50%),
-              linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  --home-bg:
+    radial-gradient(ellipse at 20% 10%, rgba(59, 130, 246, 0.15), transparent 50%),
+    radial-gradient(ellipse at 80% 90%, rgba(139, 92, 246, 0.12), transparent 50%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
 }
 
-html[data-theme="light"] {
-
+html[data-theme='light'] {
   --surface: rgba(255, 255, 255, 0.85);
   --surface-solid: #ffffff;
   --surface-2: rgba(240, 249, 255, 0.9);
@@ -577,7 +640,7 @@ html[data-theme="light"] {
     linear-gradient(180deg, #eef2ff 0%, #fdf4ff 40%, #fdf2f8 70%, #ecfeff 100%);
 }
 
-html[data-theme="light"] .glass-card {
+html[data-theme='light'] .glass-card {
   background: rgba(255, 255, 255, 0.68) !important;
   border-color: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(20px) saturate(1.4);
@@ -586,11 +649,11 @@ html[data-theme="light"] .glass-card {
     0 1px 3px rgba(15, 23, 42, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-html[data-theme="light"] .glass-card * {
+html[data-theme='light'] .glass-card * {
   color: #1e293b;
 }
 
-html[data-theme="light"] .glass {
+html[data-theme='light'] .glass {
   background: rgba(255, 255, 255, 0.58) !important;
   border-color: rgba(255, 255, 255, 0.75) !important;
   backdrop-filter: blur(20px) saturate(1.4);
@@ -599,42 +662,42 @@ html[data-theme="light"] .glass {
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-html[data-theme="light"] .home,
-html[data-theme="light"] .profile-page,
-html[data-theme="light"] .orders-page,
-html[data-theme="light"] .login-page,
-html[data-theme="light"] .register-page,
-html[data-theme="light"] .messages-page {
+html[data-theme='light'] .home,
+html[data-theme='light'] .profile-page,
+html[data-theme='light'] .orders-page,
+html[data-theme='light'] .login-page,
+html[data-theme='light'] .register-page,
+html[data-theme='light'] .messages-page {
   background: var(--home-bg) !important;
 }
 
-html[data-theme="light"] .results-header h2 {
+html[data-theme='light'] .results-header h2 {
   color: #1e293b !important;
 }
 
-html[data-theme="light"] .hero-sub {
+html[data-theme='light'] .hero-sub {
   color: #64748b !important;
 }
 
-html[data-theme="light"] .filter-btn {
+html[data-theme='light'] .filter-btn {
   background: rgba(255, 255, 255, 0.72) !important;
   color: #475569 !important;
   border-color: rgba(199, 210, 254, 0.6) !important;
   box-shadow: 0 1px 3px rgba(99, 102, 241, 0.06);
 }
-html[data-theme="light"] .filter-btn:hover {
+html[data-theme='light'] .filter-btn:hover {
   background: rgba(199, 210, 254, 0.7) !important;
   color: #4338ca !important;
   border-color: rgba(139, 92, 246, 0.4) !important;
 }
-html[data-theme="light"] .filter-btn.active {
+html[data-theme='light'] .filter-btn.active {
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(139, 92, 246, 0.18)) !important;
   color: #4f46e5 !important;
   border-color: rgba(99, 102, 241, 0.5) !important;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
 }
 
-html[data-theme="light"] .filter-bar {
+html[data-theme='light'] .filter-bar {
   background: rgba(255, 255, 255, 0.68) !important;
   border-color: rgba(255, 255, 255, 0.8) !important;
   box-shadow:
@@ -642,12 +705,12 @@ html[data-theme="light"] .filter-bar {
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
 }
-html[data-theme="light"] .filter-label {
+html[data-theme='light'] .filter-label {
   color: #6366f1 !important;
   font-weight: 600 !important;
 }
 
-html[data-theme="light"] .train-card {
+html[data-theme='light'] .train-card {
   background: rgba(255, 255, 255, 0.72) !important;
   border-color: rgba(199, 210, 254, 0.5) !important;
   box-shadow:
@@ -655,17 +718,17 @@ html[data-theme="light"] .train-card {
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
 }
-html[data-theme="light"] .train-card * {
+html[data-theme='light'] .train-card * {
   color: #1e293b;
 }
 
-html[data-theme="light"] .bg-orb {
+html[data-theme='light'] .bg-orb {
   opacity: 0.45;
 }
 
-html[data-theme="light"] .beam-1,
-html[data-theme="light"] .beam-2,
-html[data-theme="light"] .beam-3 {
+html[data-theme='light'] .beam-1,
+html[data-theme='light'] .beam-2,
+html[data-theme='light'] .beam-3 {
   opacity: 0.5;
 }
 
@@ -742,10 +805,17 @@ html[data-theme="light"] .beam-3 {
   padding: 8px;
 }
 
-.palette-body::-webkit-scrollbar { width: 6px; }
-.palette-body::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 3px; }
+.palette-body::-webkit-scrollbar {
+  width: 6px;
+}
+.palette-body::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
 
-.palette-section { margin-bottom: 10px; }
+.palette-section {
+  margin-bottom: 10px;
+}
 
 .palette-section-title {
   padding: 10px 12px 6px;
@@ -768,7 +838,9 @@ html[data-theme="light"] .beam-3 {
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
   color: #f1f5f9;
 }
 
@@ -782,9 +854,15 @@ html[data-theme="light"] .beam-3 {
   box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.25);
 }
 
-.pi-icon { font-size: 18px; flex-shrink: 0; }
+.pi-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
 
-.pi-body { flex: 1; min-width: 0; }
+.pi-body {
+  flex: 1;
+  min-width: 0;
+}
 
 .pi-title {
   font-size: 14px;
@@ -815,9 +893,20 @@ html[data-theme="light"] .beam-3 {
   padding: 40px 20px;
 }
 
-.pe-emoji { font-size: 40px; margin-bottom: 12px; }
-.pe-text { font-size: 15px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
-.pe-sub { font-size: 12px; color: #64748b; }
+.pe-emoji {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+.pe-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+.pe-sub {
+  font-size: 12px;
+  color: #64748b;
+}
 
 .palette-footer {
   display: flex;
@@ -828,7 +917,11 @@ html[data-theme="light"] .beam-3 {
   color: #64748b;
 }
 
-.pf-hint { display: inline-flex; align-items: center; gap: 4px; }
+.pf-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
 
 .palette-footer kbd {
   font-family: 'SF Mono', 'JetBrains Mono', monospace;
@@ -854,11 +947,19 @@ html[data-theme="light"] .beam-3 {
 }
 
 .palette-enter-from,
-.palette-leave-to { opacity: 0; }
+.palette-leave-to {
+  opacity: 0;
+}
 
 @keyframes paletteBoxIn {
-  from { transform: translateY(-12px) scale(0.97); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(-12px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 .kbd-hint {
@@ -876,7 +977,9 @@ html[data-theme="light"] .beam-3 {
   backdrop-filter: blur(12px);
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .kbd-hint:hover {
@@ -904,11 +1007,11 @@ html[data-theme="light"] .beam-3 {
   margin-left: 2px;
 }
 
-html[data-theme="light"] .palette-overlay {
+html[data-theme='light'] .palette-overlay {
   background: rgba(15, 23, 42, 0.3);
 }
 
-html[data-theme="light"] .palette-box {
+html[data-theme='light'] .palette-box {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.99));
   border-color: rgba(148, 163, 184, 0.35);
   box-shadow:
@@ -916,55 +1019,80 @@ html[data-theme="light"] .palette-box {
     0 0 0 1px rgba(96, 165, 250, 0.08);
 }
 
-html[data-theme="light"] .palette-input { color: #0f172a; }
-html[data-theme="light"] .palette-input::placeholder { color: #94a3b8; }
-html[data-theme="light"] .palette-search-icon { color: #64748b; }
-html[data-theme="light"] .palette-close-btn {
+html[data-theme='light'] .palette-input {
+  color: #0f172a;
+}
+html[data-theme='light'] .palette-input::placeholder {
+  color: #94a3b8;
+}
+html[data-theme='light'] .palette-search-icon {
+  color: #64748b;
+}
+html[data-theme='light'] .palette-close-btn {
   background: rgba(148, 163, 184, 0.2);
   color: #64748b;
 }
-html[data-theme="light"] .palette-item { color: #1e293b; }
-html[data-theme="light"] .palette-item:hover,
-html[data-theme="light"] .palette-item.active {
+html[data-theme='light'] .palette-item {
+  color: #1e293b;
+}
+html[data-theme='light'] .palette-item:hover,
+html[data-theme='light'] .palette-item.active {
   background: rgba(59, 130, 246, 0.1);
   border-color: rgba(37, 99, 235, 0.35);
 }
-html[data-theme="light"] .pi-title { color: #0f172a; }
-html[data-theme="light"] .pi-sub { color: #64748b; }
-html[data-theme="light"] .pi-hint {
+html[data-theme='light'] .pi-title {
+  color: #0f172a;
+}
+html[data-theme='light'] .pi-sub {
+  color: #64748b;
+}
+html[data-theme='light'] .pi-hint {
   background: rgba(148, 163, 184, 0.18);
   color: #64748b;
 }
-html[data-theme="light"] .palette-section-title { color: #64748b; }
-html[data-theme="light"] .palette-footer { color: #64748b; border-color: rgba(148, 163, 184, 0.2); }
-html[data-theme="light"] .palette-footer kbd {
+html[data-theme='light'] .palette-section-title {
+  color: #64748b;
+}
+html[data-theme='light'] .palette-footer {
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+html[data-theme='light'] .palette-footer kbd {
   background: rgba(148, 163, 184, 0.18);
   border-color: rgba(148, 163, 184, 0.3);
   color: #64748b;
 }
-html[data-theme="light"] .palette-body { border-color: rgba(148, 163, 184, 0.2); }
-html[data-theme="light"] .palette-input-wrap { border-color: rgba(148, 163, 184, 0.2); }
+html[data-theme='light'] .palette-body {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+html[data-theme='light'] .palette-input-wrap {
+  border-color: rgba(148, 163, 184, 0.2);
+}
 
-html[data-theme="light"] .kbd-hint {
+html[data-theme='light'] .kbd-hint {
   background: rgba(255, 255, 255, 0.85);
   border-color: rgba(148, 163, 184, 0.3);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
-html[data-theme="light"] .kbd-hint kbd {
+html[data-theme='light'] .kbd-hint kbd {
   background: rgba(59, 130, 246, 0.12);
   border-color: rgba(37, 99, 235, 0.3);
   color: #2563eb;
 }
-html[data-theme="light"] .kbd-hint .kbd-label {
+html[data-theme='light'] .kbd-hint .kbd-label {
   color: #334155;
   border-color: rgba(148, 163, 184, 0.25);
 }
 
 .page-enter-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 .page-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .page-enter-from {
   opacity: 0;

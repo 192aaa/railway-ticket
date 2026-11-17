@@ -14,6 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -27,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -40,6 +45,7 @@ class OrderServiceTest {
     @Mock private StationRepository stationRepository;
     @Mock private UserRepository userRepository;
     @Mock private MessageService messageService;
+    @Mock private TicketCacheVersion ticketCacheVersion;
 
     private OrderService orderService;
 
@@ -47,8 +53,19 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 测试用事务管理器：直接执行回调、不做真实事务，使 retry 逻辑可测。
+        PlatformTransactionManager txManager = new PlatformTransactionManager() {
+            @Override
+            public org.springframework.transaction.TransactionStatus getTransaction(TransactionDefinition definition) {
+                return new SimpleTransactionStatus();
+            }
+            @Override
+            public void commit(org.springframework.transaction.TransactionStatus status) {}
+            @Override
+            public void rollback(org.springframework.transaction.TransactionStatus status) {}
+        };
         orderService = new OrderService(orderRepository, trainRepository, ticketRepository,
-                stationRepository, userRepository, messageService);
+                stationRepository, userRepository, messageService, ticketCacheVersion, txManager);
     }
 
     @Test
@@ -70,7 +87,7 @@ class OrderServiceTest {
         when(ticketRepository.deductSecondSeat(eq(1L), any(LocalDate.class))).thenReturn(1);
         when(stationRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(orderRepository.findByTrainIdAndTrainDate(eq(1L), anyString())).thenReturn(Collections.emptyList());
-        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.saveAndFlush(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Order order = orderService.buyTicket(9L, buyRequest());
 
@@ -80,6 +97,41 @@ class OrderServiceTest {
         assertThat(order.getPrice()).isEqualTo(553.0);
         assertThat(order.getSeatNo()).isNotBlank();
         verify(messageService).sendSystemMessage(eq(9L), anyString(), nullable(Long.class));
+    }
+
+    @Test
+    void buyTicketShouldRetryWhenSeatConflictOccursOnce() {
+        when(trainRepository.findById(1L)).thenReturn(Optional.of(train()));
+        when(ticketRepository.deductSecondSeat(eq(1L), any(LocalDate.class))).thenReturn(1);
+        when(stationRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(orderRepository.findByTrainIdAndTrainDate(eq(1L), anyString())).thenReturn(Collections.emptyList());
+        when(orderRepository.saveAndFlush(any(Order.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate seat"))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        Order order = orderService.buyTicket(9L, buyRequest());
+
+        assertThat(order.getStatus()).isEqualTo("PAID");
+        // 冲突一次后第二次成功：扣票与落单各执行两次
+        verify(ticketRepository, times(2)).deductSecondSeat(eq(1L), any(LocalDate.class));
+        verify(orderRepository, times(2)).saveAndFlush(any(Order.class));
+    }
+
+    @Test
+    void buyTicketShouldFailAfterRepeatedSeatConflicts() {
+        when(trainRepository.findById(1L)).thenReturn(Optional.of(train()));
+        when(ticketRepository.deductSecondSeat(eq(1L), any(LocalDate.class))).thenReturn(1);
+        when(stationRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(orderRepository.findByTrainIdAndTrainDate(eq(1L), anyString())).thenReturn(Collections.emptyList());
+        when(orderRepository.saveAndFlush(any(Order.class)))
+                .thenThrow(new DataIntegrityViolationException("duplicate seat"));
+
+        assertThatThrownBy(() -> orderService.buyTicket(9L, buyRequest()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("座位紧张");
+
+        verify(orderRepository, times(8)).saveAndFlush(any(Order.class));
+        verifyNoInteractions(messageService);
     }
 
     @Test

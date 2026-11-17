@@ -13,18 +13,24 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>railway-ticket</name>
     <description>铁路购票系统 - Spring Boot 后端</description>
-    <url/>
+    <url>https://github.com/example/railway-ticket</url>
     <licenses>
-        <license/>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <name>Railway Ticket contributors</name>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:https://github.com/example/railway-ticket.git</connection>
+        <developerConnection>scm:git:https://github.com/example/railway-ticket.git</developerConnection>
+        <url>https://github.com/example/railway-ticket</url>
+        <tag>HEAD</tag>
     </scm>
     <properties>
         <java.version>17</java.version>
@@ -50,6 +56,12 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+        <!-- Redis：Spring Data Redis + Lettuce（Boot 4.1.1 的 starter 已传递引入客户端） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
@@ -67,10 +79,45 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- 链路追踪：Micrometer Observation + Brave，Span 上报到 Zipkin（endpoint 未配置时不上报） -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-sender-urlconnection</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.zipkin2</groupId>
+            <artifactId>zipkin</artifactId>
+            <version>2.27.1</version>
+        </dependency>
+
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- prod 由 Flyway 管理 schema，Hibernate 不再自动建表；版本由 Boot BOM 管理 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+        <!-- Boot 4 将 Flyway 自动配置拆到独立模块，缺少它 prod 不会执行迁移 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
         </dependency>
 
         <dependency>
@@ -117,6 +164,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- 真实 Redis 集成测试；版本由 Boot 4.1.1 的 testcontainers-bom 2.0.5 管理 -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

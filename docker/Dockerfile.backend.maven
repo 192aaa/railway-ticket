@@ -1,0 +1,19 @@
+# 可选：镜像内 Maven 打包（无需宿主机预先生成 jar）。
+# 当构建环境可稳定访问 Maven 仓库时使用；当前 Docker Desktop 代理会导致
+# 下载 jar 出现 bad_record_mac，默认 Dockerfile.backend 改用宿主机已打包的 jar。
+
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /build
+
+COPY docker/maven-settings.xml /root/.m2/settings.xml
+COPY pom.xml ./
+COPY src/ src/
+RUN mvn -B -DskipTests clean package
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /build/target/demo2-0.0.1-SNAPSHOT.jar app.jar
+
+ENV JAVA_OPTS="-Xms256m -Xmx512m"
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]

@@ -7,17 +7,25 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  // 测试环境跳过自动导入（ElMessage 由 src/test/setup.js 全局 mock），避免 ESM 注入干扰
+  const isTest = process.env.VITEST === 'true'
 
   return {
     plugins: [
       vue(),
-      AutoImport({
-        resolvers: [ElementPlusResolver()]
-      }),
-      Components({
-        resolvers: [ElementPlusResolver()]
-      })
+      ...(isTest
+        ? []
+        : [
+            AutoImport({ resolvers: [ElementPlusResolver()] }),
+            Components({ resolvers: [ElementPlusResolver()] })
+          ])
     ],
+    test: {
+      environment: 'happy-dom',
+      setupFiles: ['./src/test/setup.js'],
+      include: ['src/**/*.test.js'],
+      clearMocks: true
+    },
     resolve: {
       alias: {
         '@': resolve(process.cwd(), 'src')

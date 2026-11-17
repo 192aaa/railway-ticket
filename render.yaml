@@ -5,7 +5,7 @@ services:
     region: singapore
     plan: free
     dockerContext: .
-    dockerfilePath: ./docker/Dockerfile.backend
+    dockerfilePath: ./docker/Dockerfile.backend.maven
     healthCheckPath: /actuator/health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
@@ -18,3 +18,7 @@ services:
         sync: false
       - key: SPRING_DATASOURCE_PASSWORD
         sync: false
+      # Render 免费方案未部署 Redis，回退本地 Caffeine 缓存；
+      # 接入外部 Redis 时把该值改为 redis，并在平台补充 SPRING_DATA_REDIS_HOST / PORT / PASSWORD。
+      - key: SPRING_CACHE_TYPE
+        value: caffeine

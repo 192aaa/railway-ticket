@@ -7,22 +7,25 @@
           <svg class="train-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="appnav-tg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#60a5fa"/>
-                <stop offset="100%" stop-color="#a78bfa"/>
+                <stop offset="0%" stop-color="#60a5fa" />
+                <stop offset="100%" stop-color="#a78bfa" />
               </linearGradient>
               <filter id="glow">
-                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
               </filter>
             </defs>
-            <rect x="8" y="12" width="48" height="32" rx="6" fill="url(#appnav-tg)" filter="url(#glow)"/>
-            <rect x="14" y="20" width="10" height="10" rx="2" fill="#fff" opacity="0.95"/>
-            <rect x="28" y="20" width="10" height="10" rx="2" fill="#fff" opacity="0.95"/>
-            <rect x="42" y="20" width="8" height="10" rx="2" fill="#fff" opacity="0.95"/>
-            <rect x="14" y="36" width="36" height="3" rx="1.5" fill="#1e3a8a" opacity="0.35"/>
-            <circle cx="18" cy="48" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="2"/>
-            <circle cx="46" cy="48" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="2"/>
-            <line x1="2" y1="56" x2="62" y2="56" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+            <rect x="8" y="12" width="48" height="32" rx="6" fill="url(#appnav-tg)" filter="url(#glow)" />
+            <rect x="14" y="20" width="10" height="10" rx="2" fill="#fff" opacity="0.95" />
+            <rect x="28" y="20" width="10" height="10" rx="2" fill="#fff" opacity="0.95" />
+            <rect x="42" y="20" width="8" height="10" rx="2" fill="#fff" opacity="0.95" />
+            <rect x="14" y="36" width="36" height="3" rx="1.5" fill="#1e3a8a" opacity="0.35" />
+            <circle cx="18" cy="48" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="2" />
+            <circle cx="46" cy="48" r="5" fill="#0f172a" stroke="#60a5fa" stroke-width="2" />
+            <line x1="2" y1="56" x2="62" y2="56" stroke="#475569" stroke-width="2" stroke-linecap="round" />
           </svg>
         </div>
         <div class="brand-text">
@@ -45,36 +48,116 @@
         <template v-if="userStore.isLoggedIn">
           <div class="user-chip">
             <div class="avatar">
-              {{ (userStore.userInfo?.realName || userStore.userInfo?.username || 'U').charAt(0).toUpperCase() }}
+              {{
+                (userStore.userInfo?.realName || userStore.userInfo?.username || 'U').charAt(0).toUpperCase()
+              }}
             </div>
             <span class="username">{{ userStore.userInfo?.realName || userStore.userInfo?.username }}</span>
           </div>
-          <button v-ripple class="nav-btn" :class="{ active: isActive('/home') }" @click="$router.push('/home')">
+          <button
+            v-ripple
+            class="nav-btn"
+            :class="{ active: isActive('/home') }"
+            @click="$router.push('/home')"
+          >
             <el-icon><HomeFilled /></el-icon>
             首页
           </button>
-          <button v-ripple class="nav-btn" :class="{ active: isActive('/profile') }" @click="$router.push('/profile')">
+          <button
+            v-ripple
+            class="nav-btn"
+            :class="{ active: isActive('/profile') }"
+            @click="$router.push('/profile')"
+          >
             <el-icon><User /></el-icon>
             个人中心
           </button>
-          <button v-ripple class="nav-btn msg-btn" :class="{ active: isActive('/messages') }" @click="$router.push('/messages')">
+          <button
+            v-ripple
+            class="nav-btn msg-btn"
+            :class="{ active: isActive('/messages') }"
+            @click="$router.push('/messages')"
+          >
             <div class="msg-icon-wrap">
               <el-icon><Bell /></el-icon>
-              <span v-if="unreadCount > 0" class="msg-red-dot">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+              <span v-if="unreadCount > 0" class="msg-red-dot">{{
+                unreadCount > 99 ? '99+' : unreadCount
+              }}</span>
             </div>
             消息
           </button>
-          <button v-ripple class="nav-btn primary" :class="{ active: isActive('/orders') }" @click="$router.push('/orders')">
+          <button
+            v-ripple
+            class="nav-btn primary"
+            :class="{ active: isActive('/orders') }"
+            @click="$router.push('/orders')"
+          >
             <el-icon><Tickets /></el-icon>
             我的订单
           </button>
-          <button v-ripple class="nav-btn dashboard-btn" :class="{ active: isActive('/dashboard') }" @click="$router.push('/dashboard')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <button
+            v-ripple
+            class="nav-btn dashboard-btn"
+            :class="{ active: isActive('/dashboard') }"
+            @click="$router.push('/dashboard')"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
             大屏
           </button>
-          <button v-ripple class="nav-btn theme-btn" @click="toggleTheme" :title="isDark ? '切换浅色' : '切换深色'">
-            <svg v-if="isDark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <button
+            v-ripple
+            class="nav-btn theme-btn"
+            @click="toggleTheme"
+            :title="isDark ? '切换浅色' : '切换深色'"
+          >
+            <svg
+              v-if="isDark"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            <svg
+              v-else
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
           </button>
           <button v-ripple class="nav-btn logout" :disabled="logoutLoading" @click="logout">
             <el-icon><SwitchButton /></el-icon>
@@ -86,17 +169,78 @@
             <el-icon><User /></el-icon>
             登录
           </button>
-          <button v-ripple class="nav-btn primary" :class="{ active: isActive('/register') }" @click="goRegister">
+          <button
+            v-ripple
+            class="nav-btn primary"
+            :class="{ active: isActive('/register') }"
+            @click="goRegister"
+          >
             <el-icon><Plus /></el-icon>
             注册
           </button>
-          <button v-ripple class="nav-btn dashboard-btn" :class="{ active: isActive('/dashboard') }" @click="$router.push('/dashboard')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <button
+            v-ripple
+            class="nav-btn dashboard-btn"
+            :class="{ active: isActive('/dashboard') }"
+            @click="$router.push('/dashboard')"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
             大屏
           </button>
-          <button v-ripple class="nav-btn theme-btn" @click="toggleTheme" :title="isDark ? '切换浅色' : '切换深色'">
-            <svg v-if="isDark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <button
+            v-ripple
+            class="nav-btn theme-btn"
+            @click="toggleTheme"
+            :title="isDark ? '切换浅色' : '切换深色'"
+          >
+            <svg
+              v-if="isDark"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            <svg
+              v-else
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
           </button>
         </template>
       </div>
@@ -141,7 +285,9 @@ const clock = reactive({ date: '', hh: '00', mm: '00', ss: '00', week: '' })
 const WEEK_MAP = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
 let clockTimer = null
 
-function pad(n) { return n < 10 ? '0' + n : '' + n }
+function pad(n) {
+  return n < 10 ? '0' + n : '' + n
+}
 
 function tickClock() {
   const d = new Date()
@@ -158,13 +304,19 @@ function startClock() {
 }
 
 function stopClock() {
-  if (clockTimer) { clearInterval(clockTimer); clockTimer = null }
+  if (clockTimer) {
+    clearInterval(clockTimer)
+    clockTimer = null
+  }
 }
 
 let unreadTimer = null
 
 async function fetchUnread() {
-  if (!userStore.isLoggedIn) { unreadCount.value = 0; return }
+  if (!userStore.isLoggedIn) {
+    unreadCount.value = 0
+    return
+  }
   try {
     unreadCount.value = await request.get('/message/unread-count')
   } catch {}
@@ -177,18 +329,27 @@ function startUnreadPoll() {
 }
 
 function stopUnreadPoll() {
-  if (unreadTimer) { clearInterval(unreadTimer); unreadTimer = null }
+  if (unreadTimer) {
+    clearInterval(unreadTimer)
+    unreadTimer = null
+  }
   unreadCount.value = 0
 }
 
-watch(() => userStore.isLoggedIn, (loggedIn) => {
-  if (loggedIn) startUnreadPoll()
-  else stopUnreadPoll()
-})
+watch(
+  () => userStore.isLoggedIn,
+  (loggedIn) => {
+    if (loggedIn) startUnreadPoll()
+    else stopUnreadPoll()
+  }
+)
 
-watch(() => route.path, (p) => {
-  if (p === '/messages') fetchUnread()
-})
+watch(
+  () => route.path,
+  (p) => {
+    if (p === '/messages') fetchUnread()
+  }
+)
 
 function onScroll() {
   isScrolled.value = window.scrollY > 12
@@ -231,11 +392,11 @@ async function logout() {
   }
   logoutLoading.value = true
   try {
-    userStore.logout()
+    await userStore.logout()
     ElMessage.success('已退出登录')
   } finally {
     logoutLoading.value = false
-    router.push('/login').catch(e => console.error('[logout nav]', e))
+    router.push('/login').catch((e) => console.error('[logout nav]', e))
   }
 }
 </script>
@@ -274,7 +435,8 @@ async function logout() {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg,
+  background: linear-gradient(
+    90deg,
     transparent 0%,
     rgba(59, 130, 246, 0.6) 20%,
     rgba(139, 92, 246, 0.8) 50%,
@@ -340,8 +502,13 @@ async function logout() {
 }
 
 @keyframes trainMove {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
 }
 
 .brand-text {
@@ -362,8 +529,13 @@ async function logout() {
 }
 
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .brand-sub {
@@ -442,7 +614,9 @@ async function logout() {
   background: rgba(59, 130, 246, 0.15);
   border-color: rgba(96, 165, 250, 0.5);
   color: #93c5fd;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.12), inset 0 0 20px rgba(59, 130, 246, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(59, 130, 246, 0.12),
+    inset 0 0 20px rgba(59, 130, 246, 0.08);
 }
 
 .nav-btn.primary {
@@ -459,7 +633,9 @@ async function logout() {
 
 .nav-btn.primary.active {
   background: linear-gradient(135deg, #60a5fa 0%, #818cf8 100%);
-  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.3), 0 8px 28px rgba(59, 130, 246, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.3),
+    0 8px 28px rgba(59, 130, 246, 0.5);
 }
 
 .nav-btn.logout {
@@ -503,7 +679,9 @@ async function logout() {
   cursor: not-allowed;
 }
 
-.msg-btn { position: relative; }
+.msg-btn {
+  position: relative;
+}
 
 .msg-icon-wrap {
   position: relative;
@@ -529,9 +707,15 @@ async function logout() {
 }
 
 @keyframes dotPop {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .nav-clock {
@@ -540,7 +724,7 @@ async function logout() {
   align-items: center;
   padding: 4px 16px;
   margin-right: 8px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.10) 100%);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(139, 92, 246, 0.1) 100%);
   border: 1px solid rgba(96, 165, 250, 0.22);
   border-radius: 12px;
   position: relative;
@@ -610,8 +794,13 @@ async function logout() {
 }
 
 @keyframes colonBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.15; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
 }
 
 .clock-week {
