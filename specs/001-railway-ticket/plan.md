@@ -11,7 +11,7 @@
 
 ## Summary
 
-前后端分离的铁路购票系统：Spring Boot 后端暴露 40 个 `/api` 端点（含 13 个仅管理员可访问的管理端接口），Vue 3 前端通过同源 `/api` 访问，MySQL 持久化（prod 由 Flyway 管理 schema）。并发安全由数据库条件更新与座位唯一约束保证，重复查询由 Caffeine（dev）/ Redis（prod）短缓存承担，登录态（refresh token / 登出黑名单）、接口限流与定时任务互斥同样基于 Redis。交付采用 Docker Compose 四服务（MySQL + Redis + 后端 + 前端，含健康检查）与可选 Zipkin profile，配套 GitHub Actions CI；测试使用 H2 内存库，Redis 全链路测试用 Testcontainers（无 Docker 时跳过），前端用 Vitest + Playwright。
+前后端分离的铁路购票系统：Spring Boot 后端暴露 42 个 `/api` 端点（含 15 个仅管理员可访问的管理端接口），Vue 3 前端通过同源 `/api` 访问，MySQL 持久化（prod 由 Flyway 管理 schema）。下单已异步化：`buy` 接口只创建 `PENDING` 订单 + 事务发件箱事件，由 worker 异步扣票/选座/流转状态，RabbitMQ 为可选即时通道；并发安全由数据库条件更新与座位唯一约束保证，重复查询由 Caffeine（dev）/ Redis（prod）短缓存承担，登录态（refresh token / 登出黑名单）、接口限流与定时任务互斥同样基于 Redis。交付采用 Docker Compose（MySQL + Redis + RabbitMQ + 后端 + 前端，含健康检查）与可选 Zipkin profile，配套 GitHub Actions CI；测试使用 H2 内存库，Redis 全链路测试用 Testcontainers（无 Docker 时跳过），前端用 Vitest + Playwright。
 
 ## Technical Context
 
@@ -23,17 +23,18 @@
 | 文档/监控 | springdoc-openapi、Actuator + Micrometer Prometheus、Micrometer Tracing + Brave | 2.8.8 | dev Swagger、健康检查、缓存命中率、traceId 与可选 Zipkin |
 | 前端 | Vue / Vue Router / Pinia / Element Plus / Axios / Vite | 3.5 / 5.4 / 4.1 / 8 | 组件按需自动导入、代码分块；Vitest + Playwright + ESLint + Prettier |
 | 数据 | MySQL（dev/prod）、H2 内存库（test）、Flyway（prod 迁移） | 8.0 | 测试不依赖本机 MySQL；prod schema 由 Flyway 管理 |
-| 部署 | Docker Compose + Nginx；Render Blueprint | — | 容器/裸机两套 Nginx 配置；Redis 与可选 Zipkin |
-| 测试 | JUnit 5 + Mockito + AssertJ + `@SpringBootTest` + Testcontainers | — | 57 个测试（6 个需 Docker，无 Docker 时跳过），`mvn verify` 全绿 |
+| 消息 | RabbitMQ + Spring AMQP（可选） | 3.13 / BOM | 订单事件即时投递；未启用时由本地 worker 轮询发件箱兜底 |
+| 部署 | Docker Compose + Nginx；Render Blueprint | — | 容器/裸机两套 Nginx 配置；Redis、RabbitMQ 与可选 Zipkin |
+| 测试 | JUnit 5 + Mockito + AssertJ + `@SpringBootTest` + Testcontainers | — | 69 个测试（6 个需 Docker，无 Docker 时跳过），`mvn verify` 全绿 |
 
 ## Constitution Check
 
 | 原则 | 满足 | 说明 |
 | --- | --- | --- |
-| I. 数据库是并发真相 | ✅ | 8 条条件更新 SQL + `@Transactional`；座位唯一约束（T105）+ Flyway V1~V3 迁移（T102/T116） |
-| II. 契约稳定 | ✅ | 统一 `Result<T>`、40 端点与文档一致；新增端点需同步 spec/plan |
+| I. 数据库是并发真相 | ✅ | 8 条条件更新 SQL + `@Transactional`；座位唯一约束（T105）+ 乐观锁 + Flyway V1~V4 迁移（T102/T116/T117） |
+| II. 契约稳定 | ✅ | 统一 `Result<T>`、42 端点与文档一致；下单返回 `PENDING`，新增端点需同步 spec/plan |
 | III. 环境隔离与最小权限 | ✅ | prod 演示数据关闭、密钥外置且启动强校验；`/api` 默认拦截 + 显式放行 + 管理端角色拦截、黑名单/refresh/限流（T101/T103/T104/T116） |
-| IV. 可验证交付 | ✅ | 57 后端测试 + 11 Vitest + 2 E2E + CI 3 job + Compose 实测 + 404 冒烟 |
+| IV. 可验证交付 | ✅ | 69 后端测试 + 11 Vitest + 2 E2E + CI 3 job + Compose 实测 + 404 冒烟 |
 | V. 文档与代码同源 | ✅ | 规格、方案、任务三件套与 README 数字反向核对；2026-11-18 重新核验 |
 
 ## Architecture
@@ -49,14 +50,15 @@ flowchart LR
     end
     subgraph Back[Spring Boot 后端 :8080]
         F[TraceIdFilter / RateLimitFilter / JwtAuthFilter<br/>默认拦截 + 角色校验]
-        C[Controller 9 个<br/>含 AI 代理与管理端]
-        S[Service 7 个 + 缓存版本<br/>事务 / Redis 缓存]
-        R[Repository 7 个<br/>JPA + nativeQuery + Flyway]
-        T[定时任务<br/>Redis 锁互斥]
+        C[Controller 9 个<br/>含 AI 代理 / 管理端 / 死信补偿]
+        S[Service 9 个 + 缓存版本<br/>下单写发件箱 / 履约 / Worker 消费]
+        R[Repository 8 个<br/>JPA + nativeQuery + Flyway]
+        T[定时任务<br/>Worker 轮询 + Redis 锁互斥]
     end
     subgraph Data[数据]
-        M[(MySQL 8 :3306)]
+        M[(MySQL 8 :3306<br/>含 order_outbox 发件箱)]
         CACHE[(Redis 7<br/>缓存 / 令牌 / 限流 / 锁)]
+        MQ[(RabbitMQ 3.13<br/>订单事件 + 死信队列)]
         H[(H2 内存库<br/>仅 test)]
     end
     B -->|HTTP :80| N
@@ -64,11 +66,15 @@ flowchart LR
     N -->|/api/* 原样转发| F
     V -->|/api → :8080| F
     F --> C --> S --> R
+    C -->|buy: PENDING + event| M
+    S -->|afterCommit 投递| MQ
+    MQ -->|消费者| T
+    T -->|履约: 扣票/选座/PAID| R
     R --> M
     S --> CACHE
     F --> CACHE
     T -->|加锁| CACHE
-    T --> R
+    T -->|无 MQ 时轮询发件箱| M
     S -.->|测试环境| H
 ```
 
@@ -76,17 +82,18 @@ flowchart LR
 
 ```
 src/main/java/com/example/demo/
-  controller/   8 个 @RestController，27 端点
-  service/      7 个业务 Service（含 AdminService）+ TicketCacheVersion
-  repository/   7 个 JpaRepository，8 条原子 UPDATE
-  entity/ dto/  7 实体 + 2 枚举 + DTO/VO
+  controller/   9 个 @RestController，42 端点
+  service/      9 个业务 Service（含 AdminService / OrderFulfillmentService / OrderEventWorker）
+  repository/   8 个 JpaRepository，8 条原子 UPDATE
+  entity/ dto/  8 实体（含 OrderOutboxEvent）+ 状态机/枚举 + DTO/VO
   security/     JwtAuthFilter / JwtUtil / TokenService / RateLimitFilter（含角色校验）
+  mq/           OrderEventDispatcher / RabbitMqConfig / OrderEventConsumer / 死信拓扑
   config/       WebConfig / DataInitializer / RedisConfig / ProdSecurityValidator
                 / TraceIdFilter / TracingConfig / AiProperties
   task/         OrderAutoCompleteTask / RedisTaskLock
   common/       Result / BusinessException / GlobalExceptionHandler
-src/main/resources/       application{,-dev,-prod}.properties、logback-spring.xml、db/migration/V1~V3
-src/test/                 57 个测试（6 个 Testcontainers）+ application-test.properties
+src/main/resources/       application{,-dev,-prod}.properties、logback-spring.xml、db/migration/V1~V4
+src/test/                 69 个测试（6 个 Testcontainers）+ application-test.properties
 frontend/src/             views(9) / components(4) / router / stores / utils / test
 frontend/tests/e2e/       Playwright 端到端测试
 docker/                   Dockerfile.backend{,.maven} / Dockerfile.frontend / nginx.conf
@@ -189,6 +196,16 @@ specs/001-railway-ticket/ spec.md / plan.md / tasks.md
 - **证据**: `config/WebConfig.java`、`application.properties`、`.env.example`、`docker-compose.yml`、`README.md` 分域名部署小节，`WebConfigTest` 2 个测试。
 - **遗留**: 真实域名仍需部署方提供；`allowCredentials(true)` 与具体来源搭配需部署后用 OPTIONS 预检验证。
 
+### ADR-012: 下单异步化（事务发件箱 + 可选 RabbitMQ）
+
+- **关联需求**: FR-020~FR-022、FR-026、FR-027、NFR-008
+- **决策**: `buy` 接口只在一个事务内创建 `PENDING` 订单 + `order_outbox` 事件（事务发件箱），提交后由 `OrderEventWorker` 异步履约：`OrderFulfillmentService` 原子扣票、选座、经 `OrderStateMachine` 流转 `PENDING→PAID`、发通知并失效缓存。RabbitMQ 为可选即时通道（`app.order.mq.enabled`），未启用时靠 worker 每 1s 轮询发件箱兜底；消费者复用同一个幂等 `process(eventId)`。
+- **理由**: 把"扣票/选座"这类竞争行锁的慢操作移出下单请求路径，削峰并缩短响应；发件箱保证订单与事件原子一致，避免"单成了事件丢了"；幂等由事件状态 + 乐观锁保证，重复投递不重复扣票。
+- **备选与否决原因**: 直接 `@Async` 内存队列——服务重启丢消息；下单同步扣票——秒杀场景请求排队、吞吐低；只发 MQ 不落库——消息丢失无法补偿。
+- **关键机制**: 失败按 `2^n` 退避（上限 300s）最多 8 次，耗尽进 `DEAD` 死信；卡在 `PROCESSING` 超 5 分钟的事件自动回收重投；管理端提供死信列表与 `requeue` 补偿。RabbitMQ 侧另有死信交换机兜底。
+- **已知后果**: 下单响应不再是最终状态，前端需轮询 `PENDING` 订单；支付即时性由"秒级"变为"秒级 + 轮询"。
+- **证据**: `service/OrderService.java`、`OrderFulfillmentService.java`、`OrderEventWorker.java`、`entity/OrderStateMachine.java`、`entity/OrderOutboxEvent.java`、`mq/*`、`db/migration/V4__order_outbox.sql`；`OrderStateMachineTest` 3 例、`OrderServiceTest` 6 例、`OrderFulfillmentServiceTest` 3 例、`OrderEventWorkerTest` 6 例。
+
 ## Data Model
 
 ### 实体关系
@@ -218,12 +235,13 @@ erDiagram
 | `ticket` | id、train_id、trainDate、四类 `*_count` | **`UNIQUE(train_id, train_date)`**；计数默认 0 |
 | `orders` | id、orderNo、user_id、train_id、trainNumber、from/to_station、trainDate、seatType、seatNo、passenger_*、price、status、create_time、pay_time | orderNo unique；`UNIQUE(train_id, train_date, seat_type, seat_no)`（退票座位加 `#F` 后缀释放，T105）；时间由 Service 赋值 |
 | `message` | id、sender_id、receiver_id、content(TEXT)、type、is_read、related_order_id、create_time | type 默认 SYSTEM；is_read 默认 false |
+| `order_outbox` | id、event_id、order_id、event_type、payload(TEXT)、status、attempts、max_attempts、next_retry_at、last_error、created_at、processed_at、version | event_id unique；`idx_outbox_status(status,next_retry_at)`；乐观锁 version |
 
-**枚举**：`OrderStatus` = `PENDING/PAID/REFUNDED/CANCELLED/COMPLETED`（实际写入 PAID、REFUNDED、COMPLETED；`from()` 对非法值返回 null）；`SeatType` = 商务座 / 一等座 / 二等座 / 硬卧，各携带 label、Java 字段、DB 列名、价格字段。
+**枚举/状态机**：`OrderStatus` = `PENDING/PAID/REFUNDED/CANCELLED/COMPLETED`（下单写 PENDING，履约后 PAID，退票 REFUNDED，完结 COMPLETED；`from()` 对非法值返回 null）；`OutboxStatus` = `PENDING/PROCESSING/DONE/DEAD`；`OrderStateMachine` 集中定义合法迁移；`SeatType` = 商务座 / 一等座 / 二等座 / 硬卧，各携带 label、Java 字段、DB 列名、价格字段。
 
 **原子更新**：4 × `deduct*Seat`（`SET col=col-1 ... AND col > 0`）、4 × `restore*Seat`（`SET col=col+1`），共 8 条 `@Modifying(nativeQuery=true)`。
 
-**迁移现状**：`db/migration/V1__init.sql` + `V2__orders_seat_unique.sql`；prod `spring.flyway.enabled=true`、`baseline-on-migrate=true`、`ddl-auto=none`，dev/test 仍由 Hibernate 自动建表（T102）。
+**迁移现状**：`db/migration/V1__init.sql` + `V2__orders_seat_unique.sql` + `V3__user_role.sql` + `V4__order_outbox.sql`；prod `spring.flyway.enabled=true`、`baseline-on-migrate=true`、`ddl-auto=none`，dev/test 仍由 Hibernate 自动建表（T102）。
 
 ## API Contracts
 
@@ -244,7 +262,7 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 站点 | GET | `/api/station/list` | — | `Result<List<Station>>` | [P] |
 | 站点 | GET | `/api/station/search` | `keyword?` | `Result<List<Station>>` | [P] |
 | 车次 | GET | `/api/train/{trainId}/stops` | `trainId` | 经停站列表 | [P] |
-| 订单 | POST | `/api/order/buy` | `BuyTicketRequest` | `Result<Order>` | [A] |
+| 订单 | POST | `/api/order/buy` | `BuyTicketRequest` | `Result<Order>`（`PENDING`，异步出票） | [A] |
 | 订单 | GET | `/api/order/my` | — | `Result<List<Order>>` | [A] |
 | 订单 | POST | `/api/order/refund/{orderId}` | `orderId` | `Result<Order>` | [A] |
 | 消息 | GET | `/api/message/search-users` | `kw` | `Result<List<UserVO>>` | [A] |
@@ -273,6 +291,8 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 管理 | DELETE | `/api/admin/trains/{id}` | `id` | `Result<Void>` | [ADMIN] |
 | 管理 | GET | `/api/admin/tickets` | — | `Result<List<Ticket>>` | [ADMIN] |
 | 管理 | POST | `/api/admin/tickets/adjust` | `{trainId,trainDate,seatType,delta}` | `Result<Ticket>` | [ADMIN] |
+| 管理 | GET | `/api/admin/dead-letters` | — | `Result<List<OrderOutboxEvent>>` | [ADMIN] |
+| 管理 | POST | `/api/admin/dead-letters/{eventId}/requeue` | `eventId` | `Result<Boolean>` | [ADMIN] |
 
 
 ## Configuration
@@ -280,11 +300,12 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 配置 / 变量 | dev | prod | test |
 | --- | --- | --- | --- |
 | 数据源 | `localhost:3306/railway_ticket` | `SPRING_DATASOURCE_*` 必填 | H2 `jdbc:h2:mem:railway_test;MODE=MySQL` |
-| schema | Hibernate `ddl-auto=update` | Flyway `V1__init.sql` ~ `V3__user_role.sql` + `ddl-auto=none` | `create-drop`，Flyway 关闭 |
+| schema | Hibernate `ddl-auto=update` | Flyway `V1__init.sql` ~ `V4__order_outbox.sql` + `ddl-auto=none` | `create-drop`，Flyway 关闭 |
 | SQL 日志 | 开启 + trace | 关闭，root warn | 关闭 |
 | Swagger | 开启 | 关闭 | 关闭 |
 | 缓存 | Caffeine | Redis（可 `SPRING_CACHE_TYPE=caffeine` 回退） | `none` |
 | Redis / 限流 / 令牌 | 不启用 | `SPRING_DATA_REDIS_*` 必填；黑名单、refresh token、登录/查票限流、任务锁 | 不启用（集成测试除外） |
+| 订单异步化 / MQ | `app.order.mq.enabled=false`，worker 轮询发件箱 | `ORDER_MQ_ENABLED=true` + `SPRING_RABBITMQ_*`；事件即时投递，worker 兜底 | `mq.enabled=false`，纯 worker（测试直调 `process`） |
 | 密钥校验 | 不启用 | `JWT_SECRET`、数据源口令（Redis 模式下另有 Redis 口令）环境变量必填 | 不启用 |
 | `app.data-init.enabled` | `true` | `true` | `false` |
 | `app.demo-data.enabled` | `true` | `false` | `false` |
@@ -304,7 +325,8 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | --- | --- | --- | --- | --- |
 | `railway-mysql` | `3307` | `3306` | — | `mysqladmin ping` 5s/20 次 |
 | `railway-redis` | `127.0.0.1:6379` | `6379` | — | `redis-cli ping` 5s/20 次 |
-| `railway-backend` | `8080` | `8080` | mysql / redis `service_healthy` | `/actuator/health` 10s/12 次 |
+| `railway-rabbitmq` | `127.0.0.1:5672/15672` | `5672/15672` | — | `rabbitmq-diagnostics ping` 10s/12 次 |
+| `railway-backend` | `8080` | `8080` | mysql / redis / rabbitmq `service_healthy` | `/actuator/health` 10s/12 次 |
 | `railway-frontend` | `80` | `80` | backend `service_healthy` | `wget /` 10s/6 次 |
 | `railway-zipkin`（可选） | `9411` | `9411` | — | `wget /health` 10s/10 次；`--profile tracing` 启用 |
 
@@ -324,11 +346,11 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 构建 | `npm ci && npm run build`、`docker compose config --quiet` | 前端产物、Compose 语法 |
 | 运行时 | 容器 healthcheck + HTTP 冒烟 | 见下 |
 
-**57 个后端测试（6 个 Testcontainers，无 Docker 时跳过）+ 11 个 Vitest + 2 个 E2E**：代表类 `Demo2ApplicationTests`(2)、`GlobalExceptionHandlerTest`(2)、`AdminServiceTest`(5)、`JwtUtilTest`(4)、`JwtAuthFilterTest`(7)、`OrderServiceTest`(6)、`UserServiceTest`(7)、`RedisCacheIntegrationTest`(6)、`TraceIdFilterTest`(4)、`WebConfigTest`(2)。
+**69 个后端测试（6 个 Testcontainers，无 Docker 时跳过）+ 11 个 Vitest + 2 个 E2E**：代表类 `Demo2ApplicationTests`(2)、`GlobalExceptionHandlerTest`(2)、`AdminServiceTest`(5)、`JwtUtilTest`(4)、`JwtAuthFilterTest`(7)、`OrderServiceTest`(6)、`OrderFulfillmentServiceTest`(3)、`OrderEventWorkerTest`(6)、`OrderStateMachineTest`(3)、`UserServiceTest`(7)、`RedisCacheIntegrationTest`(6)、`TraceIdFilterTest`(4)、`WebConfigTest`(2)。
 
 **CI**（`.github/workflows/ci.yml`）：`push(main/master)` 与 `pull_request` 触发 3 个 job — `backend`（Temurin 17 + `docker info` + `sh ./mvnw -B verify`）、`frontend`（Node 22 + `npm ci` + lint + format:check + test + build + playwright install + test:e2e）、`compose`（`docker compose config --quiet`）。
 
-## Verification Results（2026-11-13 ~ 17）
+## Verification Results（2026-11-13 ~ 18）
 
 | 项 | 结果 |
 | --- | --- |
@@ -350,10 +372,11 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | Flyway 与 prod 数据隔离 | `flyway_schema_history` 含 v1/v2 成功记录；初始化器不写演示账号/订单（首次启动日志 `用户数: 0`、`历史订单: 0`）；当前卷中 2 用户 / 7 订单来自手工验证，车次 179 |
 | 链路追踪 | `/api/v2/services` 返回 `railway-ticket`，span 与日志 traceId 一致（T115） |
 | RBAC / 管理端（T116） | 57 tests 全绿；`JwtAuthFilterTest` 覆盖 USER 403 / ADMIN 放行；`AdminServiceTest` 覆盖角色非法、引用删除拒绝、余票负数拒绝与缓存失效；前端管理页 lint/build/E2E 全绿 |
+| 下单异步化 / 发件箱（T117） | `.\mvnw.cmd -B test` → 69 tests / 0 failures / 6 skipped；`OrderServiceTest` 验证 PENDING + outbox、`OrderFulfillmentServiceTest` 验证扣票/幂等、`OrderEventWorkerTest` 验证退避/死信/补偿、`OrderStateMachineTest` 验证合法迁移；前端 lint/format/test/build 全绿 |
 
 ## Known Limitations
 
-原 `T1xx` 风险已全部闭环（详见 `tasks.md` Phase 8 / 10）：安全体系（T101/T103/T104）、Flyway 迁移（T102）、座位唯一约束（T105）、缓存与异常日志（T106）、LICENSE（T107）、前端 E2E 与规范（T108）、构建提速实测（T109）、AI 服务端代理（T110）、日志归档与追踪（T111）、规格澄清（T113）、Vitest/Playwright（T114）、Brave/Zipkin（T115）、USER/ADMIN 角色与管理后台（T116）。
+原 `T1xx` 风险已全部闭环（详见 `tasks.md` Phase 8 / 10 / 11）：安全体系（T101/T103/T104）、Flyway 迁移（T102）、座位唯一约束（T105）、缓存与异常日志（T106）、LICENSE（T107）、前端 E2E 与规范（T108）、构建提速实测（T109）、AI 服务端代理（T110）、日志归档与追踪（T111）、规格澄清（T113）、Vitest/Playwright（T114）、Brave/Zipkin（T115）、USER/ADMIN 角色与管理后台（T116）、下单异步化与事务发件箱（T117）。
 
 仍需注意的环境相关事项：
 
@@ -365,4 +388,5 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | AI 助手 | 未配置 `AI_API_KEY` 时降级为模拟回复；配置后浏览器仍只访问 `/api/ai/**` 代理 |
 | 无 Redis 环境 | `SPRING_CACHE_TYPE=caffeine` 回退时，黑名单 / refresh 轮换 / 限流 / 任务锁不启用 |
 | 角色变更传播 | 角色写在 JWT 声明中，管理员调整用户角色后旧令牌仍保留原角色，需刷新令牌或等待过期（T116 已知后果） |
+| 出票最终一致 | 下单返回 `PENDING` 后由 worker 秒级履约，前端需轮询；余票不足会在履约阶段失败并进入重试/死信，用户看到的是"订单未成功"而非即时报错（ADR-012） |
 | 本机 Docker daemon | 关闭时无法复验容器健康与 Testcontainers 用例（后者自动跳过），CI 环境需 `docker info` 通过 |

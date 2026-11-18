@@ -154,12 +154,14 @@
 
 ### 订单
 
-- **FR-020**: 购票必须原子扣减对应席别余票，失败不得产生订单或消息。✅
-- **FR-021**: 购票必须生成唯一订单号、`PAID` 状态、按席别规则分配座位号、写入创建/支付时间。✅
-- **FR-022**: 购票与退票必须发送系统通知。✅
-- **FR-023**: 系统必须提供「我的订单」列表（按时间倒序）。✅
+- **FR-020**: 购票接口必须在同一事务内创建唯一订单号的 `PENDING` 订单与事务发件箱事件；不直接扣票/选座，从而削峰并保证事件不丢。✅
+- **FR-021**: 异步 worker 必须消费事件，原子扣减对应席别余票、按席别规则分配座位号、经状态机流转到 `PAID` 并写入支付时间；座位唯一约束作为并发兜底，冲突整单重试。✅
+- **FR-022**: 购票（履约成功后）与退票必须发送系统通知；消费幂等，重复投递不重复扣票/通知。✅
+- **FR-023**: 系统必须提供「我的订单」列表（按时间倒序）；前端在存在 `PENDING` 订单时静默轮询状态。✅
 - **FR-024**: 退票必须校验归属、状态与发车时间，成功后回补余票并置 `REFUNDED`。✅
 - **FR-025**: 定时任务必须每 60 秒把发车超过 10 分钟的 `PAID` 订单置 `COMPLETED`。✅
+- **FR-026**: 发件箱事件失败必须按指数退避重试（最多 8 次），耗尽进入 `DEAD` 死信；卡在 `PROCESSING` 超时的事件必须被回收重投；管理员可查询死信并重新入队补偿。✅
+- **FR-027**: RabbitMQ 为可选加速通道：未启用时 worker 定时轮询兜底，启用时事件提交后即时投递、消费者复用同一幂等 worker；两条路径不得重复履约。✅
 
 ### 消息与看板
 
@@ -198,13 +200,13 @@
 
 | ID | 标准 | 结果 |
 | --- | --- | --- |
-| SC-001 | `.\mvnw.cmd -B verify` 全部测试通过 | ✅ 57 tests / 0 failures；Docker 就绪时 0 skipped（6 个 Testcontainers 真实执行），无 Docker 时自动跳过 |
+| SC-001 | `.\mvnw.cmd -B verify` 全部测试通过 | ✅ 69 tests / 0 failures；Docker 就绪时 0 skipped（6 个 Testcontainers 真实执行），无 Docker 时自动跳过 |
 | SC-002 | `npm ci && npm run build` 成功 | ✅ 11 个 Vitest 单测、2 个 Playwright E2E，lint/format/build 均通过 |
 | SC-003 | `docker compose config --quiet` 通过 | ✅ |
 | SC-004 | MySQL / Redis / 后端 / 前端四服务启动并具备健康检查 | ✅（2026-11-17 复验，含 `--profile tracing` 的 zipkin 共 5 容器 healthy） |
 | SC-005 | 首页、静态资源、公开 `/api/*` 可达；未知 `/api` 路径未登录 401、带令牌 404 | ✅ |
 | SC-006 | prod 不写入演示账号与模拟订单 | ✅ |
-| SC-007 | 文档数字与代码一致（40 端点 / 7 实体 / 8 条原子 SQL / 57 测试） | ✅ |
+| SC-007 | 文档数字与代码一致（42 端点 / 8 实体 / 8 条原子 SQL / 69 测试） | ✅ |
 | SC-008 | CORS 白名单可配置，默认同源部署行为不变 | ✅ `WebConfigTest` 2 个测试 |
 | SC-009 | 日志可按 traceId 检索，可选上报 Zipkin | ✅ `TraceIdFilterTest` 4 例、`TracingConfigTest` 2 例 |
 
@@ -257,7 +259,8 @@
 | CORS 白名单配置化 | PASS | `WebConfigTest` 2 个测试；默认 `*` 不改变同源部署行为 |
 | traceId / Zipkin | PASS | `TraceIdFilterTest` 4 例、`TracingConfigTest` 2 例；实测 `/api/v2/services` 返回 `railway-ticket` 且 span 与日志 traceId 一致 |
 | RBAC / 管理端（2026-11-18） | PASS | `AdminServiceTest` 5 例、`JwtAuthFilterTest` 新增 2 例（403/放行）、`JwtUtilTest` 新增角色声明例；前端 lint/build/E2E 全绿 |
+| 下单异步化 / 发件箱（2026-11-18） | PASS | `OrderStateMachineTest` 3 例、`OrderServiceTest` 6 例（PENDING + outbox）、`OrderFulfillmentServiceTest` 3 例（扣票/幂等/余票不足）、`OrderEventWorkerTest` 6 例（成功/幂等/退避/死信/补偿）；后端共 69 tests / 0 failures |
 
 ## 11. 已完成改造回填
 
-以下几轮已完成的工程化改造在 `./tasks.md` 中作为已完成项（`- [x]`）逐条登记，并附验收证据：版本控制修复、容器部署链路、配置一致性、演示数据隔离、57 个后端测试与 CI、前端 Vitest/Playwright/ESLint/Prettier、文档、Docker 实测、404 处理器、分域名 CORS 配置化、Spec Kit 三件套、Redis 缓存与令牌/限流/任务锁、Flyway 迁移、默认拦截鉴权、prod 密钥校验、座位唯一约束、AI 服务端代理、日志追踪与 Zipkin、RBAC 与管理后台。原遗留风险 `T1xx` 已全部完成并与 `.specify/memory/constitution.md` 的原则逐条对应。
+以下几轮已完成的工程化改造在 `./tasks.md` 中作为已完成项（`- [x]`）逐条登记，并附验收证据：版本控制修复、容器部署链路、配置一致性、演示数据隔离、69 个后端测试与 CI、前端 Vitest/Playwright/ESLint/Prettier、文档、Docker 实测、404 处理器、分域名 CORS 配置化、Spec Kit 三件套、Redis 缓存与令牌/限流/任务锁、Flyway 迁移、默认拦截鉴权、prod 密钥校验、座位唯一约束、AI 服务端代理、日志追踪与 Zipkin、RBAC 与管理后台、下单异步化（事务发件箱 + RabbitMQ 可选 + 幂等重试死信）。原遗留风险 `T1xx` 已全部完成并与 `.specify/memory/constitution.md` 的原则逐条对应。

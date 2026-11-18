@@ -8,6 +8,7 @@ import com.example.demo.entity.Ticket;
 import com.example.demo.entity.Train;
 import com.example.demo.entity.User;
 import com.example.demo.entity.UserRole;
+import com.example.demo.repository.OrderOutboxRepository;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.StationRepository;
 import com.example.demo.repository.TicketRepository;
@@ -29,19 +30,35 @@ public class AdminService {
     private final TrainRepository trainRepository;
     private final TicketRepository ticketRepository;
     private final TicketCacheVersion ticketCacheVersion;
+    private final OrderOutboxRepository orderOutboxRepository;
+    private final OrderEventWorker orderEventWorker;
 
     public AdminService(UserRepository userRepository,
                         OrderRepository orderRepository,
                         StationRepository stationRepository,
                         TrainRepository trainRepository,
                         TicketRepository ticketRepository,
-                        TicketCacheVersion ticketCacheVersion) {
+                        TicketCacheVersion ticketCacheVersion,
+                        OrderOutboxRepository orderOutboxRepository,
+                        OrderEventWorker orderEventWorker) {
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.stationRepository = stationRepository;
         this.trainRepository = trainRepository;
         this.ticketRepository = ticketRepository;
         this.ticketCacheVersion = ticketCacheVersion;
+        this.orderOutboxRepository = orderOutboxRepository;
+        this.orderEventWorker = orderEventWorker;
+    }
+
+    // ---------- 发件箱 / 死信补偿 ----------
+
+    public List<com.example.demo.entity.OrderOutboxEvent> listDeadLetters() {
+        return orderOutboxRepository.findByStatus(com.example.demo.entity.OutboxStatus.DEAD);
+    }
+
+    public boolean requeueDeadLetter(String eventId) {
+        return orderEventWorker.requeueDead(eventId);
     }
 
     // ---------- 用户 ----------

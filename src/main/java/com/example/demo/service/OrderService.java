@@ -2,11 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.common.BusinessException;
 import com.example.demo.dto.BuyTicketRequest;
+import com.example.demo.dto.OrderEventPayload;
 import com.example.demo.entity.*;
+import com.example.demo.mq.OrderEventDispatcher;
 import com.example.demo.repository.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,120 +21,120 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
-    private static final int MAX_SEAT_RETRIES = 8;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final OrderRepository orderRepository;
     private final TrainRepository trainRepository;
     private final TicketRepository ticketRepository;
     private final StationRepository stationRepository;
-    private final UserRepository userRepository;
+    private final OrderOutboxRepository orderOutboxRepository;
     private final MessageService messageService;
     private final TicketCacheVersion ticketCacheVersion;
+    private final OrderEventDispatcher eventDispatcher;
     private final TransactionTemplate transactionTemplate;
 
     public OrderService(OrderRepository orderRepository,
                          TrainRepository trainRepository,
                          TicketRepository ticketRepository,
                          StationRepository stationRepository,
-                         UserRepository userRepository,
+                         OrderOutboxRepository orderOutboxRepository,
                          MessageService messageService,
                          TicketCacheVersion ticketCacheVersion,
+                         OrderEventDispatcher eventDispatcher,
                          PlatformTransactionManager transactionManager) {
         this.orderRepository = orderRepository;
         this.trainRepository = trainRepository;
         this.ticketRepository = ticketRepository;
         this.stationRepository = stationRepository;
-        this.userRepository = userRepository;
+        this.orderOutboxRepository = orderOutboxRepository;
         this.messageService = messageService;
         this.ticketCacheVersion = ticketCacheVersion;
+        this.eventDispatcher = eventDispatcher;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     /**
-     * 购票入口。座位号由数据库唯一约束兜底：并发下两个事务可能挑到同一座位，
-     * 失败方抛 DataIntegrityViolationException，整个事务回滚（含余票扣减），
-     * 再用新事务重新扣票、重新选座，直到成功或耗尽重试次数。
+     * 购票入口（异步化）：校验参数后，在同一个事务里创建 PENDING 订单 + 事务发件箱事件，
+     * 提交后由 worker 异步完成扣票、选座、状态流转与通知。下单接口不再直接竞争座位行锁，
+     * 从而削峰并保证"订单创建"与"事件记录"原子一致。
      */
     public Order buyTicket(Long userId, BuyTicketRequest req) {
-        for (int attempt = 1; attempt <= MAX_SEAT_RETRIES; attempt++) {
-            try {
-                return transactionTemplate.execute(status -> buyTicketOnce(userId, req));
-            } catch (DataIntegrityViolationException e) {
-                if (attempt >= MAX_SEAT_RETRIES) {
-                    log.warn("用户 {} 购票座位冲突，重试 {} 次后仍失败", userId, attempt);
-                    throw new BusinessException("座位紧张，请稍后重试");
-                }
-                log.debug("用户 {} 购票座位冲突，第 {} 次重试", userId, attempt);
-            }
-        }
-        throw new BusinessException("座位紧张，请稍后重试");
-    }
-
-    /** 单次购票：在事务内扣票、选座、落单并强制 flush 以触发唯一约束检查。 */
-    private Order buyTicketOnce(Long userId, BuyTicketRequest req) {
         Train train = trainRepository.findById(req.getTrainId())
                 .orElseThrow(() -> new BusinessException("车次不存在"));
-
-        LocalDate date = LocalDate.parse(req.getTrainDate());
-
         SeatType seatType;
         try {
             seatType = SeatType.fromLabel(req.getSeatType());
         } catch (IllegalArgumentException e) {
             throw new BusinessException("不支持的座位类型: " + req.getSeatType());
         }
+        LocalDate.parse(req.getTrainDate());
 
-        int affected = deductSeatAtomic(train.getId(), date, seatType);
-        if (affected == 0) {
-            throw new BusinessException("座位类型 " + seatType.getLabel() + " 余票不足");
-        }
+        return transactionTemplate.execute(status -> {
+            Station fromStation = stationRepository.findById(train.getFromStationId()).orElse(null);
+            Station toStation = stationRepository.findById(train.getToStationId()).orElse(null);
 
-        Station fromStation = stationRepository.findById(train.getFromStationId()).orElse(null);
-        Station toStation = stationRepository.findById(train.getToStationId()).orElse(null);
+            Order order = new Order();
+            order.setOrderNo("ORD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
+            order.setUserId(userId);
+            order.setTrainId(train.getId());
+            order.setTrainNumber(train.getTrainNumber());
+            order.setFromStation(fromStation != null ? fromStation.getName() : "");
+            order.setToStation(toStation != null ? toStation.getName() : "");
+            order.setTrainDate(req.getTrainDate());
+            order.setSeatType(seatType.getLabel());
+            order.setPassengerName(req.getPassengerName());
+            order.setPassengerIdCard(req.getPassengerIdCard());
+            order.setPrice(getPriceBySeatType(train, seatType));
+            order.setStatus(OrderStatus.PENDING.name());
+            order.setCreateTime(LocalDateTime.now());
+            // saveAndFlush：让订单号唯一约束在事务内立即校验。
+            Order saved = orderRepository.saveAndFlush(order);
 
-        Double price = getPriceBySeatType(train, seatType);
-        String seatNo = generateSeatNo(train.getId(), req.getTrainDate(), seatType);
+            String eventId = UUID.randomUUID().toString();
+            OrderOutboxEvent event = new OrderOutboxEvent();
+            event.setEventId(eventId);
+            event.setOrderId(saved.getId());
+            event.setEventType(OrderEventTypes.ORDER_CREATED);
+            event.setPayload(eventPayload(eventId, saved));
+            event.setNextRetryAt(LocalDateTime.now());
+            orderOutboxRepository.save(event);
+            log.info("用户 {} 下单 {} 已创建（PENDING），事件 {} 待异步履约", userId, saved.getOrderNo(), eventId);
 
-        Order order = new Order();
-        order.setOrderNo("ORD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
-        order.setUserId(userId);
-        order.setTrainId(train.getId());
-        order.setTrainNumber(train.getTrainNumber());
-        order.setFromStation(fromStation != null ? fromStation.getName() : "");
-        order.setToStation(toStation != null ? toStation.getName() : "");
-        order.setTrainDate(req.getTrainDate());
-        order.setSeatType(seatType.getLabel());
-        order.setSeatNo(seatNo);
-        order.setPassengerName(req.getPassengerName());
-        order.setPassengerIdCard(req.getPassengerIdCard());
-        order.setPrice(price);
-        order.setStatus(OrderStatus.PAID.name());
-        order.setCreateTime(LocalDateTime.now());
-        order.setPayTime(LocalDateTime.now());
-
-        // saveAndFlush：让唯一约束冲突在事务内立即抛出，便于回滚后重试。
-        Order saved = orderRepository.saveAndFlush(order);
-        messageService.sendSystemMessage(userId,
-                String.format("购票成功！%s %s → %s，座位 %s 号",
-                        saved.getTrainNumber(), saved.getFromStation(), saved.getToStation(), saved.getSeatNo()),
-                saved.getId());
-        invalidateTicketCache();
-        return saved;
+            // 事务提交后才投递：避免订单回滚后 MQ 里残留幽灵事件。
+            if (TransactionSynchronizationManager.isSynchronizationActive()) {
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        eventDispatcher.dispatch(eventId);
+                    }
+                });
+            } else {
+                eventDispatcher.dispatch(eventId);
+            }
+            return saved;
+        });
     }
 
-    private int deductSeatAtomic(Long trainId, LocalDate date, SeatType seatType) {
-        return switch (seatType) {
-            case BUSINESS_SEAT -> ticketRepository.deductBusinessSeat(trainId, date);
-            case FIRST_SEAT -> ticketRepository.deductFirstSeat(trainId, date);
-            case SECOND_SEAT -> ticketRepository.deductSecondSeat(trainId, date);
-            case SLEEPER -> ticketRepository.deductSleeper(trainId, date);
-        };
+    private String eventPayload(String eventId, Order order) {
+        OrderEventPayload payload = new OrderEventPayload();
+        payload.setEventId(eventId);
+        payload.setOrderId(order.getId());
+        payload.setUserId(order.getUserId());
+        payload.setTrainId(order.getTrainId());
+        payload.setTrainDate(order.getTrainDate());
+        payload.setSeatType(order.getSeatType());
+        payload.setPassengerName(order.getPassengerName());
+        payload.setPassengerIdCard(order.getPassengerIdCard());
+        try {
+            return OBJECT_MAPPER.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new BusinessException("订单事件序列化失败");
+        }
     }
 
     private Double getPriceBySeatType(Train train, SeatType seatType) {
@@ -142,57 +144,6 @@ public class OrderService {
             case SECOND_SEAT -> train.getSecondSeatPrice();
             case SLEEPER -> train.getSleeperPrice();
         };
-    }
-
-    /**
-     * 按座位类型生成符合真实车厢布局的座位号：
-     * 商务座 4 排 × A/C/F，一等座 13 排 × A/C/D/F，二等座 20 排 × A/B/C/D/F，
-     * 硬卧 27 排 × 上/中/下铺。座位池容量均大于对应席别的初始余票数。
-     */
-    private String generateSeatNo(Long trainId, String trainDate, SeatType seatType) {
-        String seatLabel = seatType.getLabel();
-        List<Order> soldOrders = orderRepository.findByTrainIdAndTrainDate(trainId, trainDate);
-        Set<String> usedSeats = soldOrders.stream()
-                .filter(o -> seatLabel.equals(o.getSeatType())
-                        && OrderStatus.REFUNDED != OrderStatus.from(o.getStatus()))
-                .map(Order::getSeatNo)
-                .collect(Collectors.toSet());
-
-        List<String> candidates = buildSeatCandidates(seatType);
-        Random random = new Random();
-        int start = random.nextInt(candidates.size());
-        for (int i = 0; i < candidates.size(); i++) {
-            String seatNo = candidates.get((start + i) % candidates.size());
-            if (!usedSeats.contains(seatNo)) {
-                return seatNo;
-            }
-        }
-        throw new BusinessException("该车次座位已分配完毕");
-    }
-
-    private List<String> buildSeatCandidates(SeatType seatType) {
-        List<String> seats = new ArrayList<>();
-        switch (seatType) {
-            case BUSINESS_SEAT -> addSeatRows(seats, 4, "A", "C", "F");
-            case FIRST_SEAT -> addSeatRows(seats, 13, "A", "C", "D", "F");
-            case SECOND_SEAT -> addSeatRows(seats, 20, "A", "B", "C", "D", "F");
-            case SLEEPER -> {
-                for (int row = 1; row <= 27; row++) {
-                    for (String berth : new String[]{"上", "中", "下"}) {
-                        seats.add(row + berth);
-                    }
-                }
-            }
-        }
-        return seats;
-    }
-
-    private void addSeatRows(List<String> seats, int rows, String... cols) {
-        for (int row = 1; row <= rows; row++) {
-            for (String col : cols) {
-                seats.add(row + col);
-            }
-        }
     }
 
     public List<Order> getMyOrders(Long userId) {

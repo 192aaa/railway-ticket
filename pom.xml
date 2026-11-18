@@ -67,6 +67,12 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- RabbitMQ：订单事件的加速/跨服务投递通道（可选，未启用时由本地 worker 定时轮询兜底） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>

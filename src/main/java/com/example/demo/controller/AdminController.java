@@ -122,4 +122,16 @@ public class AdminController {
         int delta = Integer.parseInt(String.valueOf(body.get("delta")));
         return Result.success(adminService.adjustSeat(trainId, date, seatType, delta));
     }
+
+    @Operation(summary = "死信事件列表")
+    @GetMapping("/dead-letters")
+    public Result<List<com.example.demo.entity.OrderOutboxEvent>> deadLetters() {
+        return Result.success(adminService.listDeadLetters());
+    }
+
+    @Operation(summary = "死信补偿：重新入队")
+    @PostMapping("/dead-letters/{eventId}/requeue")
+    public Result<Boolean> requeueDeadLetter(@PathVariable String eventId) {
+        return Result.success(adminService.requeueDeadLetter(eventId));
+    }
 }

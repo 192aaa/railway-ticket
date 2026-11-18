@@ -219,7 +219,7 @@
 
 | 门禁 | 命令 | 当前状态 |
 | --- | --- | --- |
-| 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-18：57 tests / 0 failures / 6 skipped；Docker 就绪时 0 skipped） |
+| 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-18：69 tests / 0 failures / 6 skipped；Docker 就绪时 0 skipped） |
 | 前端单测 | `cd frontend && npm test` | PASS（11 tests） |
 | 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 0 warnings；全部文件符合 Prettier） |
 | 前端 E2E | `npm run test:e2e` | PASS（2 tests，mock API） |
@@ -303,14 +303,20 @@
   > 验收: JWT 携带角色；`/api/admin/**` 非管理员 403；注册不可自我提权；管理端可维护用户角色、订单查询、站点/车次 CRUD、余票调整；被引用站点与有订单车次不可删除；余票调整后缓存失效；前端管理页仅管理员可见且有路由守卫
   > 证据: `entity/UserRole.java`、`db/migration/V3__user_role.sql`、`JwtUtil` 3 参 generateToken + getRole、`JwtAuthFilter` ADMIN 前缀 403、`AdminService`/`AdminController` 13 端点、`views/Admin.vue`；`AdminServiceTest` 5 例、`JwtAuthFilterTest` 7 例、`JwtUtilTest` 4 例；`.\mvnw.cmd -B test` → 57 tests / 0 failures / 6 skipped；前端 lint/format/test/build/E2E 全绿
 
+## Phase 11: 下单异步化（事务发件箱 + 可选 MQ）
+
+- [x] T117 [高] [宪法 I/IV] 下单改为 PENDING + 事务发件箱，异步 worker 履约，含幂等/重试/死信/补偿与 RabbitMQ 可选通道
+  > 验收: buy 同事务写 PENDING 订单 + order_outbox 事件；worker 扣票/选座/状态机流转 PAID/通知/缓存失效；事件幂等、指数退避最多 8 次、DEAD 死信、超时 PROCESSING 回收、管理端死信查询与 requeue；RabbitMQ 可选（默认 worker 轮询兜底）；前端订单页 PENDING 静默轮询、下单弹窗改异步语义
+  > 证据: `entity/OrderStateMachine.java`、`entity/OrderOutboxEvent.java`、`repository/OrderOutboxRepository.java`、`service/OrderFulfillmentService.java`、`service/OrderEventWorker.java`、`mq/*`、`db/migration/V4__order_outbox.sql`、`docker-compose.yml` rabbitmq 服务、`views/Orders.vue` 轮询、`views/Home.vue` 文案；`OrderStateMachineTest` 3 例 + `OrderServiceTest` 6 例 + `OrderFulfillmentServiceTest` 3 例 + `OrderEventWorkerTest` 6 例；`.\mvnw.cmd -B test` → 69 tests / 0 failures / 6 skipped；前端 lint/format/test/build 全绿
+
 ## 统计
 
 | 状态 | 数量 |
 | --- | --- |
-| 已完成 | 63 |
+| 已完成 | 64 |
 | 待办 | 0 |
-| 合计 | 63 |
+| 合计 | 64 |
 
-Phase 8/9/10 全部完成。第二批新增完成：T107、T108、T111、T113；第三批新增完成：T116。
+Phase 8/9/10/11 全部完成。第二批新增完成：T107、T108、T111、T113；第三批新增完成：T116；第四批新增完成：T117。
 
-> 2026-11-18 复核：63 项全部完成；`spec.md`、`plan.md`、`README.md` 同步到当前代码（40 端点 / 57 测试 / Redis + Flyway V3 + Zipkin + RBAC 管理后台）。
+> 2026-11-18 复核：64 项全部完成；`spec.md`、`plan.md`、`README.md` 同步到当前代码（42 端点 / 69 测试 / Redis + RabbitMQ + Flyway V4 + Zipkin + RBAC 管理后台 + 下单异步化）。

@@ -10,14 +10,14 @@
 | 前端 | Vue 3、Vue Router、Pinia、Element Plus、Axios、Vite 8、ESLint 9、Prettier |
 | 数据库 | MySQL 8.0（本地 dev）/ 环境变量注入的 MySQL（prod，Flyway 迁移）；测试用 H2 内存库 |
 | 缓存 | dev / 测试用 Caffeine 或 `none`；prod 默认 Redis 7（JSON 序列化，余票 30s、站点/车次 600s TTL） |
-| 部署 | Docker Compose（MySQL + Redis + 后端 + 前端，可选 Zipkin profile）、Nginx、Render（`render.yaml`） |
+| 部署 | Docker Compose（MySQL + Redis + RabbitMQ + 后端 + 前端，可选 Zipkin profile）、Nginx、Render（`render.yaml`） |
 | 测试 | 后端 JUnit 5、Mockito、AssertJ、`@SpringBootTest`、Testcontainers（真实 Redis）；前端 Vitest 单测 + Playwright E2E（mock API） |
 
 ## 主要功能
 
 - 用户注册/登录（JWT + BCrypt）、access/refresh token 自动续期、服务端登出黑名单、个人信息与密码修改
 - 车站搜索、车次经停站查询、按出发/到达站与日期查询余票；余票缓存版本化失效，站点/车次查询走 Redis 缓存
-- 购票、我的订单、退票；定时任务每分钟将已发车订单自动置为完成并发送系统消息（Redis 分布式锁保证多实例只跑一次）
+- 购票（异步出票：下单只返回 `PENDING`，worker 通过事务发件箱异步扣票/选座/流转到 `PAID`，RabbitMQ 可选加速、失败退避重试与死信补偿）、我的订单（PENDING 自动轮询）、退票；定时任务每分钟将已发车订单自动置为完成并发送系统消息（Redis 分布式锁保证多实例只跑一次）
 - 鉴权默认拦截 + 显式放行；登录/注册/余票查询按 IP 限流（Redis 固定窗口，超限返回 429）
 - 用户间私信、会话列表、未读数、系统通知；页面内置 AI 助手（兼容 OpenAI/DeepSeek 格式，密钥仅存于服务端环境变量、由后端代理调用，未配置时降级为模拟模式）
 - 数据看板：概览、热门线路、趋势统计
@@ -46,7 +46,7 @@
 ├── deploy/nginx/          # 裸机部署用 Nginx 配置
 ├── deploy/scripts/        # 打包与进程管理脚本
 ├── .github/workflows/     # CI 流水线
-├── docker-compose.yml     # MySQL + Redis + 后端 + 前端
+├── docker-compose.yml     # MySQL + Redis + RabbitMQ + 后端 + 前端
 ├── render.yaml            # Render 部署配置
 ├── .env.example           # Compose 环境变量模板
 └── .dockerignore          # 容器构建上下文排除规则
@@ -59,6 +59,7 @@
 - JDK 17（项目自带 Maven Wrapper，无需单独安装 Maven）
 - MySQL 8.0，本地端口 `3306`
 - Redis 7：仅 prod / 主动启用 Redis 缓存时需要；Compose 部署会自动启动，本地 dev 默认用 Caffeine，无需安装
+- RabbitMQ 3.13：仅 Compose 部署会启动（订单事件即时通道）；本地 dev 不启用，订单由 worker 轮询发件箱兜底，无需安装
 - Node.js 20.19+ 或 22.12+（Vite 8 要求），npm
 - Docker / Docker Compose（容器部署；Testcontainers 真实 Redis 集成测试也需要，无 Docker 时自动跳过）
 
@@ -163,6 +164,9 @@ Vite 开发服务器为 `http://localhost:5173`，`/api` 请求默认代理到 `
 | `app.cache.redis.*-ttl-seconds` | Redis 各缓存 TTL（秒） | `tickets` `30`、`stations` / `trains` `600` |
 | `REDIS_PWD` / `REDIS_HOST_PORT` | Compose 中 Redis 密码与宿主机映射端口（仅绑定 `127.0.0.1`） | `railway_redis_123` / `6379` |
 | `REDIS_HEALTH_ENABLED` | 是否把 Redis 纳入 `/actuator/health` | 默认 `false`，Compose `true` |
+| `ORDER_MQ_ENABLED` | 是否启用 RabbitMQ 即时投递订单事件 | dev/test `false`（worker 轮询兜底），Compose `true` |
+| `SPRING_RABBITMQ_*` | RabbitMQ 连接参数 | `localhost:5672` / guest；Compose 用 rabbitmq 服务名 |
+| `RABBITMQ_USER` / `RABBITMQ_PWD` / `RABBITMQ_PORT` / `RABBITMQ_MGMT_PORT` | Compose 中 RabbitMQ 账号与端口（管理台 `http://localhost:15672`，仅绑定 `127.0.0.1`） | `railway` / `railway_rabbit_123` / `5672` / `15672` |
 | `APP_CORS_ALLOWED_ORIGINS` | 后端跨域来源白名单（逗号分隔） | `*`（同源反代） |
 | `VITE_API_TARGET` | 开发环境代理目标 | `http://localhost:8080` |
 | `VITE_API_BASE_URL` | 生产环境 axios 基础路径 | `/api`（同源反代） |
@@ -177,7 +181,7 @@ Compose 使用根目录 `.env`，模板见 `.env.example`。
 ## 测试与 CI
 
 ```powershell
-# 后端：57 个测试（其中 6 个 Testcontainers 真实 Redis 用例需 Docker，就绪时全部执行，无 Docker 时自动跳过）；
+# 后端：69 个测试（其中 6 个 Testcontainers 真实 Redis 用例需 Docker，就绪时全部执行，无 Docker 时自动跳过）；
 # 其余测试用 H2 内存库，无需本机 MySQL / Redis
 .\mvnw.cmd -B verify
 
@@ -191,7 +195,7 @@ npm run build
 npm run test:e2e      # Playwright E2E（登录/登出、401 自动刷新重放，2 例；mock API 不依赖后端）
 ```
 
-- 后端覆盖上下文加载、注册/登录/改密、JWT 生成与失效、购票原子扣减、座位唯一约束冲突重试、退票回补与座位释放、越权校验、异常分类、CORS 白名单解析、默认拦截与黑名单、限流降级、缓存版本化失效、分布式锁、prod 密钥校验、traceId 生成/透传/清洗与 MDC 清理、Brave Tracer 与 span 生成。
+- 后端覆盖上下文加载、注册/登录/改密、JWT 生成与失效、下单 PENDING + 发件箱、异步履约扣票/选座/幂等、座位唯一约束冲突重试、订单状态机、worker 退避/死信/补偿、退票回补与座位释放、越权校验、异常分类、CORS 白名单解析、默认拦截与黑名单、限流降级、缓存版本化失效、分布式锁、prod 密钥校验、traceId 生成/透传/清洗与 MDC 清理、Brave Tracer 与 span 生成。
 - `RedisCacheIntegrationTest` 在 CI 用 Testcontainers 起真实 Redis（带密码），验证缓存序列化 / TTL / 版本化失效、任务锁互斥、refresh token 轮换与限流 429。
 - 前端 E2E 全部用 `page.route` mock 后端响应，断言令牌存储、401→refresh→重放、登出清理；不依赖真实后端，CI 通过 `npx playwright install chromium` 后直接运行。
 - `.github/workflows/ci.yml` 在 push / PR 时先用 `docker info` 确认 Docker 可用，再执行后端 `verify`、前端 `npm ci + lint + format:check + test + build + test:e2e` 与 `docker compose config` 校验。
@@ -208,8 +212,8 @@ docker compose up -d --build
 - `docker/Dockerfile.backend` 默认直接复制宿主机 `.\mvnw.cmd -B -DskipTests package` 生成的 `target/demo2-0.0.1-SNAPSHOT.jar`（本机 Docker Desktop 代理会导致镜像内 Maven 下载出现 `bad_record_mac`）；若构建环境可稳定访问 Maven 仓库，可改用 `docker/Dockerfile.backend.maven` 在镜像内打包（Render 即使用该版本）。运行阶段由 Spring Boot 直接读取 `SPRING_DATASOURCE_*`、`SPRING_DATA_REDIS_*`、`JWT_SECRET`、`SPRING_PROFILES_ACTIVE`、`APP_CORS_ALLOWED_ORIGINS` 环境变量。
 - `docker/Dockerfile.frontend` 使用 `npm ci` 构建，产物放入 `/usr/share/nginx/html`。
 - **两套 Nginx 配置不要混用**：`docker/nginx.conf` 用于容器（root `/usr/share/nginx/html`，`/api` 反代到 Compose 服务 `backend`）；`deploy/nginx/railway.conf` 用于裸机（root `/var/www/railway-frontend`，`/api` 反代到 `127.0.0.1:8080`）。
-- Compose 为 MySQL、Redis 与后端配置了 healthcheck，backend 等 MySQL / Redis 健康后再启动；Redis 开启 `appendonly` 持久化，数据卷为 `redis-data`，缓存默认走 Redis（设 `SPRING_CACHE_TYPE=caffeine` 可回退本地缓存）。
-- prod 由 Flyway 执行 `db/migration/V1__init.sql` 建表、`V2__orders_seat_unique.sql` 建座位唯一约束、`V3__user_role.sql` 增加用户角色（存量库自动 baseline），Hibernate 改为 `ddl-auto=none`；启动期还会校验 `JWT_SECRET`、`SPRING_DATASOURCE_PASSWORD`（Redis 模式下另有 Redis 口令）确由环境变量提供，否则拒绝启动。
+- Compose 为 MySQL、Redis、RabbitMQ 与后端配置了 healthcheck，backend 等 MySQL / Redis / RabbitMQ 健康后再启动；Redis 开启 `appendonly` 持久化，数据卷为 `redis-data`，缓存默认走 Redis（设 `SPRING_CACHE_TYPE=caffeine` 可回退本地缓存）。RabbitMQ 也有独立数据卷 `rabbitmq-data`，管理台在 `http://localhost:15672`。
+- prod 由 Flyway 执行 `db/migration/V1__init.sql` 建表、`V2__orders_seat_unique.sql` 建座位唯一约束、`V3__user_role.sql` 增加用户角色、`V4__order_outbox.sql` 建事务发件箱表（存量库自动 baseline），Hibernate 改为 `ddl-auto=none`；启动期还会校验 `JWT_SECRET`、`SPRING_DATASOURCE_PASSWORD`（Redis 模式下另有 Redis 口令）确由环境变量提供，否则拒绝启动。
 - 启动后访问 `http://localhost/`（前端）、`http://localhost:8080/actuator/health`（后端）；容器 MySQL 映射到宿主机 `3307`，Redis 只绑定宿主机 `127.0.0.1:6379`（可用 `REDIS_HOST_PORT` 改），避免暴露公网。
 - `frontend/.env.production` 默认 `/api`，即**同源部署**：浏览器请求前端域名的 `/api`，由 Nginx 反代到后端，不产生跨域，`APP_CORS_ALLOWED_ORIGINS` 保持 `*` 即可。
 
@@ -252,16 +256,17 @@ docker compose up -d --build
 | `/api/user/logout` | 登出（access token 加入黑名单、撤销 refresh token） | 需要登录 |
 | `/api/user/info`、`/profile`、`/change-password` | 当前用户信息与维护 | 需要登录 |
 | `/api/ticket/query`、`/api/station/*`、`/api/train/{id}/stops` | 余票、车站、经停站查询 | 公开 |
-| `/api/order/buy`、`/my`、`/refund/{id}` | 购票、订单、退票 | 需要登录 |
+| `/api/order/buy`、`/my`、`/refund/{id}` | 购票（返回 PENDING，异步出票）、订单、退票 | 需要登录 |
 | `/api/message/*` | 私信与系统通知 | 需要登录 |
 | `/api/dashboard/*` | 看板统计 | 公开 |
 | `/api/ai/status`、`/api/ai/chat` | AI 助手配置状态与对话代理 | 需要登录 |
 | `/api/admin/users`、`/api/admin/orders`、`/api/admin/stations`、`/api/admin/trains`、`/api/admin/tickets` | 管理后台（角色/订单查询、站点车次 CRUD、余票调整） | 需要 ADMIN |
+| `/api/admin/dead-letters`、`/api/admin/dead-letters/{eventId}/requeue` | 死信事件列表与补偿重新入队 | 需要 ADMIN |
 
 ## 注意事项
 
 - `DataInitializer` 在 prod 仍会幂等补齐站点/车次/余票，但不创建演示账号与模拟订单；生产账号请自行创建。
-- 内置 JWT 密钥、数据库与 Redis 密码仅供本地演示，公网部署前必须替换 `JWT_SECRET`、`DB_*`、`REDIS_PWD`；prod 启动会拒绝缺失这些环境变量的部署。CORS 默认 `*` 仅适用于同源部署，分域名部署必须通过 `APP_CORS_ALLOWED_ORIGINS` 收紧白名单。
+- 内置 JWT 密钥、数据库与 Redis 密码仅供本地演示，公网部署前必须替换 `JWT_SECRET`、`DB_*`、`REDIS_PWD`、`RABBITMQ_PWD`；prod 启动会拒绝缺失这些环境变量的部署。CORS 默认 `*` 仅适用于同源部署，分域名部署必须通过 `APP_CORS_ALLOWED_ORIGINS` 收紧白名单。
 - AI 助手的模型密钥由服务端通过 `AI_API_KEY` 环境变量持有，浏览器只与 `/api/ai/**` 代理交互，不接触密钥；未配置时自动降级为模拟回复。可用 `AI_ENDPOINT` / `AI_MODEL` / `AI_TEMPERATURE` 调整服务端模型参数。
 - prod schema 由 Flyway 管理（Hibernate `ddl-auto=none`）；后续表结构变更请新增 `V4__*.sql` 等迁移脚本，不要直接改库或改回 `update`。dev / test 仍由 Hibernate 自动建表。
 - 角色写在 JWT 声明中：注册用户默认 `USER`，内置 `admin` 账号（仅 dev 演示）为 `ADMIN`；prod 需用户自注册后由管理员调用 `/api/admin/users/{id}/role` 提升。角色变更后旧令牌保持原角色直到刷新/过期。前端管理后台入口仅 `ADMIN` 可见。

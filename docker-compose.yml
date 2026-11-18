@@ -22,6 +22,26 @@ services:
       retries: 20
       start_period: 30s
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: railway-rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-railway}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PWD:-railway_rabbit_123}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      # 管理台 http://localhost:15672
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MGMT_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
   redis:
     image: redis:7-alpine
     container_name: railway-redis
@@ -55,6 +75,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/railway_ticket?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
@@ -73,6 +95,12 @@ services:
       # 链路追踪：默认空（不上报）；启用 zipkin profile 时在 .env 设 ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans
       ZIPKIN_ENDPOINT: ${ZIPKIN_ENDPOINT:-}
       TRACING_SAMPLING_PROBABILITY: ${TRACING_SAMPLING_PROBABILITY:-1.0}
+      # 订单异步化：通过 RabbitMQ 即时唤醒 worker（关掉则退化为定时轮询）
+      ORDER_MQ_ENABLED: ${ORDER_MQ_ENABLED:-true}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-railway}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PWD:-railway_rabbit_123}
     ports:
       - "8080:8080"
     healthcheck:
@@ -119,3 +147,4 @@ services:
 volumes:
   mysql-data:
   redis-data:
+  rabbitmq-data:

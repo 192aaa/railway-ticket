@@ -606,11 +606,43 @@ function setFilter(key) {
 }
 
 let loadAbort = null
+let pollTimer = null
+let polling = false
 
-onMounted(load)
+// 下单已改为异步：新订单先返回 PENDING，由后端 worker 异步扣票/选座。
+// 页面在存在 PENDING 订单时静默轮询，状态流转后自动刷新，不打扰用户。
+async function pollPending() {
+  if (polling || !orders.value.some((o) => o.status === 'PENDING' || o.status === '待支付')) return
+  polling = true
+  try {
+    const list = await request.get('/order/my')
+    if (Array.isArray(list)) {
+      orders.value = [...list].sort((a, b) => {
+        const ta = a.createTime || a.id || 0
+        const tb = b.createTime || b.id || 0
+        return String(tb).localeCompare(String(ta))
+      })
+      highlightId.value = qHighlightNew() ? (orders.value[0]?.id ?? null) : highlightId.value
+    }
+  } catch {
+    // 轮询失败不打断页面，下一轮再试
+  } finally {
+    polling = false
+  }
+}
+
+function qHighlightNew() {
+  return route.query.highlight === 'new'
+}
+
+onMounted(() => {
+  load()
+  pollTimer = setInterval(pollPending, 1500)
+})
 
 onBeforeUnmount(() => {
   if (loadAbort) loadAbort.abort()
+  if (pollTimer) clearInterval(pollTimer)
 })
 
 watch(

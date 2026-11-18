@@ -759,7 +759,7 @@
                 <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
               </svg>
             </div>
-            <h3 class="success-title">购票成功！</h3>
+            <h3 class="success-title">订单已提交！</h3>
             <div class="success-info">
               <div class="si-row">
                 <span class="si-label">车次</span>
@@ -770,8 +770,8 @@
                 <span class="si-route">{{ successData.from }} → {{ successData.to }}</span>
               </div>
               <div class="si-row">
-                <span class="si-label">座位</span>
-                <span>{{ successData.seatType }}</span>
+                <span class="si-label">进度</span>
+                <span>出票中，可在订单页查看</span>
               </div>
               <div class="si-row">
                 <span class="si-label">乘客</span>
