@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import com.example.demo.entity.UserRole;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -23,13 +24,20 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /** 兼容旧调用：签发普通用户令牌。 */
     public String generateToken(Long userId, String username) {
+        return generateToken(userId, username, UserRole.USER);
+    }
+
+    public String generateToken(Long userId, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
+        String safeRole = UserRole.isValid(role) ? role : UserRole.USER;
 
         return Jwts.builder()
                 .subject(username)
                 .claim("userId", userId)
+                .claim("role", safeRole)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getKey())
@@ -50,6 +58,12 @@ public class JwtUtil {
 
     public String getUsername(String token) {
         return parseToken(token).getSubject();
+    }
+
+    /** 从令牌读取角色；旧令牌无 role 声明时按普通用户处理。 */
+    public String getRole(String token) {
+        String role = parseToken(token).get("role", String.class);
+        return UserRole.isValid(role) ? role : UserRole.USER;
     }
 
     public boolean validateToken(String token) {

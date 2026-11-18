@@ -11,7 +11,7 @@
 
 ## Summary
 
-前后端分离的铁路购票系统：Spring Boot 后端暴露 27 个 `/api` 端点，Vue 3 前端通过同源 `/api` 访问，MySQL 持久化（prod 由 Flyway 管理 schema）。并发安全由数据库条件更新与座位唯一约束保证，重复查询由 Caffeine（dev）/ Redis（prod）短缓存承担，登录态（refresh token / 登出黑名单）、接口限流与定时任务互斥同样基于 Redis。交付采用 Docker Compose 四服务（MySQL + Redis + 后端 + 前端，含健康检查）与可选 Zipkin profile，配套 GitHub Actions CI；测试使用 H2 内存库，Redis 全链路测试用 Testcontainers（无 Docker 时跳过），前端用 Vitest + Playwright。
+前后端分离的铁路购票系统：Spring Boot 后端暴露 40 个 `/api` 端点（含 13 个仅管理员可访问的管理端接口），Vue 3 前端通过同源 `/api` 访问，MySQL 持久化（prod 由 Flyway 管理 schema）。并发安全由数据库条件更新与座位唯一约束保证，重复查询由 Caffeine（dev）/ Redis（prod）短缓存承担，登录态（refresh token / 登出黑名单）、接口限流与定时任务互斥同样基于 Redis。交付采用 Docker Compose 四服务（MySQL + Redis + 后端 + 前端，含健康检查）与可选 Zipkin profile，配套 GitHub Actions CI；测试使用 H2 内存库，Redis 全链路测试用 Testcontainers（无 Docker 时跳过），前端用 Vitest + Playwright。
 
 ## Technical Context
 
@@ -19,22 +19,22 @@
 | --- | --- | --- | --- |
 | 后端 | Java / Spring Boot / Spring MVC / Data JPA | 17 / 4.1.1 | 项目基线，不可随意升级 |
 | 缓存 | Spring Cache + Caffeine / Redis（Spring Data Redis + Lettuce） | BOM 管理 | dev 本地 Caffeine；prod 共享 Redis，余票 30s、站点/车次 600s |
-| 安全 | JJWT + BCrypt + 自研过滤器（默认拦截 + 黑名单/限流/refresh token） | 0.12.6 | 轻量演示；未引入完整 Spring Security（T101 已按自研方案闭环） |
+| 安全 | JJWT + BCrypt + 自研过滤器（默认拦截 + USER/ADMIN 角色 + 黑名单/限流/refresh token） | 0.12.6 | 轻量演示；未引入完整 Spring Security（T101/T116 已按自研方案闭环） |
 | 文档/监控 | springdoc-openapi、Actuator + Micrometer Prometheus、Micrometer Tracing + Brave | 2.8.8 | dev Swagger、健康检查、缓存命中率、traceId 与可选 Zipkin |
 | 前端 | Vue / Vue Router / Pinia / Element Plus / Axios / Vite | 3.5 / 5.4 / 4.1 / 8 | 组件按需自动导入、代码分块；Vitest + Playwright + ESLint + Prettier |
 | 数据 | MySQL（dev/prod）、H2 内存库（test）、Flyway（prod 迁移） | 8.0 | 测试不依赖本机 MySQL；prod schema 由 Flyway 管理 |
 | 部署 | Docker Compose + Nginx；Render Blueprint | — | 容器/裸机两套 Nginx 配置；Redis 与可选 Zipkin |
-| 测试 | JUnit 5 + Mockito + AssertJ + `@SpringBootTest` + Testcontainers | — | 49 个测试（6 个需 Docker，无 Docker 时跳过），`mvn verify` 全绿 |
+| 测试 | JUnit 5 + Mockito + AssertJ + `@SpringBootTest` + Testcontainers | — | 57 个测试（6 个需 Docker，无 Docker 时跳过），`mvn verify` 全绿 |
 
 ## Constitution Check
 
 | 原则 | 满足 | 说明 |
 | --- | --- | --- |
-| I. 数据库是并发真相 | ✅ | 8 条条件更新 SQL + `@Transactional`；座位唯一约束（T105）+ Flyway V1/V2 迁移（T102） |
-| II. 契约稳定 | ✅ | 统一 `Result<T>`、27 端点与文档一致；新增端点需同步 spec/plan |
-| III. 环境隔离与最小权限 | ✅ | prod 演示数据关闭、密钥外置且启动强校验；`/api` 默认拦截 + 显式放行、黑名单/refresh/限流（T101/T103/T104） |
-| IV. 可验证交付 | ✅ | 49 后端测试 + 11 Vitest + 2 E2E + CI 3 job + Compose 实测 + 404 冒烟 |
-| V. 文档与代码同源 | ✅ | 规格、方案、任务三件套与 README 数字反向核对；2026-11-17 重新核验 |
+| I. 数据库是并发真相 | ✅ | 8 条条件更新 SQL + `@Transactional`；座位唯一约束（T105）+ Flyway V1~V3 迁移（T102/T116） |
+| II. 契约稳定 | ✅ | 统一 `Result<T>`、40 端点与文档一致；新增端点需同步 spec/plan |
+| III. 环境隔离与最小权限 | ✅ | prod 演示数据关闭、密钥外置且启动强校验；`/api` 默认拦截 + 显式放行 + 管理端角色拦截、黑名单/refresh/限流（T101/T103/T104/T116） |
+| IV. 可验证交付 | ✅ | 57 后端测试 + 11 Vitest + 2 E2E + CI 3 job + Compose 实测 + 404 冒烟 |
+| V. 文档与代码同源 | ✅ | 规格、方案、任务三件套与 README 数字反向核对；2026-11-18 重新核验 |
 
 ## Architecture
 
@@ -48,9 +48,9 @@ flowchart LR
         V[Vite Dev :5173<br/>/api 代理]
     end
     subgraph Back[Spring Boot 后端 :8080]
-        F[TraceIdFilter / RateLimitFilter / JwtAuthFilter<br/>默认拦截 + 显式放行]
-        C[Controller 8 个<br/>含 /api/ai 代理]
-        S[Service 6 个 + 缓存版本<br/>事务 / Redis 缓存]
+        F[TraceIdFilter / RateLimitFilter / JwtAuthFilter<br/>默认拦截 + 角色校验]
+        C[Controller 9 个<br/>含 AI 代理与管理端]
+        S[Service 7 个 + 缓存版本<br/>事务 / Redis 缓存]
         R[Repository 7 个<br/>JPA + nativeQuery + Flyway]
         T[定时任务<br/>Redis 锁互斥]
     end
@@ -77,17 +77,17 @@ flowchart LR
 ```
 src/main/java/com/example/demo/
   controller/   8 个 @RestController，27 端点
-  service/      6 个业务 Service + TicketCacheVersion
+  service/      7 个业务 Service（含 AdminService）+ TicketCacheVersion
   repository/   7 个 JpaRepository，8 条原子 UPDATE
   entity/ dto/  7 实体 + 2 枚举 + DTO/VO
-  security/     JwtAuthFilter / JwtUtil / TokenService / RateLimitFilter
+  security/     JwtAuthFilter / JwtUtil / TokenService / RateLimitFilter（含角色校验）
   config/       WebConfig / DataInitializer / RedisConfig / ProdSecurityValidator
                 / TraceIdFilter / TracingConfig / AiProperties
   task/         OrderAutoCompleteTask / RedisTaskLock
   common/       Result / BusinessException / GlobalExceptionHandler
-src/main/resources/       application{,-dev,-prod}.properties、logback-spring.xml、db/migration/V1~V2
-src/test/                 49 个测试（6 个 Testcontainers）+ application-test.properties
-frontend/src/             views(8) / components(4) / router / stores / utils / test
+src/main/resources/       application{,-dev,-prod}.properties、logback-spring.xml、db/migration/V1~V3
+src/test/                 57 个测试（6 个 Testcontainers）+ application-test.properties
+frontend/src/             views(9) / components(4) / router / stores / utils / test
 frontend/tests/e2e/       Playwright 端到端测试
 docker/                   Dockerfile.backend{,.maven} / Dockerfile.frontend / nginx.conf
 deploy/                   nginx/railway.conf（裸机）、scripts/*
@@ -108,12 +108,12 @@ specs/001-railway-ticket/ spec.md / plan.md / tasks.md
 
 ### ADR-002: 默认拦截 + 显式放行的 JWT 鉴权
 
-- **关联需求**: FR-005、FR-006、NFR-011
-- **决策**: `JwtAuthFilter` 只维护 `PUBLIC_API_PREFIXES`（login/register/refresh 与查询类接口）；其余 `/api/**` 默认要求 Bearer token，校验通过后注入 `request.setAttribute("userId", ...)`，黑名单命中返回 401。Redis 模式下另由 `RateLimitFilter` 按 IP 限流，`TokenService` 负责 refresh 轮换与登出撤销。
-- **理由**: 修正原先「白名单外直接放行」的缺陷，使新增端点默认受保护；演示系统无需完整安全框架，保持轻量与既有 401 JSON 响应格式。
-- **备选与否决原因**: Spring Security 默认全局拦截 + 显式放行——引入成本高且会改变现有响应格式；继续前缀两张表——新增端点易漏配（T103 已修复）。
-- **已知后果**: 非 `/api` 路径（Actuator、Swagger、静态资源、`/error`）不走此过滤器，由部署层控制访问。
-- **证据**: `security/JwtAuthFilter.java:21-80`、`security/TokenService.java`、`security/RateLimitFilter.java`、`JwtAuthFilterTest` 5 例、`TokenServiceTest`、`RateLimitFilterTest`。
+- **关联需求**: FR-005~FR-008、NFR-011
+- **决策**: `JwtAuthFilter` 只维护 `PUBLIC_API_PREFIXES`（login/register/refresh 与查询类接口）；其余 `/api/**` 默认要求 Bearer token，校验通过后注入 `userId` 与 `role` 到 request attribute，黑名单命中返回 401。`/api/admin/**` 在登录校验之后再检查角色是否为 `ADMIN`，否则 403。Redis 模式下另由 `RateLimitFilter` 按 IP 限流，`TokenService` 负责 refresh 轮换与登出撤销。
+- **理由**: 修正原先「白名单外直接放行」的缺陷，使新增端点默认受保护；管理端用 JWT 声明做角色拦截，避免每次请求查库；演示系统无需完整 Spring Security，保持轻量与既有 JSON 响应格式。
+- **备选与否决原因**: Spring Security 角色注解——引入成本高且会改变现有响应格式；每个 Controller 手写角色判断——易遗漏且难测试。
+- **已知后果**: 角色来自 JWT 声明，修改用户角色后旧令牌仍保留旧角色直至过期/刷新；非 `/api` 路径（Actuator、Swagger、静态资源、`/error`）不走此过滤器，由部署层控制访问。
+- **证据**: `security/JwtAuthFilter.java`、`security/JwtUtil.java`、`entity/UserRole.java`、`AdminServiceTest` 5 例、`JwtAuthFilterTest` 7 例、`JwtUtilTest` 4 例。
 
 ### ADR-003: 多阶段 Docker 构建 + 环境变量绑定
 
@@ -229,7 +229,7 @@ erDiagram
 
 Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Bearer <token>`，Controller 用 `@RequestAttribute("userId")`。下表「入参」不含该隐式参数。
 
-**[P]** 显式公开的查询/登录类接口 / **[A]** 强制鉴权（默认行为）
+**[P]** 显式公开的查询/登录类接口 / **[A]** 强制鉴权（默认行为） / **[ADMIN]** 登录 + ADMIN 角色
 
 | 模块 | 方法 | 路径 | 入参 | 返回 | 鉴权 |
 | --- | --- | --- | --- | --- | --- |
@@ -260,6 +260,19 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 看板 | GET | `/api/dashboard/trend` | — | 近 7 日趋势 | [P] |
 | AI | GET | `/api/ai/status` | — | `{configured,model}` | [A] |
 | AI | POST | `/api/ai/chat` | `AiChatRequest` | 上游 JSON 原样透传 | [A] |
+| 管理 | GET | `/api/admin/users` | — | `Result<List<User>>` | [ADMIN] |
+| 管理 | PUT | `/api/admin/users/{id}/role` | `{role}` | `Result<User>` | [ADMIN] |
+| 管理 | GET | `/api/admin/orders` | `status?` | `Result<List<Order>>` | [ADMIN] |
+| 管理 | GET | `/api/admin/stations` | — | `Result<List<Station>>` | [ADMIN] |
+| 管理 | POST | `/api/admin/stations` | `Station` | `Result<Station>` | [ADMIN] |
+| 管理 | PUT | `/api/admin/stations/{id}` | `Station` | `Result<Station>` | [ADMIN] |
+| 管理 | DELETE | `/api/admin/stations/{id}` | `id` | `Result<Void>` | [ADMIN] |
+| 管理 | GET | `/api/admin/trains` | — | `Result<List<Train>>` | [ADMIN] |
+| 管理 | POST | `/api/admin/trains` | `Train` | `Result<Train>` | [ADMIN] |
+| 管理 | PUT | `/api/admin/trains/{id}` | `Train` | `Result<Train>` | [ADMIN] |
+| 管理 | DELETE | `/api/admin/trains/{id}` | `id` | `Result<Void>` | [ADMIN] |
+| 管理 | GET | `/api/admin/tickets` | — | `Result<List<Ticket>>` | [ADMIN] |
+| 管理 | POST | `/api/admin/tickets/adjust` | `{trainId,trainDate,seatType,delta}` | `Result<Ticket>` | [ADMIN] |
 
 
 ## Configuration
@@ -267,7 +280,7 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 配置 / 变量 | dev | prod | test |
 | --- | --- | --- | --- |
 | 数据源 | `localhost:3306/railway_ticket` | `SPRING_DATASOURCE_*` 必填 | H2 `jdbc:h2:mem:railway_test;MODE=MySQL` |
-| schema | Hibernate `ddl-auto=update` | Flyway `V1__init.sql` + `ddl-auto=none` | `create-drop`，Flyway 关闭 |
+| schema | Hibernate `ddl-auto=update` | Flyway `V1__init.sql` ~ `V3__user_role.sql` + `ddl-auto=none` | `create-drop`，Flyway 关闭 |
 | SQL 日志 | 开启 + trace | 关闭，root warn | 关闭 |
 | Swagger | 开启 | 关闭 | 关闭 |
 | 缓存 | Caffeine | Redis（可 `SPRING_CACHE_TYPE=caffeine` 回退） | `none` |
@@ -305,13 +318,13 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 
 | 层级 | 手段 | 覆盖 |
 | --- | --- | --- |
-| 单元 | JUnit 5 + Mockito + AssertJ（真实 BCrypt / JJWT） | Service 分支、座位冲突重试、JWT/黑名单/限流、异常分类、CORS、traceId、prod 密钥校验 |
+| 单元 | JUnit 5 + Mockito + AssertJ（真实 BCrypt / JJWT） | Service 分支、座位冲突重试、JWT 角色声明/黑名单/限流、管理端越权校验、异常分类、CORS、traceId、prod 密钥校验 |
 | 集成 | `@SpringBootTest` + H2 + `@ActiveProfiles("test")`；Testcontainers Redis | 上下文装配、Bean 条件开关、缓存/令牌/任务锁真实 Redis 行为 |
 | 前端 | Vitest + Playwright（mock API）+ ESLint + Prettier | auth 存储与 401 刷新重放、登录/登出、代码规范与格式 |
 | 构建 | `npm ci && npm run build`、`docker compose config --quiet` | 前端产物、Compose 语法 |
 | 运行时 | 容器 healthcheck + HTTP 冒烟 | 见下 |
 
-**49 个后端测试（6 个 Testcontainers，无 Docker 时跳过）+ 11 个 Vitest + 2 个 E2E**：代表类 `Demo2ApplicationTests`(2)、`GlobalExceptionHandlerTest`(2)、`JwtUtilTest`(3)、`JwtAuthFilterTest`(5)、`OrderServiceTest`(6)、`UserServiceTest`(7)、`RedisCacheIntegrationTest`(6)、`TraceIdFilterTest`(4)、`WebConfigTest`(2)。
+**57 个后端测试（6 个 Testcontainers，无 Docker 时跳过）+ 11 个 Vitest + 2 个 E2E**：代表类 `Demo2ApplicationTests`(2)、`GlobalExceptionHandlerTest`(2)、`AdminServiceTest`(5)、`JwtUtilTest`(4)、`JwtAuthFilterTest`(7)、`OrderServiceTest`(6)、`UserServiceTest`(7)、`RedisCacheIntegrationTest`(6)、`TraceIdFilterTest`(4)、`WebConfigTest`(2)。
 
 **CI**（`.github/workflows/ci.yml`）：`push(main/master)` 与 `pull_request` 触发 3 个 job — `backend`（Temurin 17 + `docker info` + `sh ./mvnw -B verify`）、`frontend`（Node 22 + `npm ci` + lint + format:check + test + build + playwright install + test:e2e）、`compose`（`docker compose config --quiet`）。
 
@@ -320,6 +333,7 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 项 | 结果 |
 | --- | --- |
 | `.\mvnw.cmd -B verify`（2026-11-17） | Docker 未启动：49 tests / 0 failures / 6 skipped；启动后复验：49 tests / 0 failures / 0 skipped（Testcontainers Redis 6 例真实执行），均 `BUILD SUCCESS` |
+| `.\mvnw.cmd -B test`（2026-11-18 RBAC） | 57 tests / 0 failures / 6 skipped（`BUILD SUCCESS`，新增 8 个 RBAC/管理端用例） |
 | `npm test` / `npm run lint` / `npm run format:check` / `npm run build` | 11 通过 / 0 errors 0 warnings / 通过 / 1.46s |
 | `npm audit --audit-level=moderate` | 0 vulnerabilities（移除未使用的 `@vue/test-utils`，`happy-dom` 17.6.3 → 21.0.4） |
 | `npm run test:e2e` | 2 例通过（登录存储+登出清理、401→refresh→重放） |
@@ -335,10 +349,11 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | 分层后 backend 重启 | `healthy`；`/actuator/health` 200、未知路径 404（T109 历史记录，鉴权改造前） |
 | Flyway 与 prod 数据隔离 | `flyway_schema_history` 含 v1/v2 成功记录；初始化器不写演示账号/订单（首次启动日志 `用户数: 0`、`历史订单: 0`）；当前卷中 2 用户 / 7 订单来自手工验证，车次 179 |
 | 链路追踪 | `/api/v2/services` 返回 `railway-ticket`，span 与日志 traceId 一致（T115） |
+| RBAC / 管理端（T116） | 57 tests 全绿；`JwtAuthFilterTest` 覆盖 USER 403 / ADMIN 放行；`AdminServiceTest` 覆盖角色非法、引用删除拒绝、余票负数拒绝与缓存失效；前端管理页 lint/build/E2E 全绿 |
 
 ## Known Limitations
 
-原 `T1xx` 风险已全部闭环（详见 `tasks.md` Phase 8 / 9）：安全体系（T101/T103/T104）、Flyway 迁移（T102）、座位唯一约束（T105）、缓存与异常日志（T106）、LICENSE（T107）、前端 E2E 与规范（T108）、构建提速实测（T109）、AI 服务端代理（T110）、日志归档与追踪（T111）、规格澄清（T113）、Vitest/Playwright（T114）、Brave/Zipkin（T115）。
+原 `T1xx` 风险已全部闭环（详见 `tasks.md` Phase 8 / 10）：安全体系（T101/T103/T104）、Flyway 迁移（T102）、座位唯一约束（T105）、缓存与异常日志（T106）、LICENSE（T107）、前端 E2E 与规范（T108）、构建提速实测（T109）、AI 服务端代理（T110）、日志归档与追踪（T111）、规格澄清（T113）、Vitest/Playwright（T114）、Brave/Zipkin（T115）、USER/ADMIN 角色与管理后台（T116）。
 
 仍需注意的环境相关事项：
 
@@ -349,4 +364,5 @@ Base path `/api`；统一 `Result<T>`；需登录接口带 `Authorization: Beare
 | Zipkin | 默认不上报外部 collector；启用 `--profile tracing` 时需设置 `ZIPKIN_ENDPOINT` |
 | AI 助手 | 未配置 `AI_API_KEY` 时降级为模拟回复；配置后浏览器仍只访问 `/api/ai/**` 代理 |
 | 无 Redis 环境 | `SPRING_CACHE_TYPE=caffeine` 回退时，黑名单 / refresh 轮换 / 限流 / 任务锁不启用 |
+| 角色变更传播 | 角色写在 JWT 声明中，管理员调整用户角色后旧令牌仍保留原角色，需刷新令牌或等待过期（T116 已知后果） |
 | 本机 Docker daemon | 关闭时无法复验容器健康与 Testcontainers 用例（后者自动跳过），CI 环境需 `docker info` 通过 |

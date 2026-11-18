@@ -13,6 +13,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     List<Order> findByTrainIdAndTrainDate(Long trainId, String trainDate);
 
+    boolean existsByTrainId(Long trainId);
+
     List<Order> findByStatus(String status);
 
     long countByStatus(String status);

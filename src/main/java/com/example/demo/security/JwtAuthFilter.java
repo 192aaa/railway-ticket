@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.example.demo.entity.UserRole;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -28,6 +29,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             "/api/train/",
             "/api/dashboard/"
     );
+
+    /** 管理端路径：登录之外还要求 ADMIN 角色。 */
+    private static final String ADMIN_API_PREFIX = "/api/admin/";
 
     public JwtAuthFilter(JwtUtil jwtUtil, TokenService tokenService) {
         this.jwtUtil = jwtUtil;
@@ -62,7 +66,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        String role = jwtUtil.getRole(token);
+        if (path.startsWith(ADMIN_API_PREFIX) && !UserRole.ADMIN.equals(role)) {
+            writeForbidden(response, "需要管理员权限");
+            return;
+        }
+
         request.setAttribute("userId", jwtUtil.getUserId(token));
+        request.setAttribute("role", role);
         filterChain.doFilter(request, response);
     }
 
@@ -78,5 +89,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setContentType("application/json;charset=UTF-8");
         String safeMessage = message.replace("\\", "\\\\").replace("\"", "\\\"");
         response.getWriter().write("{\"code\":401,\"message\":\"" + safeMessage + "\",\"data\":null}");
+    }
+
+    private void writeForbidden(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json;charset=UTF-8");
+        String safeMessage = message.replace("\\", "\\\\").replace("\"", "\\\"");
+        response.getWriter().write("{\"code\":403,\"message\":\"" + safeMessage + "\",\"data\":null}");
     }
 }

@@ -27,6 +27,15 @@ class JwtUtilTest {
     }
 
     @Test
+    void generateTokenShouldCarryRole() {
+        String token = jwtUtil.generateToken(1L, "admin", "ADMIN");
+
+        assertThat(jwtUtil.getRole(token)).isEqualTo("ADMIN");
+        assertThat(jwtUtil.generateToken(1L, "u", "GUEST")).isNotNull();
+        assertThat(jwtUtil.getRole(jwtUtil.generateToken(1L, "u", "GUEST"))).isEqualTo("USER");
+    }
+
+    @Test
     void validateTokenShouldRejectTamperedToken() {
         String token = jwtUtil.generateToken(1L, "admin");
         String tampered = token.substring(0, token.length() - 2) + "xx";

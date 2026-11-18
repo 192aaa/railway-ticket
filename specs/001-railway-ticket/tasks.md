@@ -219,7 +219,7 @@
 
 | 门禁 | 命令 | 当前状态 |
 | --- | --- | --- |
-| 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-17：Docker 未启动 49 tests / 6 skipped；启动后 49 tests / 0 skipped） |
+| 后端测试 | `.\mvnw.cmd -B verify` | PASS（2026-11-18：57 tests / 0 failures / 6 skipped；Docker 就绪时 0 skipped） |
 | 前端单测 | `cd frontend && npm test` | PASS（11 tests） |
 | 前端规范 / 格式 | `npm run lint` / `npm run format:check` | PASS（0 errors / 0 warnings；全部文件符合 Prettier） |
 | 前端 E2E | `npm run test:e2e` | PASS（2 tests，mock API） |
@@ -297,14 +297,20 @@
 - [x] T115 [中] [宪法 IV] 接入 Micrometer Tracing + Brave + 可选 Zipkin collector
   > 证据: Boot 4.1.1 无 tracing 自动配置，`TracingConfig` 手动装配 `BraveTracer`（`localServiceName`、Sampler、`AsyncReporter`+`URLConnectionSender`→`ZipkinSpanHandler`）；`TraceIdFilter` 注入 Tracer 创建 SERVER span，日志/响应头/Zipkin 共用同一 traceId，入站 `X-Trace-Id` 作为 span tag；`TracingConfigTest` 2 例；Compose 新增 `zipkin` profile 服务（`--profile tracing`）；实测 `GET /api/v2/services` 返回 `railway-ticket`，span name=`get /actuator/health`、traceId=`37772fe82f26c2eb`；`ZIPKIN_ENDPOINT` 默认空不上报
 
+## Phase 10: 单体项目 deepening（RBAC 与管理后台）
+
+- [x] T116 [高] [宪法 III] 引入 USER/ADMIN 角色与管理端接口，前端增加管理后台
+  > 验收: JWT 携带角色；`/api/admin/**` 非管理员 403；注册不可自我提权；管理端可维护用户角色、订单查询、站点/车次 CRUD、余票调整；被引用站点与有订单车次不可删除；余票调整后缓存失效；前端管理页仅管理员可见且有路由守卫
+  > 证据: `entity/UserRole.java`、`db/migration/V3__user_role.sql`、`JwtUtil` 3 参 generateToken + getRole、`JwtAuthFilter` ADMIN 前缀 403、`AdminService`/`AdminController` 13 端点、`views/Admin.vue`；`AdminServiceTest` 5 例、`JwtAuthFilterTest` 7 例、`JwtUtilTest` 4 例；`.\mvnw.cmd -B test` → 57 tests / 0 failures / 6 skipped；前端 lint/format/test/build/E2E 全绿
+
 ## 统计
 
 | 状态 | 数量 |
 | --- | --- |
-| 已完成 | 62 |
+| 已完成 | 63 |
 | 待办 | 0 |
-| 合计 | 62 |
+| 合计 | 63 |
 
-Phase 8 全部完成。本轮（第二批）新增完成：T107、T108、T111、T113。
+Phase 8/9/10 全部完成。第二批新增完成：T107、T108、T111、T113；第三批新增完成：T116。
 
-> 2026-11-17 复核：上述 62 项仍为全部完成；`spec.md`、`plan.md`、`README.md` 的数字与描述已同步到当前代码（27 端点 / 49 测试 / Redis + Flyway + Zipkin）。当前改动位于工作区，尚未提交。
+> 2026-11-18 复核：63 项全部完成；`spec.md`、`plan.md`、`README.md` 同步到当前代码（40 端点 / 57 测试 / Redis + Flyway V3 + Zipkin + RBAC 管理后台）。

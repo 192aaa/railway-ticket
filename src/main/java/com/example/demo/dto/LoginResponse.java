@@ -14,4 +14,6 @@ public class LoginResponse {
     private Long userId;
     private String username;
     private String realName;
+    /** RBAC 角色：USER / ADMIN。 */
+    private String role;
 }

@@ -371,6 +371,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("123456"));
             admin.setRealName("管理员");
+            admin.setRole(com.example.demo.entity.UserRole.ADMIN);
             admin.setIdCard("110101199001011234");
             admin.setPhone("13800138000");
             userRepository.save(admin);

@@ -85,7 +85,7 @@ class UserServiceTest {
     @Test
     void loginShouldReturnToken() {
         when(userRepository.findByUsername("admin")).thenReturn(Optional.of(existingUser("admin", "correct-pwd")));
-        when(jwtUtil.generateToken(1L, "admin")).thenReturn("jwt-token");
+        when(jwtUtil.generateToken(1L, "admin", "USER")).thenReturn("jwt-token");
 
         LoginResponse resp = userService.login(loginRequest("admin", "correct-pwd"));
 

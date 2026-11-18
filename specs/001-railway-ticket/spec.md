@@ -136,11 +136,14 @@
 ### 用户与鉴权
 
 - **FR-001**: 系统必须提供注册，校验用户名唯一，密码以 BCrypt 存储。✅
-- **FR-002**: 系统必须提供登录，签发含 `userId` 与 `username` 的 JWT。✅
+- **FR-002**: 系统必须提供登录，签发含 `userId`、`username` 与 `role` 的 JWT；登录响应同步返回角色。✅
 - **FR-003**: 系统必须提供当前用户信息、修改密码（校验原密码、新密码 ≥6 位、不得与原密码相同）。✅
 - **FR-004**: 系统必须支持修改资料，校验身份证（15/18 位）与手机号（`^1[3-9]\d{9}$`）。✅
 - **FR-005**: 需要登录的接口必须校验 `Authorization: Bearer <token>`，失败返回 401。✅
-- **FR-006**: `/api/user/login`、`/api/user/register`、`/api/ticket/`、`/api/station/` 等前缀必须公开可访问。✅
+- **FR-006**: `/api/user/login`、`/api/user/register`、`/api/user/refresh`、`/api/ticket/`、`/api/station/`、`/api/train/`、`/api/dashboard/` 前缀公开可访问，其余 `/api/**` 默认要求登录。✅
+- **FR-007**: 用户必须区分 `USER` / `ADMIN` 两种角色；注册一律为 `USER`，不能通过请求参数自我提权。✅
+- **FR-008**: `/api/admin/**` 必须同时校验登录与 `ADMIN` 角色，非管理员返回 HTTP 403 + code 403。✅
+- **FR-009**: 管理员必须能查询用户与订单、修改用户角色、维护站点与车次、调整余票；删除被车次引用的站点或存在订单的车次必须被拒绝；余票调整后缓存必须失效。✅
 
 ### 票务查询
 
@@ -171,7 +174,7 @@
 - **FR-042**: 系统必须提供 dev 环境的 Swagger 文档与 Actuator 健康检查/监控端点。✅
 - **FR-043**: 系统必须在首次启动幂等初始化站点、车次、经停站与未来 7 天余票。✅
 - **FR-044**: 演示账号与模拟订单必须只在 dev 生成，prod 与 test 必须关闭。✅
-- **FR-045**: 前端必须提供首页、登录、注册、订单、资料、消息、看板、404 共 8 个视图，并对订单/资料/消息页做登录守卫。✅
+- **FR-045**: 前端必须提供首页、登录、注册、订单、资料、消息、看板、管理后台、404 共 9 个视图；订单/资料/消息做登录守卫，管理后台做管理员守卫且入口仅管理员可见。✅
 - **FR-046**: 前端必须统一注入 Bearer、自动解包 `data`、处理 401 强制登出。✅
 - **FR-047**: 前端必须提供 AI 助手浮窗；未配置密钥时以模拟模式工作。✅
 - **FR-048**: 系统必须提供 Docker Compose 一键部署、健康检查与 CI 流水线；跨域来源必须可通过配置收紧，以支撑前后端分域名部署。✅
@@ -188,20 +191,20 @@
 - **NFR-008（性能）**: 余票缓存 30s、站点/车次 600s，Redis 版本化失效；定时任务批量查询避免 N+1、前端代码分块。✅
 - **NFR-009（可观测）**: Actuator 暴露 `health,info,metrics,prometheus,caches`；MDC traceId + 分级日志 + prod 滚动归档，Micrometer/Brave 支持可选 Zipkin 导出。✅
 - **NFR-010（文档）**: 文档中端点数、测试数、端口等数字必须能与代码反向核对。✅
-- **NFR-011（权限）**: `/api` 默认拦截，仅显式放行查询类接口；refresh token 轮换、登出黑名单与按 IP 限流由 Redis 支撑（T101/T103）。✅
+- **NFR-011（权限）**: `/api` 默认拦截，仅显式放行查询类接口；`/api/admin/**` 再按 JWT 角色二次拦截；refresh token 轮换、登出黑名单与按 IP 限流由 Redis 支撑（T101/T103/T116）。✅
 - **NFR-012（CORS）**: 同源部署保持 `*`；分域名部署必须能通过 `APP_CORS_ALLOWED_ORIGINS` 收紧来源白名单。✅ 已配置化（2026-11-14），具体域名由部署时提供。
 
 ## 6. 成功标准
 
 | ID | 标准 | 结果 |
 | --- | --- | --- |
-| SC-001 | `.\mvnw.cmd -B verify` 全部测试通过 | ✅ 49 tests / 0 failures；Docker 就绪时 0 skipped（6 个 Testcontainers 真实执行），无 Docker 时自动跳过 |
+| SC-001 | `.\mvnw.cmd -B verify` 全部测试通过 | ✅ 57 tests / 0 failures；Docker 就绪时 0 skipped（6 个 Testcontainers 真实执行），无 Docker 时自动跳过 |
 | SC-002 | `npm ci && npm run build` 成功 | ✅ 11 个 Vitest 单测、2 个 Playwright E2E，lint/format/build 均通过 |
 | SC-003 | `docker compose config --quiet` 通过 | ✅ |
 | SC-004 | MySQL / Redis / 后端 / 前端四服务启动并具备健康检查 | ✅（2026-11-17 复验，含 `--profile tracing` 的 zipkin 共 5 容器 healthy） |
 | SC-005 | 首页、静态资源、公开 `/api/*` 可达；未知 `/api` 路径未登录 401、带令牌 404 | ✅ |
 | SC-006 | prod 不写入演示账号与模拟订单 | ✅ |
-| SC-007 | 文档数字与代码一致（27 端点 / 7 实体 / 8 条原子 SQL / 49 测试） | ✅ |
+| SC-007 | 文档数字与代码一致（40 端点 / 7 实体 / 8 条原子 SQL / 57 测试） | ✅ |
 | SC-008 | CORS 白名单可配置，默认同源部署行为不变 | ✅ `WebConfigTest` 2 个测试 |
 | SC-009 | 日志可按 traceId 检索，可选上报 Zipkin | ✅ `TraceIdFilterTest` 4 例、`TracingConfigTest` 2 例 |
 
@@ -209,8 +212,8 @@
 
 | 在范围内 | 不在范围内 |
 | --- | --- |
-| 用户、站点、车次、余票、订单、消息、看板 | 真实支付、发票、实名制核验接口 |
-| JWT 鉴权、refresh token 轮换、登出黑名单、限流、参数校验、统一响应与异常 | 完整 Spring Security 权限模型、RBAC |
+| 用户、站点、车次、余票、订单、消息、看板、管理后台 | 真实支付、发票、实名制核验接口 |
+| JWT 鉴权、USER/ADMIN 角色、refresh token 轮换、登出黑名单、限流、参数校验、统一响应与异常 | 完整 Spring Security 权限模型、多角色 RBAC |
 | Docker Compose 部署（含 Redis、可选 Zipkin）、Render 后端部署、CI | 生产级高可用、多副本、分库分表 |
 | 演示数据初始化、Flyway 迁移、单元/集成测试 | 真实外部日志平台与独立采集链路 |
 | 容器与裸机两套 Nginx 配置 | 自动化备份 |
@@ -240,7 +243,7 @@
 
 | 检查项 | 结果 | 证据 |
 | --- | --- | --- |
-| 后端测试 | PASS | `.\mvnw.cmd -B verify` → `BUILD SUCCESS`，49 tests / 0 failures；Docker 就绪时 0 skipped（2026-11-17 复验），无 Docker 时 6 个 Testcontainers 用例自动跳过 |
+| 后端测试 | PASS | `.\mvnw.cmd -B test` → `BUILD SUCCESS`，57 tests / 0 failures / 6 skipped（Docker 未启动时 Testcontainers 自动跳过） |
 | 前端单测 / 规范 / 格式 / 构建 | PASS | `npm test` 11 例、`npm run lint` 0 errors 0 warnings、`npm run format:check` 通过、`npm run build` 1.46s、`npm audit` 0 vulnerabilities |
 | 前端 E2E | PASS | `npm run test:e2e` 2 例（登录存储/登出清理、401→refresh→重放），`page.route` mock API |
 | Compose 配置 | PASS | `docker compose config --quiet`（2026-11-17 复验仍通过） |
@@ -253,7 +256,8 @@
 | prod 数据隔离与 Flyway | PASS | 初始化器不写入演示账号/订单（首次启动日志 `用户数: 0`、`历史订单: 0`）；当前持久化卷中 2 用户 / 7 订单来自后续手工验证，非初始化器写入；车次 179；`flyway_schema_history` 含 v1/v2 成功记录 |
 | CORS 白名单配置化 | PASS | `WebConfigTest` 2 个测试；默认 `*` 不改变同源部署行为 |
 | traceId / Zipkin | PASS | `TraceIdFilterTest` 4 例、`TracingConfigTest` 2 例；实测 `/api/v2/services` 返回 `railway-ticket` 且 span 与日志 traceId 一致 |
+| RBAC / 管理端（2026-11-18） | PASS | `AdminServiceTest` 5 例、`JwtAuthFilterTest` 新增 2 例（403/放行）、`JwtUtilTest` 新增角色声明例；前端 lint/build/E2E 全绿 |
 
 ## 11. 已完成改造回填
 
-以下几轮已完成的工程化改造在 `./tasks.md` 中作为已完成项（`- [x]`）逐条登记，并附验收证据：版本控制修复、容器部署链路、配置一致性、演示数据隔离、49 个后端测试与 CI、前端 Vitest/Playwright/ESLint/Prettier、文档、Docker 实测、404 处理器、分域名 CORS 配置化、Spec Kit 三件套、Redis 缓存与令牌/限流/任务锁、Flyway 迁移、默认拦截鉴权、prod 密钥校验、座位唯一约束、AI 服务端代理、日志追踪与 Zipkin。原遗留风险 `T1xx` 已全部完成并与 `.specify/memory/constitution.md` 的原则逐条对应。
+以下几轮已完成的工程化改造在 `./tasks.md` 中作为已完成项（`- [x]`）逐条登记，并附验收证据：版本控制修复、容器部署链路、配置一致性、演示数据隔离、57 个后端测试与 CI、前端 Vitest/Playwright/ESLint/Prettier、文档、Docker 实测、404 处理器、分域名 CORS 配置化、Spec Kit 三件套、Redis 缓存与令牌/限流/任务锁、Flyway 迁移、默认拦截鉴权、prod 密钥校验、座位唯一约束、AI 服务端代理、日志追踪与 Zipkin、RBAC 与管理后台。原遗留风险 `T1xx` 已全部完成并与 `.specify/memory/constitution.md` 的原则逐条对应。

@@ -177,7 +177,7 @@ Compose 使用根目录 `.env`，模板见 `.env.example`。
 ## 测试与 CI
 
 ```powershell
-# 后端：49 个测试（其中 6 个 Testcontainers 真实 Redis 用例需 Docker，就绪时全部执行，无 Docker 时自动跳过）；
+# 后端：57 个测试（其中 6 个 Testcontainers 真实 Redis 用例需 Docker，就绪时全部执行，无 Docker 时自动跳过）；
 # 其余测试用 H2 内存库，无需本机 MySQL / Redis
 .\mvnw.cmd -B verify
 
@@ -209,7 +209,7 @@ docker compose up -d --build
 - `docker/Dockerfile.frontend` 使用 `npm ci` 构建，产物放入 `/usr/share/nginx/html`。
 - **两套 Nginx 配置不要混用**：`docker/nginx.conf` 用于容器（root `/usr/share/nginx/html`，`/api` 反代到 Compose 服务 `backend`）；`deploy/nginx/railway.conf` 用于裸机（root `/var/www/railway-frontend`，`/api` 反代到 `127.0.0.1:8080`）。
 - Compose 为 MySQL、Redis 与后端配置了 healthcheck，backend 等 MySQL / Redis 健康后再启动；Redis 开启 `appendonly` 持久化，数据卷为 `redis-data`，缓存默认走 Redis（设 `SPRING_CACHE_TYPE=caffeine` 可回退本地缓存）。
-- prod 由 Flyway 执行 `db/migration/V1__init.sql` 建表（存量库自动 baseline），Hibernate 改为 `ddl-auto=none`；启动期还会校验 `JWT_SECRET`、`SPRING_DATASOURCE_PASSWORD`（Redis 模式下另有 Redis 口令）确由环境变量提供，否则拒绝启动。
+- prod 由 Flyway 执行 `db/migration/V1__init.sql` 建表、`V2__orders_seat_unique.sql` 建座位唯一约束、`V3__user_role.sql` 增加用户角色（存量库自动 baseline），Hibernate 改为 `ddl-auto=none`；启动期还会校验 `JWT_SECRET`、`SPRING_DATASOURCE_PASSWORD`（Redis 模式下另有 Redis 口令）确由环境变量提供，否则拒绝启动。
 - 启动后访问 `http://localhost/`（前端）、`http://localhost:8080/actuator/health`（后端）；容器 MySQL 映射到宿主机 `3307`，Redis 只绑定宿主机 `127.0.0.1:6379`（可用 `REDIS_HOST_PORT` 改），避免暴露公网。
 - `frontend/.env.production` 默认 `/api`，即**同源部署**：浏览器请求前端域名的 `/api`，由 Nginx 反代到后端，不产生跨域，`APP_CORS_ALLOWED_ORIGINS` 保持 `*` 即可。
 
@@ -244,7 +244,7 @@ docker compose up -d --build
 
 ## 接口概览
 
-统一响应格式为 `Result`（`code` / `message` / `data`）。除下表标注「公开」的 `/api` 路径外，其余 `/api` 路径**默认要求** `Authorization: Bearer <token>`（Actuator、Swagger 等非 `/api` 路径不受拦截）；因此不存在的 `/api/**` 在未登录时先返回 401，带有效令牌才由异常处理器返回 404 `{"code":404,...}`，非 `/api` 未知路径直接 404。登录 / 注册 / 余票查询超限返回 429。
+统一响应格式为 `Result`（`code` / `message` / `data`）。除下表标注「公开」的 `/api` 路径外，其余 `/api` 路径**默认要求** `Authorization: Bearer <token>`（Actuator、Swagger 等非 `/api` 路径不受拦截）；`/api/admin/**` 还要求令牌中的角色为 `ADMIN`，否则返回 403。因此不存在的 `/api/**` 在未登录时先返回 401，带有效令牌才由异常处理器返回 404 `{"code":404,...}`，非 `/api` 未知路径直接 404。登录 / 注册 / 余票查询超限返回 429。
 
 | 前缀 | 说明 | 鉴权 |
 | --- | --- | --- |
@@ -256,13 +256,15 @@ docker compose up -d --build
 | `/api/message/*` | 私信与系统通知 | 需要登录 |
 | `/api/dashboard/*` | 看板统计 | 公开 |
 | `/api/ai/status`、`/api/ai/chat` | AI 助手配置状态与对话代理 | 需要登录 |
+| `/api/admin/users`、`/api/admin/orders`、`/api/admin/stations`、`/api/admin/trains`、`/api/admin/tickets` | 管理后台（角色/订单查询、站点车次 CRUD、余票调整） | 需要 ADMIN |
 
 ## 注意事项
 
 - `DataInitializer` 在 prod 仍会幂等补齐站点/车次/余票，但不创建演示账号与模拟订单；生产账号请自行创建。
 - 内置 JWT 密钥、数据库与 Redis 密码仅供本地演示，公网部署前必须替换 `JWT_SECRET`、`DB_*`、`REDIS_PWD`；prod 启动会拒绝缺失这些环境变量的部署。CORS 默认 `*` 仅适用于同源部署，分域名部署必须通过 `APP_CORS_ALLOWED_ORIGINS` 收紧白名单。
 - AI 助手的模型密钥由服务端通过 `AI_API_KEY` 环境变量持有，浏览器只与 `/api/ai/**` 代理交互，不接触密钥；未配置时自动降级为模拟回复。可用 `AI_ENDPOINT` / `AI_MODEL` / `AI_TEMPERATURE` 调整服务端模型参数。
-- prod schema 由 Flyway 管理（Hibernate `ddl-auto=none`）；后续表结构变更请新增 `V3__*.sql` 等迁移脚本，不要直接改库或改回 `update`。dev / test 仍由 Hibernate 自动建表。
+- prod schema 由 Flyway 管理（Hibernate `ddl-auto=none`）；后续表结构变更请新增 `V4__*.sql` 等迁移脚本，不要直接改库或改回 `update`。dev / test 仍由 Hibernate 自动建表。
+- 角色写在 JWT 声明中：注册用户默认 `USER`，内置 `admin` 账号（仅 dev 演示）为 `ADMIN`；prod 需用户自注册后由管理员调用 `/api/admin/users/{id}/role` 提升。角色变更后旧令牌保持原角色直到刷新/过期。前端管理后台入口仅 `ADMIN` 可见。
 - Redis 共享缓存、版本化失效、令牌黑名单、refresh token、限流与任务锁仅在 `SPRING_CACHE_TYPE=redis` 时启用；无 Redis 或 Redis 故障时降级为本地缓存 / 直接放行，不会导致启动失败。
 - 每个 HTTP 请求都会生成或透传 `X-Trace-Id`（写入 MDC 与响应头，非法字符清洗），日志格式含 `[app,traceId,thread]` 可按请求检索关联；prod 日志落到 `logs/` 并按天+大小滚动归档（可用 `LOG_DIR` / `LOG_RETAIN_DAYS` 等环境变量调整）。
 - 链路追踪默认开启（写日志 traceId + 内存 span），不配置 `ZIPKIN_ENDPOINT` 时不产生外部网络调用。需要可视化时，在 `.env` 设置 `ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans` 后执行 `docker compose --profile tracing up -d`，访问 `http://localhost:9411` 查看 span（日志 traceId 与 Zipkin traceId 一致）。Spring Boot 4 无 tracing 自动配置，本项目用 `TracingConfig` 手动装配 Brave Tracer 与 reporter。

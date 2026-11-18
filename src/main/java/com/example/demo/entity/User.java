@@ -32,6 +32,10 @@ public class User {
     @Column(length = 20)
     private String seatType;
 
+    /** RBAC 角色：USER / ADMIN；默认普通用户。 */
+    @Column(length = 20)
+    private String role = UserRole.USER;
+
     @Column(name = "create_time")
     private LocalDateTime createTime;
 

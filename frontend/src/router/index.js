@@ -10,6 +10,12 @@ const routes = [
   { path: '/profile', name: 'Profile', component: () => import('@/views/Profile.vue') },
   { path: '/messages', name: 'Messages', component: () => import('@/views/Messages.vue') },
   { path: '/dashboard', name: 'Dashboard', component: () => import('@/views/Dashboard.vue') },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/views/Admin.vue'),
+    meta: { requiresAdmin: true }
+  },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('@/views/NotFound.vue') }
 ]
 
@@ -25,6 +31,9 @@ router.beforeEach((to) => {
   const store = useUserStore()
   if ((to.path === '/orders' || to.path === '/profile' || to.path === '/messages') && !store.isLoggedIn) {
     return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  if (to.meta.requiresAdmin && !store.isAdmin) {
+    return { path: '/home' }
   }
 })
 

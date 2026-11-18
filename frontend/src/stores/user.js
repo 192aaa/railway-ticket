@@ -24,6 +24,7 @@ export const useUserStore = defineStore('user', () => {
 
   const isLoggedIn = computed(() => !!token.value)
   const username = computed(() => userInfo.value?.username || '')
+  const isAdmin = computed(() => userInfo.value?.role === 'ADMIN')
 
   async function login(username, password) {
     const payload = await request.post('/user/login', { username, password })
@@ -58,5 +59,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { token, userInfo, isLoggedIn, username, login, register, fetchUserInfo, logout }
+  return { token, userInfo, isLoggedIn, username, isAdmin, login, register, fetchUserInfo, logout }
 })

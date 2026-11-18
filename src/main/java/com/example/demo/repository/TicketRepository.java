@@ -14,6 +14,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Optional<Ticket> findByTrainIdAndTrainDate(Long trainId, LocalDate trainDate);
 
+    List<Ticket> findByTrainId(Long trainId);
+
     List<Ticket> findByTrainIdInAndTrainDate(List<Long> trainIds, LocalDate trainDate);
 
     long countByTrainDateBetween(LocalDate start, LocalDate end);

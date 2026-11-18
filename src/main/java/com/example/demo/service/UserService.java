@@ -5,6 +5,7 @@ import com.example.demo.dto.LoginRequest;
 import com.example.demo.dto.LoginResponse;
 import com.example.demo.dto.RegisterRequest;
 import com.example.demo.entity.User;
+import com.example.demo.entity.UserRole;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtil;
 import com.example.demo.security.TokenService;
@@ -45,6 +46,8 @@ public class UserService {
         user.setRealName(req.getRealName());
         user.setIdCard(req.getIdCard());
         user.setPhone(req.getPhone());
+        // 注册永远是普通用户，避免通过请求参数自我提权。
+        user.setRole(UserRole.USER);
         return userRepository.save(user);
     }
 
@@ -74,9 +77,10 @@ public class UserService {
     }
 
     private LoginResponse issueTokens(User user) {
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername());
+        String role = user.getRole() == null ? UserRole.USER : user.getRole();
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), role);
         return new LoginResponse(token, tokenService.issueRefreshToken(user.getId()),
-                user.getId(), user.getUsername(), user.getRealName());
+                user.getId(), user.getUsername(), user.getRealName(), role);
     }
 
     public User getUserById(Long id) {

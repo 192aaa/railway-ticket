@@ -119,6 +119,16 @@
             大屏
           </button>
           <button
+            v-if="userStore.isAdmin"
+            v-ripple
+            class="nav-btn admin-btn"
+            :class="{ active: isActive('/admin') }"
+            @click="$router.push('/admin')"
+          >
+            <el-icon><Setting /></el-icon>
+            管理后台
+          </button>
+          <button
             v-ripple
             class="nav-btn theme-btn"
             :title="isDark ? '切换浅色' : '切换深色'"
@@ -200,6 +210,16 @@
               <rect x="3" y="14" width="7" height="7" />
             </svg>
             大屏
+          </button>
+          <button
+            v-if="userStore.isAdmin"
+            v-ripple
+            class="nav-btn admin-btn"
+            :class="{ active: isActive('/admin') }"
+            @click="$router.push('/admin')"
+          >
+            <el-icon><Setting /></el-icon>
+            管理后台
           </button>
           <button
             v-ripple

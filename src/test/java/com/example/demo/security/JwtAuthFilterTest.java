@@ -69,6 +69,35 @@ class JwtAuthFilterTest {
     }
 
     @Test
+    void adminApiRequiresAdminRole() throws Exception {
+        when(jwtUtil.validateToken("jwt")).thenReturn(true);
+        when(jwtUtil.getRole("jwt")).thenReturn("USER");
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin/users");
+        request.addHeader("Authorization", "Bearer jwt");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertThat(response.getStatus()).isEqualTo(403);
+        assertThat(response.getContentAsString()).contains("需要管理员权限");
+    }
+
+    @Test
+    void adminApiPassesForAdminRole() throws Exception {
+        when(jwtUtil.validateToken("jwt")).thenReturn(true);
+        when(jwtUtil.getRole("jwt")).thenReturn("ADMIN");
+        when(jwtUtil.getUserId("jwt")).thenReturn(1L);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/admin/users");
+        request.addHeader("Authorization", "Bearer jwt");
+        MockFilterChain chain = new MockFilterChain();
+
+        filter.doFilter(request, new MockHttpServletResponse(), chain);
+
+        assertThat(chain.getRequest()).isNotNull();
+        assertThat(request.getAttribute("role")).isEqualTo("ADMIN");
+    }
+
+    @Test
     void blacklistedTokenIsRejected() throws Exception {
         when(jwtUtil.validateToken("jwt")).thenReturn(true);
         when(tokenService.isBlacklisted("jwt")).thenReturn(true);
